@@ -162,13 +162,22 @@ export default function PatientRecords() {
           <div className={`mt-4 rounded-xl p-4 border ${
             qaResult.status === "GROUNDED_ANSWER" 
               ? "bg-emerald-50 border-emerald-200 text-emerald-950" 
-              : "bg-amber-50 border-amber-200 text-amber-950"
+              : qaResult.status === "REFUSAL_SAFETY_GUARD"
+                ? "bg-rose-50 border-rose-300 text-rose-950"
+                : "bg-amber-50 border-amber-200 text-amber-950"
           }`}>
             <div className="flex items-center gap-2 font-bold text-xs uppercase mb-1">
               {qaResult.status === "GROUNDED_ANSWER" ? (
                 <>
                   <CheckCircle2 className="h-4 w-4 text-emerald-600" />
                   <span className="text-emerald-700">Verified Evidence-Grounded Answer</span>
+                </>
+              ) : qaResult.status === "REFUSAL_SAFETY_GUARD" ? (
+                <>
+                  <ShieldAlert className="h-4 w-4 text-rose-600" />
+                  <span className="text-rose-700 font-extrabold tracking-wide">
+                    Clinical Refusal Firewall (Never Prescribes or Diagnoses)
+                  </span>
                 </>
               ) : (
                 <>

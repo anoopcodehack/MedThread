@@ -40,7 +40,7 @@ export interface CitationItem {
 export interface QAResponse {
   question: string;
   answer: string;
-  status: "GROUNDED_ANSWER" | "NOT_DOCUMENTED";
+  status: "GROUNDED_ANSWER" | "NOT_DOCUMENTED" | "REFUSAL_SAFETY_GUARD";
   citations: CitationItem[];
 }
 
