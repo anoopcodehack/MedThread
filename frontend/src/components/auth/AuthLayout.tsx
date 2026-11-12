@@ -4,10 +4,63 @@ import {
   ShieldCheck,
   Pill,
 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import AuthForm from "./AuthForm";
+import { getSupabaseClient } from "../../lib/supabase";
+import {
+  getRoleLandingPath,
+  PENDING_SIGNUP_ROLE_KEY,
+} from "../../services/authService";
 
 export default function AuthLayout() {
+  const navigate = useNavigate();
+  const [authError, setAuthError] = useState("");
+
+  useEffect(() => {
+    let active = true;
+
+    async function redirectExistingSession() {
+      try {
+        const supabase = getSupabaseClient();
+        const { data, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        if (!data.session) return;
+
+        const user = data.session.user;
+        const pendingRole = sessionStorage.getItem(PENDING_SIGNUP_ROLE_KEY);
+        let role = user.user_metadata?.role as string | undefined;
+
+        if (!role && pendingRole) {
+          const { data: updated, error: updateError } =
+            await supabase.auth.updateUser({ data: { role: pendingRole } });
+          if (updateError) throw updateError;
+          role = updated.user.user_metadata?.role;
+        }
+
+        sessionStorage.removeItem(PENDING_SIGNUP_ROLE_KEY);
+        if (active) {
+          navigate(getRoleLandingPath(role), { replace: true });
+        }
+      } catch (reason) {
+        if (active) {
+          setAuthError(
+            reason instanceof Error
+              ? reason.message
+              : "Unable to restore your authentication session.",
+          );
+        }
+      }
+    }
+
+    void redirectExistingSession();
+
+    return () => {
+      active = false;
+    };
+  }, [navigate]);
+
   return (
     <main className="grid min-h-screen grid-cols-1 bg-cream lg:grid-cols-2">
 
@@ -105,6 +158,15 @@ export default function AuthLayout() {
               className="h-16 w-48 object-contain"
             />
           </div>
+
+          {authError && (
+            <p
+              role="alert"
+              className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700"
+            >
+              {authError}
+            </p>
+          )}
 
           <AuthForm />
         </div>

@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import AuthLayout from "./components/auth/AuthLayout";
 import DoctorLayout from "./components/doctor/DoctorLayout";
+import PatientPortal from "./pages/patient/PatientPortal";
 import AccessHistory from "./pages/doctor/AccessHistory";
 import DoctorDashboard from "./pages/doctor/DoctorDashboard";
 import DoctorProfile from "./pages/doctor/DoctorProfile";
@@ -13,6 +14,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<AuthLayout />} />
+        <Route path="/patient/*" element={<PatientPortal />} />
         <Route path="/doctor" element={<DoctorLayout />}>
           <Route index element={<Navigate to="/doctor/dashboard" replace />} />
           <Route path="dashboard" element={<DoctorDashboard />} />
