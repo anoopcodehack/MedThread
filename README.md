@@ -604,11 +604,18 @@ docker-compose down
 
 ## 👥 4-Member Team Ownership & Execution Matrix
 
+| Role | Engineer | GitHub Handle | Core Deliverables |
+|---|---|---|---|
+| **Member 1 (Backend & DB Lead)** | **Anoop A** | [@anoopcodehack](https://github.com/anoopcodehack) | FastAPI, Database Models, Supabase Cloud Storage, Document Upload API |
+| **Member 2 (Frontend & Cockpit Lead)** | **Prajna K V** | [@PrajnaKV123](https://github.com/PrajnaKV123) | React 18, Patient Portal, Doctor Dashboard, Routing & Tailwind UI |
+| **Member 3 (Clinical Logic Lead)** | **Muhammad Ashath** | [@muhammadasthathci24-web](https://github.com/muhammadasthathci24-web) | Medication FSM, Unit Normalizer, 4-Tier Conflict Radar, Refusal Firewall |
+| **Member 4 (Data & Evaluation Lead)** | **Pratheeksha K** | [@pratheeksha654](https://github.com/pratheeksha654) | Benchmark Dossiers, Ground Truth Annotations, Evaluation Runner |
+
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
 │                        4-MEMBER ENGINEERING ROLES                                      │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
-│ 👨💻 MEMBER 1: Backend, Storage & OCR Lead (FastAPI + PyMuPDF + Gemini)                 │
+│ 👨‍💻 MEMBER 1: Backend, Storage & OCR Lead (FastAPI + PyMuPDF + Gemini)                 │
 │ 🎨 MEMBER 2: Frontend & 3-Panel Cockpit Lead (React 18 + Vite + Tailwind CSS)          │
 │ 🧠 MEMBER 3: Deterministic Clinical Logic & Safety Lead (FSM + Radar + Abstention)     │
 │ 📊 MEMBER 4: Data Engineering, Benchmark & Pitch Lead (5 Patients + Ground Truth)      │
