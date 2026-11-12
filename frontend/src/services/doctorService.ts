@@ -106,14 +106,25 @@ export async function getPatientRecords(patientId: string): Promise<PatientRecor
 
       // Map Investigations
       const labEvents = events.filter((e) => e.category === "LAB");
-      const investigations = labEvents.map((e) => ({
-        id: String(e.id),
-        name: e.entity,
-        date: e.normalized_date,
-        result: e.normalized_value || e.raw_value || "Completed",
-        unit: e.raw_unit || "",
-        source: `${e.source_doc}, p. ${e.page_number}`,
-      }));
+      const investigations = labEvents.map((e) => {
+        let displayResult = e.normalized_value || e.raw_value || "Completed";
+        if (
+          e.raw_value && 
+          e.raw_unit && 
+          e.normalized_value && 
+          !e.normalized_value.toLowerCase().includes(e.raw_unit.toLowerCase())
+        ) {
+          displayResult = `${e.normalized_value} (raw: ${e.raw_value} ${e.raw_unit})`;
+        }
+        return {
+          id: String(e.id),
+          name: e.entity,
+          date: e.normalized_date,
+          result: displayResult,
+          unit: "",
+          source: `${e.source_doc}, p. ${e.page_number}`,
+        };
+      });
 
       // Map Documents
       const documents = docs.map((d) => ({
