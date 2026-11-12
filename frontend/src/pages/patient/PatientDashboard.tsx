@@ -35,12 +35,7 @@ const sections = [
     icon: Pill,
     page: "medications",
   },
-  {
-    title: "Tests & Investigations",
-    description: "Access laboratory and investigation records.",
-    icon: Activity,
-    page: "investigations",
-  },
+ 
 ];
 
 export default function PatientDashboard({ onNavigate }: Props) {

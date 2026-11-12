@@ -36,7 +36,7 @@ export function resolveDocumentUrl(pathOrUrl: string, patientId?: number, filena
  */
 export async function uploadPatientFileToSupabase(patientId: number, file: File) {
   const filePath = `${patientId}/${file.name}`;
-  const { data, error } = await supabase.storage
+  const { error } = await supabase.storage
     .from(SUPABASE_BUCKET)
     .upload(filePath, file, {
       cacheControl: '3600',

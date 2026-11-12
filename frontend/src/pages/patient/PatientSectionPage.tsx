@@ -8,7 +8,6 @@ import {
   ClipboardList,
   FileText,
   FilterX,
-  FolderOpen,
   HeartPulse,
   Hospital,
   LoaderCircle,
@@ -27,10 +26,13 @@ import type {
 } from "../../types/clinical";
 import type { PatientPage } from "../../components/patient/PatientSidebar";
 
-type PatientSection = Exclude<PatientPage, "dashboard" | "history">;
+type PatientSection = Exclude<
+  PatientPage,
+  "dashboard" | "history" | "documents"
+>;
 type TimelineSection = Extract<
   PatientSection,
-  "conditions" | "medications" | "investigations" | "visits" | "documents"
+  "conditions" | "medications" | "investigations" | "visits"
 >;
 type LoadState = "unavailable" | "loading" | "ready" | "error";
 type StatusFilter =
@@ -109,14 +111,6 @@ const sectionConfig: Record<PatientSection, SectionConfig> = {
     dataNote:
       "The current event schema has no separate provider, facility, reason, or visit-type fields. This page displays only the category and text supplied in each timeline event.",
   },
-  documents: {
-    title: "Medical Documents",
-    description:
-      "Source document references associated with events in the medical timeline.",
-    icon: FolderOpen,
-    dataNote:
-      "The API exposes document names only through timeline events. Document metadata, processing status, file listing, preview, and download endpoints aren’t available, so this page does not create links or expose local file paths.",
-  },
   access: {
     title: "Share & Access",
     description:
@@ -136,7 +130,6 @@ const timelineSections: TimelineSection[] = [
   "medications",
   "investigations",
   "visits",
-  "documents",
 ];
 
 function isTimelineSection(page: PatientSection): page is TimelineSection {
@@ -173,7 +166,6 @@ function getConflictsForEvent(
 }
 
 function categoryMatches(page: TimelineSection, category: string): boolean {
-  if (page === "documents") return true;
   const supportedCategories = sectionConfig[page].categories ?? [];
   return supportedCategories.includes(category.toUpperCase());
 }
@@ -345,19 +337,6 @@ export default function PatientSectionPage({ page, patientId }: Props) {
       statusFilter,
     ],
   );
-
-  const documentGroups = useMemo(() => {
-    const groups = new Map<string, TimelineEventItem[]>();
-    for (const { event } of filteredEvents) {
-      if (!event.source_doc) continue;
-      const current = groups.get(event.source_doc) ?? [];
-      current.push(event);
-      groups.set(event.source_doc, current);
-    }
-    return [...groups.entries()].sort(([left], [right]) =>
-      left.localeCompare(right),
-    );
-  }, [filteredEvents]);
 
   const hasActiveFilters =
     search !== "" ||
@@ -543,12 +522,10 @@ export default function PatientSectionPage({ page, patientId }: Props) {
               </p>
             )}
 
-            {page !== "documents" && (
-              <p className="mt-3 text-xs text-[#829087]">
-                Provider and facility details aren’t included in the timeline
-                response.
-              </p>
-            )}
+            <p className="mt-3 text-xs text-[#829087]">
+              Provider and facility details aren’t included in the timeline
+              response.
+            </p>
 
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[#EEF2EE] pt-4">
               <p aria-live="polite" className="text-sm text-[#718077]">
@@ -611,16 +588,6 @@ export default function PatientSectionPage({ page, patientId }: Props) {
             </div>
           </div>
         </section>
-      ) : page === "documents" ? (
-        documentGroups.length > 0 ? (
-          <DocumentReferenceList groups={documentGroups} />
-        ) : (
-          <EmptyState
-            icon={FolderOpen}
-            title="No source documents referenced"
-            description="The timeline response contains no source document references for this patient."
-          />
-        )
       ) : filteredEvents.length > 0 ? (
         <ol
           aria-label={`${config.title} timeline`}
@@ -786,58 +753,6 @@ function EventCard({
         </div>
       )}
     </article>
-  );
-}
-
-function DocumentReferenceList({
-  groups,
-}: {
-  groups: [string, TimelineEventItem[]][];
-}) {
-  return (
-    <section aria-label="Timeline source document references" className="space-y-4">
-      {groups.map(([sourceDocument, relatedEvents]) => (
-        <article
-          key={sourceDocument}
-          className="rounded-2xl border border-[#E5ECE6] bg-white p-5 shadow-sm md:p-6"
-        >
-          <div className="flex items-start gap-3">
-            <div className="rounded-xl bg-[#EAF1EB] p-2.5 text-[#164A32]">
-              <FileText size={20} aria-hidden="true" />
-            </div>
-            <div className="min-w-0">
-              <h2 className="break-words font-semibold text-[#26352D]">
-                {sourceDocument}
-              </h2>
-              <p className="mt-1 text-xs leading-5 text-[#829087]">
-                Reference only. No preview or download URL was supplied.
-              </p>
-            </div>
-          </div>
-          <ul className="mt-4 space-y-2 border-t border-[#EEF2EE] pt-4">
-            {relatedEvents.map((event, index) => (
-              <li
-                key={`${event.id ?? event.entity}-${index}`}
-                className="flex flex-wrap gap-x-2 gap-y-1 text-sm text-[#526158]"
-              >
-                {event.raw_date && (
-                  <span className="font-medium text-[#164A32]">
-                    {event.raw_date}
-                  </span>
-                )}
-                {event.category && <span>{event.category}</span>}
-                {event.entity && <span>{event.entity}</span>}
-                {typeof event.page_number === "number" && (
-                  <span className="text-[#829087]">
-                    Page {event.page_number}
-                  </span>
-                )}
-              </li>
-            ))}
-          </ul>
-        </article>
-      ))}
-    </section>
   );
 }
 

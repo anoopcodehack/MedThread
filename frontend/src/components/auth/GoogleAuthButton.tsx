@@ -2,13 +2,16 @@ import { useState } from "react";
 import { ArrowRight } from "lucide-react";
 
 import { signInWithGoogle } from "../../services/authService";
+import type { UserRole } from "../../types/auth";
 
 interface GoogleAuthButtonProps {
   action: "login" | "signup";
+  role?: UserRole;
 }
 
 export default function GoogleAuthButton({
   action,
+  role,
 }: GoogleAuthButtonProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -18,7 +21,7 @@ export default function GoogleAuthButton({
     setLoading(true);
 
     try {
-      await signInWithGoogle();
+      await signInWithGoogle(action === "signup" ? role : undefined);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Google authentication failed.");
       setLoading(false);
@@ -35,6 +38,11 @@ export default function GoogleAuthButton({
 
       <button
         type="button"
+        aria-label={
+          action === "login"
+            ? "Continue with Google"
+            : "Sign up with Google"
+        }
         onClick={handleGoogleAuth}
         disabled={loading}
         className="flex w-full items-center justify-center gap-3 rounded-xl bg-forest py-3.5 text-sm font-semibold text-white shadow-lg shadow-forest/10 transition hover:-translate-y-0.5 hover:bg-forest-dark disabled:cursor-not-allowed disabled:opacity-60"

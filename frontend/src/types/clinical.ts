@@ -43,3 +43,34 @@ export interface QAResponse {
   status: "GROUNDED_ANSWER" | "NOT_DOCUMENTED";
   citations: CitationItem[];
 }
+
+export interface PatientSummary {
+  id: number;
+  external_id: string;
+  name: string;
+}
+
+export interface SeedPatientResponse {
+  status: string;
+  patient_id: number;
+  documents_ingested: number;
+  total_events: number;
+  conflicts_detected: number;
+}
+
+export interface PatientDocument {
+  id: number;
+  filename: string;
+  file_size_bytes: number;
+  file_type: string;
+  ocr_applied: boolean;
+  file_url: string;
+  uploaded_at: string;
+}
+
+export interface SignedDocumentUrl {
+  patient_id: number;
+  filename: string;
+  signed_url: string;
+  expires_in_seconds: number;
+}

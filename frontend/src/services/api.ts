@@ -1,5 +1,13 @@
 import axios from 'axios';
-import { TimelineEventItem, ContradictionItem, QAResponse } from '../types/clinical';
+import type {
+  ContradictionItem,
+  PatientDocument,
+  PatientSummary,
+  QAResponse,
+  SeedPatientResponse,
+  SignedDocumentUrl,
+  TimelineEventItem,
+} from '../types/clinical';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
@@ -11,14 +19,46 @@ const client = axios.create({
 });
 
 export const api = {
+  getPatients: async (): Promise<PatientSummary[]> => {
+    const res = await client.get<PatientSummary[]>('/patients');
+    return res.data;
+  },
+
+  seedPatientData: async (patientId: number): Promise<SeedPatientResponse> => {
+    const res = await client.post<SeedPatientResponse>(`/seed/${patientId}`);
+    return res.data;
+  },
+
   getTimeline: async (patientId: number): Promise<TimelineEventItem[]> => {
-    const res = await client.get(`/timeline/${patientId}`);
+    const res = await client.get<TimelineEventItem[]>(`/timeline/${patientId}`);
     return res.data;
   },
 
   getConflicts: async (patientId: number): Promise<ContradictionItem[]> => {
-    const res = await client.get(`/conflicts/${patientId}`);
+    const res = await client.get<ContradictionItem[]>(`/conflicts/${patientId}`);
     return res.data;
+  },
+
+  getPatientDocuments: async (patientId: number): Promise<PatientDocument[]> => {
+    const res = await client.get<PatientDocument[]>(`/documents/${patientId}`);
+    return res.data;
+  },
+
+  getSignedDocumentUrl: async (
+    patientId: number,
+    filename: string,
+    expiresIn = 3600,
+  ): Promise<SignedDocumentUrl> => {
+    const res = await client.post<SignedDocumentUrl>('/documents/signed-url', {
+      patient_id: patientId,
+      filename,
+      expires_in: expiresIn,
+    });
+    const baseUrl = `${API_BASE.replace(/\/+$/, '')}/`;
+    return {
+      ...res.data,
+      signed_url: new URL(res.data.signed_url, baseUrl).toString(),
+    };
   },
 
   askQuestion: async (patientId: number, question: string): Promise<QAResponse> => {

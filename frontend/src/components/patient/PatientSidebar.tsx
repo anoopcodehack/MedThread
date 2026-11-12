@@ -17,11 +17,11 @@ export type PatientPage =
   | "history"
   | "conditions"
   | "medications"
-  | "investigations"
+  
   | "visits"
   | "documents"
-  | "access"
-  | "profile";
+
+  
 
 interface Props {
   activePage: PatientPage;
@@ -35,11 +35,11 @@ const navigation = [
   { id: "history", label: "Medical History", icon: History },
   { id: "conditions", label: "Conditions & Diagnoses", icon: ClipboardList },
   { id: "medications", label: "Medications", icon: Pill },
-  { id: "investigations", label: "Tests & Investigations", icon: Activity },
+  
   { id: "visits", label: "Visits & Procedures", icon: Hospital },
   { id: "documents", label: "Medical Documents", icon: FolderOpen },
-  { id: "access", label: "Share & Access", icon: Share2 },
-  { id: "profile", label: "Profile & Caregivers", icon: HeartPulse },
+  
+ 
 ] as const;
 
 export default function PatientSidebar({
