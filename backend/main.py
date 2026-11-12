@@ -8,6 +8,7 @@ import shutil
 from pathlib import Path
 from typing import List, Optional
 from fastapi import FastAPI, Depends, UploadFile, File, Form, HTTPException, status
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
@@ -26,6 +27,7 @@ from backend.services.extractor_service import extract_text_from_pdf, parse_clin
 from backend.services.rules_engine import normalize_clinical_unit, normalize_date
 from backend.services.reconciliation_service import detect_contradictions
 from backend.services.qa_service import answer_clinical_question
+from backend.services.storage_service import storage_service
 
 Base.metadata.create_all(bind=engine)
 
@@ -98,30 +100,26 @@ async def upload_document(
             detail=f"Unsupported format '{file_ext}'. Allowed: {settings.ALLOWED_EXTENSIONS}"
         )
         
-    patient_dir = Path(settings.UPLOAD_DIR) / str(patient_id)
-    patient_dir.mkdir(parents=True, exist_ok=True)
-    dest_path = patient_dir / file.filename
-    
-    total_size = 0
-    with open(dest_path, "wb") as buffer:
-        while chunk := await file.read(1024 * 1024):
-            total_size += len(chunk)
-            if total_size > settings.MAX_FILE_SIZE_BYTES:
-                buffer.close()
-                dest_path.unlink(missing_ok=True)
-                raise HTTPException(
-                    status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                    detail="File exceeds maximum allowed size limit of 15MB."
-                )
-            buffer.write(chunk)
+    content = await file.read()
+    total_size = len(content)
+    if total_size > settings.MAX_FILE_SIZE_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail="File exceeds maximum allowed size limit of 15MB."
+        )
+        
+    # Hybrid save: writes locally for extraction and uploads to Supabase Storage
+    storage_res = storage_service.save_document(str(patient_id), file.filename, content)
+    local_path = storage_res["local_path"]
+    storage_url = storage_res["storage_url"]
             
     patient = get_or_create_patient(db, patient_id)
-    full_text, ocr_applied, pages = extract_text_from_pdf(str(dest_path))
+    full_text, ocr_applied, pages = extract_text_from_pdf(local_path)
     
     doc_record = Document(
         patient_id=patient.id,
         filename=file.filename,
-        file_path=str(dest_path),
+        file_path=storage_url,
         file_size_bytes=total_size,
         file_type="PDF" if file_ext == ".pdf" else "IMAGE",
         ocr_applied=1 if ocr_applied else 0
@@ -242,9 +240,23 @@ def get_patient_documents(patient_id: int, db: Session = Depends(get_db)):
         {
             "id": d.id, "filename": d.filename, "file_size_bytes": d.file_size_bytes,
             "file_type": d.file_type, "ocr_applied": bool(d.ocr_applied),
+            "file_url": d.file_path,
             "uploaded_at": d.uploaded_at.isoformat()
         } for d in docs
     ]
+
+@app.get("/api/documents/raw/{patient_id}/{filename}")
+def get_raw_document(patient_id: int, filename: str):
+    """
+    Serves raw PDF or image document from isolated local filesystem for offline preview.
+    """
+    file_path = Path(settings.UPLOAD_DIR) / str(patient_id) / filename
+    if not file_path.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Document {filename} not found for patient {patient_id}."
+        )
+    return FileResponse(path=str(file_path), filename=filename)
 
 @app.patch("/api/review/{event_id}")
 def review_event(
