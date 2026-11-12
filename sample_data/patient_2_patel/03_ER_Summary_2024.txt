@@ -1,0 +1,10 @@
+=== MAX HOSPITAL - Emergency Department Summary ===
+
+Patient: Priya Patel | Date: 14/01/2024
+
+Emergency Presentation: Acute urticaria, lip angioedema, and wheezing following IV Ceftriaxone injection for UTI.
+Diagnosis: Severe Anaphylactic Reaction to Ceftriaxone.
+Treatment: IM Epinephrine 0.3mg, IV Hydrocortisone, nebulized salbutamol.
+CRITICAL WARNING: Ceftriaxone Allergy documented. Absolute contraindication.
+
+Dr. V. Gupta, Emergency Physician

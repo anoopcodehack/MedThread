@@ -1,0 +1,12 @@
+=== MEDANTA HEART INSTITUTE - Outpatient Cardiology Note ===
+
+Patient: Rajesh Sharma | Date: 18/02/2024
+
+Subjective: Patient presents for routine cardiovascular evaluation.
+Assessment: Stable coronary status, post-hernia repair.
+
+Plan:
+- Continue Tab. Aspirin 75mg daily for secondary cardioprotection.
+- Continue Metformin 850mg BD.
+
+Dr. S. Kapoor, DM Cardiology

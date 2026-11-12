@@ -1,0 +1,10 @@
+=== APOLLO 247 TELEHEALTH - Consultation Summary ===
+
+Patient: Vikram Malhotra | Date: 18/09/2023
+
+Chief Complaint: Home BP monitoring shows elevated systolic readings (150/95 mmHg).
+Rx Modification:
+- Up-titrate Ramipril to 10 mg once daily.
+- Continue Atorvastatin 20 mg.
+
+Dr. P. Sundaram, MD

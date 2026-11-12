@@ -1,0 +1,50 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 392 >>
+stream
+BT
+/F1 16 Tf
+50 750 Td
+(CHARITE BERLIN - Arztbrief Ambulanz) Tj
+/F1 10 Tf
+0 -25 Td
+(Patient: Vikram Malhotra | Geburtsdatum: 14.05.1972 | Datum: 12.08.2021) Tj
+0 -14 Td
+0 -15 Td
+(Diagnose: Essentielle Hypertonie \(Grad 1\).) Tj
+0 -14 Td
+(Therapie: Ramipril 5 mg morgens 1x taglich.) Tj
+0 -14 Td
+(Blutdruck: 145/92 mmHg.) Tj
+0 -14 Td
+0 -15 Td
+(Dr. med. H. Weber, Charite Berlin) Tj
+0 -14 Td
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000000684 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+754
+%%EOF

@@ -1,0 +1,9 @@
+=== RADIOLOGY ASSOCIATES - Plain Radiograph Report ===
+
+Patient: David Fernandes | Date: 28/10/2021
+
+Examination: Right Wrist X-Ray (AP and Lateral views).
+Findings: Adequate callus formation across distal radial fracture line. Alignment anatomic.
+Impression: Satisfactory bony healing.
+
+Dr. M. Joseph, Radiologist

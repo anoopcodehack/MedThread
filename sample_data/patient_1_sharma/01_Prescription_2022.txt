@@ -1,0 +1,11 @@
+=== CITY HEALTH CLINIC - Outpatient Prescription ===
+
+Patient: Rajesh Sharma | Age: 58 | Date: 15/01/2022
+
+Diagnosis: Newly diagnosed Type 2 Diabetes Mellitus.
+
+Rx:
+1. Tab. Metformin 500 mg once daily with meals.
+2. Lifestyle and diet modification advised.
+
+Dr. A. Verma, MD Internal Medicine (Reg #44921)

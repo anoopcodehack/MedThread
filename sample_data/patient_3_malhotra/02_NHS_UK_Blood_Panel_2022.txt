@@ -1,0 +1,9 @@
+=== ST THOMAS HOSPITAL NHS - Biochemistry Report ===
+
+Patient: Vikram Malhotra | NHS No: 739 104 2291 | Date: 15/04/2022
+
+Serum Cholesterol: 6.2 mmol/L (Desirable: < 5.0 mmol/L)
+Serum Triglycerides: 2.1 mmol/L
+Serum Creatinine: 88 umol/L
+
+Authorized by NHS Pathology Labs

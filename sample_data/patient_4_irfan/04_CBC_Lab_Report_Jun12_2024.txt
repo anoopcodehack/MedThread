@@ -1,0 +1,10 @@
+=== SRL DIAGNOSTICS - Hematology Report ===
+
+Patient: Mohammed Irfan | Sample Collected: 12/06/2024 10:45 AM
+
+TEST: Complete Blood Count (CBC) [REDUNDANT / REPEAT TEST]
+Hemoglobin: 14.0 g/dL
+Total WBC Count: 10,900 /mcL
+Platelet Count: 190,000 /mcL
+
+Verified by SRL Central Labs

@@ -1,0 +1,8 @@
+=== CITY CLINIC - General OPD Note ===
+
+Patient: Mohammed Irfan | Age: 29 | Date: 10/06/2024 10:15 AM
+
+Symptoms: 3-day history of high-grade fever, chills, body ache.
+Investigations Ordered: Complete Blood Count (CBC), Dengue NS1 Ag.
+
+Dr. S. Tariq, MBBS

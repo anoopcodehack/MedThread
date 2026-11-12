@@ -1,0 +1,9 @@
+=== ST. JOHN'S HOSPITAL - Emergency Trauma Record ===
+
+Patient: David Fernandes | Age: 42 | Date: 14/09/2021
+
+Mechanism of Injury: Fall from bicycle onto outstretched right hand.
+Diagnosis: Closed Distal Radius Fracture (Colles fracture), right wrist.
+Management: Closed reduction and plaster cast immobilization performed.
+
+Dr. J. D'Souza, MS Ortho

@@ -1,0 +1,50 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 470 >>
+stream
+BT
+/F1 16 Tf
+50 750 Td
+(CORPORATE HEALTH - Periodic Medical Assessment) Tj
+/F1 10 Tf
+0 -25 Td
+(Patient: David Fernandes | Date: 10/11/2023) Tj
+0 -14 Td
+0 -15 Td
+(General Physical Examination: Fit and healthy adult male.) Tj
+0 -14 Td
+(Blood Pressure: 116/74 mmHg | Resting Pulse: 64 bpm | BMI: 22.4 kg/m2) Tj
+0 -14 Td
+(Past History: Right wrist fracture \(2021, fully healed\). No chronic conditions.) Tj
+0 -14 Td
+0 -15 Td
+(Dr. A. Rao, Occupational Health) Tj
+0 -14 Td
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000000762 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+832
+%%EOF

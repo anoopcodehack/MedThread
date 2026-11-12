@@ -1,0 +1,12 @@
+=== THYROCARE DIAGNOSTICS - Laboratory Report ===
+
+Patient: Rajesh Sharma | Ref By: Dr. Verma | Date: 04/05/2023
+
+TEST: Fasting Blood Glucose
+RESULT: 7.8 mmol/L  (Ref range: 3.9 - 5.6 mmol/L)
+STATUS: ELEVATED
+
+TEST: HbA1c
+RESULT: 7.4 %
+
+Verified by Dr. R. Sen, Consultant Biochemist

@@ -1,0 +1,9 @@
+=== METRO HEALTH - Comprehensive Intake Form ===
+
+Patient: Priya Patel | Age: 34 | Date: 10/03/2022
+
+Chief Complaint: General wellness checkup.
+Allergies: NKDA (No Known Drug Allergies) documented.
+Vitals: BP 118/76 mmHg, Pulse 72 bpm.
+
+Dr. Mehra, MBBS

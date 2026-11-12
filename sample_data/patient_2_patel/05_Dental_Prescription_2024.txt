@@ -1,0 +1,9 @@
+=== SMILE CARE DENTAL - Treatment Plan ===
+
+Patient: Priya Patel | Date: 05/04/2024
+
+Procedure: Molar extraction planned.
+Prophylaxis Rx: Tab. Amoxicillin 500mg tid for 5 days.
+Caution: Verify cross-reactivity with beta-lactam sensitivities.
+
+Dr. N. Shah, MDS

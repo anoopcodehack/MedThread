@@ -1,0 +1,11 @@
+=== APOLLO CLINIC - Follow-up Consultation ===
+
+Patient: Rajesh Sharma | Date: 12/05/2023
+
+Clinical Note: Suboptimal glycemic control on Metformin 500mg.
+
+Rx Adjustment:
+1. Tab. Metformin 850 mg twice daily with meals.
+2. Tab. Aspirin 75 mg once daily post-lunch.
+
+Dr. A. Verma, MD

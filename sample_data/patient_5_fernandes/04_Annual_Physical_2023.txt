@@ -1,0 +1,9 @@
+=== CORPORATE HEALTH - Periodic Medical Assessment ===
+
+Patient: David Fernandes | Date: 10/11/2023
+
+General Physical Examination: Fit and healthy adult male.
+Blood Pressure: 116/74 mmHg | Resting Pulse: 64 bpm | BMI: 22.4 kg/m2
+Past History: Right wrist fracture (2021, fully healed). No chronic conditions.
+
+Dr. A. Rao, Occupational Health

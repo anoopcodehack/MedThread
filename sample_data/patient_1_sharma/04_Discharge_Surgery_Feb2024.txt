@@ -1,0 +1,12 @@
+=== FORTIS HOSPITAL - Inpatient Discharge Summary ===
+
+Patient: Rajesh Sharma | IP No: 99420 | Date of Discharge: 10/02/2024
+
+Procedure: Laparoscopic Inguinal Hernia Repair
+
+Discharge Instructions:
+- Tab. Paracetamol 650mg SOS for pain.
+- Tab. Metformin 850mg resume tomorrow morning.
+- Tab. Aspirin 75mg TEMPORARILY HELD for surgery risk; do not resume until surgical review.
+
+Dr. K. Nambiar, MS FRCS

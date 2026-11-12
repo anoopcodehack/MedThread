@@ -1,0 +1,9 @@
+=== ALLERGY & ASTHMA CLINIC - Evaluation Note ===
+
+Patient: Priya Patel | Date: 28/01/2024
+
+Review of recent ER anaphylaxis episode.
+Confirmation: Confirmed severe Cephalosporin/Ceftriaxone allergy.
+Prescription: Auto-injector Epinephrine 0.3mg prescribed for emergency self-administration.
+
+Dr. R. Joshi, MD Immunology

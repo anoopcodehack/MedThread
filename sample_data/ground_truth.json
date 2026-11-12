@@ -1,0 +1,285 @@
+{
+  "benchmark_metadata": {
+    "version": "1.0.0",
+    "evaluation_date": "2026-11-12",
+    "hackathon": "SOSC SYNERGY 26",
+    "problem_statement": "PS 7 - One Patient, Many Records",
+    "total_patients": 5,
+    "total_documents": 25,
+    "metrics_tracked": [
+      "extraction_precision",
+      "extraction_recall",
+      "conflict_detection_recall",
+      "abstention_accuracy",
+      "review_time_reduction_pct"
+    ]
+  },
+  "patients": [
+    {
+      "patient_id": 101,
+      "name": "Rajesh Sharma",
+      "clinical_focus": "Cardiac & Type 2 Diabetes Management (Master Demo)",
+      "documents": [
+        "01_Prescription_2022.pdf",
+        "02_Lab_Thyrocare_2023.pdf",
+        "03_Prescription_2023.pdf",
+        "04_Discharge_Surgery_Feb2024.pdf",
+        "05_Consultation_Note_DrKapoor_Feb2024.pdf"
+      ],
+      "expected_events": [
+        {
+          "entity": "Metformin",
+          "category": "MEDICATION",
+          "status": "STARTED",
+          "raw_value": "500",
+          "raw_unit": "mg",
+          "normalized_value": "500 mg",
+          "raw_date": "15/01/2022",
+          "normalized_date": "2022-01-15",
+          "source_doc": "01_Prescription_2022.pdf"
+        },
+        {
+          "entity": "Fasting Blood Glucose",
+          "category": "LAB",
+          "status": "COMPLETED",
+          "raw_value": "7.8",
+          "raw_unit": "mmol/L",
+          "normalized_value": "140.5 mg/dL",
+          "raw_date": "04/05/2023",
+          "normalized_date": "2023-05-04",
+          "source_doc": "02_Lab_Thyrocare_2023.pdf"
+        },
+        {
+          "entity": "Metformin",
+          "category": "MEDICATION",
+          "status": "DOSE_CHANGED",
+          "raw_value": "850",
+          "raw_unit": "mg",
+          "normalized_value": "850 mg",
+          "raw_date": "12/05/2023",
+          "normalized_date": "2023-05-12",
+          "source_doc": "03_Prescription_2023.pdf"
+        },
+        {
+          "entity": "Aspirin",
+          "category": "MEDICATION",
+          "status": "TEMPORARILY_HELD",
+          "raw_value": "75",
+          "raw_unit": "mg",
+          "normalized_value": "75 mg",
+          "raw_date": "10/02/2024",
+          "normalized_date": "2024-02-10",
+          "source_doc": "04_Discharge_Surgery_Feb2024.pdf"
+        },
+        {
+          "entity": "Aspirin",
+          "category": "MEDICATION",
+          "status": "STARTED",
+          "raw_value": "75",
+          "raw_unit": "mg",
+          "normalized_value": "75 mg",
+          "raw_date": "18/02/2024",
+          "normalized_date": "2024-02-18",
+          "source_doc": "05_Consultation_Note_DrKapoor_Feb2024.pdf"
+        }
+      ],
+      "expected_conflicts": [
+        {
+          "tier": "DIRECT_CONFLICT",
+          "category": "MEDICATION",
+          "entity": "Aspirin",
+          "description": "Contradictory state: Discharge order held Aspirin for hernia surgery, while Dr. Kapoor outpatient note resumed it without reconciliation.",
+          "doc1": "04_Discharge_Surgery_Feb2024.pdf",
+          "doc2": "05_Consultation_Note_DrKapoor_Feb2024.pdf"
+        }
+      ],
+      "expected_abstentions": [
+        {
+          "question": "What is Rajesh Sharma's current penicillin allergy status?",
+          "expected_status": "NOT_DOCUMENTED"
+        }
+      ]
+    },
+    {
+      "patient_id": 102,
+      "name": "Priya Patel",
+      "clinical_focus": "Allergy Evolution & Antibiotic Safety",
+      "documents": [
+        "01_Initial_Consult_2022.pdf",
+        "02_Dermatology_2023.pdf",
+        "03_ER_Summary_2024.pdf",
+        "04_Followup_Note_2024.pdf",
+        "05_Dental_Prescription_2024.pdf"
+      ],
+      "expected_events": [
+        {
+          "entity": "NKDA (No Known Drug Allergies)",
+          "category": "ALLERGY",
+          "status": "RECORDED",
+          "raw_date": "10/03/2022",
+          "normalized_date": "2022-03-10",
+          "source_doc": "01_Initial_Consult_2022.pdf"
+        },
+        {
+          "entity": "Ceftriaxone Allergy",
+          "category": "ALLERGY",
+          "status": "RECORDED",
+          "raw_date": "14/01/2024",
+          "normalized_date": "2024-01-14",
+          "source_doc": "03_ER_Summary_2024.pdf"
+        }
+      ],
+      "expected_conflicts": [
+        {
+          "tier": "NEEDS_REVIEW",
+          "category": "ALLERGY",
+          "entity": "Ceftriaxone",
+          "description": "Historical NKDA in 2022 superseded by severe anaphylactic reaction to Ceftriaxone in 2024.",
+          "doc1": "01_Initial_Consult_2022.pdf",
+          "doc2": "03_ER_Summary_2024.pdf"
+        }
+      ],
+      "expected_abstentions": [
+        {
+          "question": "Does Priya Patel have a history of hypertension?",
+          "expected_status": "NOT_DOCUMENTED"
+        }
+      ]
+    },
+    {
+      "patient_id": 103,
+      "name": "Vikram Malhotra",
+      "clinical_focus": "Cross-Border Clinical Records & Multilingual Units",
+      "documents": [
+        "01_Berlin_Clinic_Summary_2021.pdf",
+        "02_NHS_UK_Blood_Panel_2022.pdf",
+        "03_Cardiology_London_2023.pdf",
+        "04_Telehealth_India_2023.pdf",
+        "05_Max_Healthcare_Delhi_2024.pdf"
+      ],
+      "expected_events": [
+        {
+          "entity": "Ramipril",
+          "category": "MEDICATION",
+          "status": "STARTED",
+          "raw_value": "5",
+          "raw_unit": "mg",
+          "normalized_value": "5 mg",
+          "raw_date": "12.08.2021",
+          "normalized_date": "2021-08-12",
+          "source_doc": "01_Berlin_Clinic_Summary_2021.pdf"
+        },
+        {
+          "entity": "Total Cholesterol",
+          "category": "LAB",
+          "status": "COMPLETED",
+          "raw_value": "6.2",
+          "raw_unit": "mmol/L",
+          "normalized_value": "239.8 mg/dL",
+          "raw_date": "15/04/2022",
+          "normalized_date": "2022-04-15",
+          "source_doc": "02_NHS_UK_Blood_Panel_2022.pdf"
+        }
+      ],
+      "expected_conflicts": [
+        {
+          "tier": "UPDATED",
+          "category": "MEDICATION",
+          "entity": "Ramipril",
+          "description": "Ramipril titration from 5mg (Germany) to 10mg (India telehealth).",
+          "doc1": "01_Berlin_Clinic_Summary_2021.pdf",
+          "doc2": "04_Telehealth_India_2023.pdf"
+        }
+      ],
+      "expected_abstentions": [
+        {
+          "question": "What is Vikram Malhotra's HbA1c level?",
+          "expected_status": "NOT_DOCUMENTED"
+        }
+      ]
+    },
+    {
+      "patient_id": 104,
+      "name": "Mohammed Irfan",
+      "clinical_focus": "Duplicate Investigation Redundancy (Within 72 Hours)",
+      "documents": [
+        "01_OPD_Fever_Jun10_2024.pdf",
+        "02_CBC_Lab_Report_Jun10_2024.pdf",
+        "03_Second_Opinion_Jun12_2024.pdf",
+        "04_CBC_Lab_Report_Jun12_2024.pdf",
+        "05_Discharge_Summary_Jun15_2024.pdf"
+      ],
+      "expected_events": [
+        {
+          "entity": "Complete Blood Count (CBC)",
+          "category": "LAB",
+          "status": "COMPLETED",
+          "raw_value": "11200",
+          "raw_unit": "/mcL",
+          "raw_date": "10/06/2024",
+          "normalized_date": "2024-06-10",
+          "source_doc": "02_CBC_Lab_Report_Jun10_2024.pdf"
+        },
+        {
+          "entity": "Complete Blood Count (CBC)",
+          "category": "LAB",
+          "status": "COMPLETED",
+          "raw_value": "10900",
+          "raw_unit": "/mcL",
+          "raw_date": "12/06/2024",
+          "normalized_date": "2024-06-12",
+          "source_doc": "04_CBC_Lab_Report_Jun12_2024.pdf"
+        }
+      ],
+      "expected_conflicts": [
+        {
+          "tier": "DUPLICATE_INVESTIGATION",
+          "category": "LAB",
+          "entity": "Complete Blood Count (CBC)",
+          "description": "Redundant CBC investigation performed 48 hours apart without acute hemorrhage indication.",
+          "doc1": "02_CBC_Lab_Report_Jun10_2024.pdf",
+          "doc2": "04_CBC_Lab_Report_Jun12_2024.pdf"
+        }
+      ],
+      "expected_abstentions": [
+        {
+          "question": "Does Mohammed Irfan have a history of kidney disease?",
+          "expected_status": "NOT_DOCUMENTED"
+        }
+      ]
+    },
+    {
+      "patient_id": 105,
+      "name": "David Fernandes",
+      "clinical_focus": "Trauma History & Epistemic Abstention Gate",
+      "documents": [
+        "01_Orthopedic_Trauma_2021.pdf",
+        "02_XRay_Report_2021.pdf",
+        "03_Physiotherapy_Log_2022.pdf",
+        "04_Annual_Physical_2023.pdf",
+        "05_Sports_Fitness_Clearance_2024.pdf"
+      ],
+      "expected_events": [
+        {
+          "entity": "Distal Radius Fracture",
+          "category": "CONDITION",
+          "status": "RESOLVED",
+          "raw_date": "14/09/2021",
+          "normalized_date": "2021-09-14",
+          "source_doc": "01_Orthopedic_Trauma_2021.pdf"
+        }
+      ],
+      "expected_conflicts": [],
+      "expected_abstentions": [
+        {
+          "question": "What is David Fernandes's asthma medication dosage?",
+          "expected_status": "NOT_DOCUMENTED"
+        },
+        {
+          "question": "Does David Fernandes have diabetes?",
+          "expected_status": "NOT_DOCUMENTED"
+        }
+      ]
+    }
+  ]
+}

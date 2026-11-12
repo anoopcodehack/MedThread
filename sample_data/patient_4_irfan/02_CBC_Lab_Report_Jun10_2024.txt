@@ -1,0 +1,11 @@
+=== METROPOLIS HEALTHCARE - Diagnostic Lab Report ===
+
+Patient: Mohammed Irfan | Sample Collected: 10/06/2024 11:30 AM
+
+TEST: Complete Blood Count (CBC)
+Hemoglobin: 14.1 g/dL
+Total WBC Count: 11,200 /mcL (Ref: 4,000 - 10,000 /mcL)
+Platelet Count: 185,000 /mcL
+Dengue NS1 Antigen: NEGATIVE
+
+Dr. B. Roy, MD Pathologist
