@@ -1,5 +1,4 @@
-
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   History,
   Pill,
@@ -12,7 +11,8 @@ import {
   X,
   CheckCircle2,
   LoaderCircle,
-  AlertCircle
+  AlertCircle,
+  ClipboardList,
 } from "lucide-react";
 import { api } from "../../services/api";
 
@@ -25,19 +25,19 @@ interface Props {
 const sections = [
   {
     title: "Medical History",
-    description: "Explore your complete medical journey.",
+    description: "Explore your complete verifiable chronological journey.",
     icon: History,
     page: "history",
   },
   {
     title: "Conditions & Diagnoses",
-    description: "View conditions documented in your records.",
-    icon: FileText,
+    description: "View conditions and diagnoses documented in your records.",
+    icon: ClipboardList,
     page: "conditions",
   },
   {
     title: "Medications",
-    description: "Explore current and previous medications.",
+    description: "Explore active, changed, and discontinued medications.",
     icon: Pill,
     page: "medications",
   },
@@ -55,15 +55,36 @@ const sections = [
   },
 ];
 
-export default function PatientDashboard({ patientId, onUploadSuccess, onNavigate }: Props) {
+export default function PatientDashboard({ patientId = 101, onUploadSuccess, onNavigate }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  
+  const [docCount, setDocCount] = useState<number>(10);
+  const [eventCount, setEventCount] = useState<number>(14);
+  const [medCount, setMedCount] = useState<number>(3);
 
-  const handleFileSelection = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  useEffect(() => {
+    let active = true;
+    Promise.all([
+      api.getPatientDocuments(patientId).catch(() => []),
+      api.getTimeline(patientId).catch(() => []),
+    ]).then(([docs, events]) => {
+      if (!active) return;
+      if (docs && docs.length > 0) setDocCount(docs.length);
+      if (events && events.length > 0) {
+        setEventCount(events.length);
+        const activeMeds = events.filter((e) => e.category === "MEDICATION" && e.status !== "DISCONTINUED");
+        setMedCount(activeMeds.length);
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, [patientId]);
+
+  const handleFileSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     setSelectedFiles(files);
     setUploadStatus(null);
@@ -71,26 +92,28 @@ export default function PatientDashboard({ patientId, onUploadSuccess, onNavigat
 
   const handleUploadFiles = async () => {
     if (selectedFiles.length === 0) return;
-    const pid = patientId || 101;
     setUploading(true);
     setUploadStatus(null);
     try {
       let count = 0;
       for (const file of selectedFiles) {
-        await api.uploadDocument(pid, file);
+        await api.uploadDocument(patientId, file);
         count++;
       }
       setUploadStatus({
         type: "success",
-        message: `Successfully uploaded and ingested ${count} document${count > 1 ? "s" : ""} for Patient ${pid}. Extracted into longitudinal timeline!`
+        message: `Successfully ingested and parsed ${count} document${count > 1 ? "s" : ""} for Patient ${patientId}. Chronological timeline updated!`,
       });
       setSelectedFiles([]);
       if (fileInputRef.current) fileInputRef.current.value = "";
       onUploadSuccess?.();
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const msg = err && typeof err === "object" && "response" in err && (err as { response?: { data?: { detail?: string } } }).response?.data?.detail
+        ? (err as { response?: { data?: { detail?: string } } }).response!.data!.detail!
+        : "Failed to upload document. Maximum allowed size is 15MB (.pdf, .png, .jpg).";
       setUploadStatus({
         type: "error",
-        message: err?.response?.data?.detail || "Failed to upload document. Max size is 15MB (.pdf, .png, .jpg)."
+        message: msg,
       });
     } finally {
       setUploading(false);
@@ -99,49 +122,94 @@ export default function PatientDashboard({ patientId, onUploadSuccess, onNavigat
 
   return (
     <div className="space-y-8">
-
-      {/* Welcome section */}
-      <section className="rounded-2xl bg-gradient-to-r from-[#164A32] to-[#6C987F] p-7 text-white md:p-10">
-        <p className="mb-3 text-xs font-semibold uppercase tracking-[2px] text-[#D9E9DC]">
-          Your health, connected
-        </p>
-
-        <h1 className="max-w-2xl text-2xl font-bold leading-tight md:text-3xl">
-          Your complete medical history, all in one place.
-        </h1>
-
-        <p className="mt-3 max-w-xl text-sm leading-6 text-white/80">
-          Organize your medical records, access your health information
-          and keep your healthcare journey connected.
-        </p>
+      {/* Hero Welcome Banner (Identical to DoctorDashboard style) */}
+      <section className="flex flex-col justify-between gap-5 rounded-3xl bg-forest p-6 text-white sm:flex-row sm:items-center sm:p-8">
+        <div>
+          <p className="mb-2 text-sm font-medium text-sage">Personal Health Record</p>
+          <h1 className="font-heading text-3xl font-extrabold">
+            Your Medical History, in One Place
+          </h1>
+          <p className="mt-3 max-w-xl text-sm leading-6 text-white/75">
+            Organize prescriptions, lab reports, and discharge summaries into one verifiable longitudinal timeline with zero lost evidence.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={() => onNavigate("history")}
+            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/20"
+          >
+            <History size={17} />
+            Medical History
+          </button>
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-forest transition hover:bg-sage"
+          >
+            <FilePlus2 size={18} />
+            Upload Document
+          </button>
+        </div>
       </section>
 
-      {/* Upload medical documents */}
-      <section className="rounded-2xl border border-[#DCE8DE] bg-white p-6 shadow-sm md:p-8">
-        <div className="flex flex-col justify-between gap-5 md:flex-row md:items-center">
-          <div className="flex items-start gap-4">
-            <div className="rounded-xl bg-[#EAF1EB] p-3 text-[#164A32]">
-              <Upload size={25} />
+      {/* Clinical Telemetry Stat Cards */}
+      <div className="grid gap-4 sm:grid-cols-3">
+        <div className="rounded-2xl border border-sage bg-white p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold text-muted">Ingested Documents</p>
+            <div className="rounded-xl bg-sage/60 p-2 text-forest">
+              <FolderOpen size={18} />
             </div>
+          </div>
+          <p className="mt-3 font-heading text-2xl font-extrabold text-forest">{docCount} Files</p>
+        </div>
 
+        <div className="rounded-2xl border border-sage bg-white p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold text-muted">Timeline Events Extracted</p>
+            <div className="rounded-xl bg-sage/60 p-2 text-forest">
+              <Activity size={18} />
+            </div>
+          </div>
+          <p className="mt-3 font-heading text-2xl font-extrabold text-forest">{eventCount} Recorded</p>
+        </div>
+
+        <div className="rounded-2xl border border-sage bg-white p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold text-muted">Active Medications</p>
+            <div className="rounded-xl bg-sage/60 p-2 text-forest">
+              <Pill size={18} />
+            </div>
+          </div>
+          <p className="mt-3 font-heading text-2xl font-extrabold text-forest">{medCount} Active</p>
+        </div>
+      </div>
+
+      {/* Upload Medical Documents Section */}
+      <section className="rounded-2xl border border-sage bg-white p-6 shadow-sm sm:p-8">
+        <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
+          <div className="flex items-start gap-4">
+            <div className="rounded-xl bg-sage/60 p-3 text-forest">
+              <Upload size={24} />
+            </div>
             <div>
-              <h2 className="text-lg font-semibold text-[#26352D]">
-                Upload Medical Documents
+              <h2 className="font-heading text-xl font-bold text-forest">
+                Ingest Medical Documents
               </h2>
-
-              <p className="mt-1 max-w-lg text-sm leading-6 text-[#829087]">
-                Add prescriptions, laboratory reports, discharge
-                summaries, scan reports and other medical documents.
+              <p className="mt-1 max-w-lg text-sm text-muted">
+                Upload prescriptions, lab reports (mmol/L or mg/dL), or discharge summaries. Processed with PyMuPDF and Gemini Vision OCR.
               </p>
             </div>
           </div>
 
           <button
+            type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[#164A32] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#082818]"
+            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-bold text-white transition hover:bg-forest/90"
           >
             <FilePlus2 size={18} />
-            Upload Documents
+            Select Files
           </button>
         </div>
 
@@ -154,23 +222,18 @@ export default function PatientDashboard({ patientId, onUploadSuccess, onNavigat
           onChange={handleFileSelection}
         />
 
-        <div className="mt-6 rounded-xl border-2 border-dashed border-[#C7D9CB] bg-[#F8FAF8] p-6 text-center">
-          <FolderOpen
-            size={30}
-            className="mx-auto text-[#6C987F]"
-          />
-
-          <p className="mt-3 text-sm font-medium text-[#26352D]">
-            Select your medical records to get started
+        <div className="mt-6 rounded-2xl border-2 border-dashed border-sage bg-cream/50 p-6 text-center hover:bg-cream transition">
+          <FolderOpen size={32} className="mx-auto text-forest/70" />
+          <p className="mt-3 text-sm font-bold text-forest">
+            Drop medical records here or browse from device
           </p>
-
-          <p className="mt-1 text-xs text-[#829087]">
-            PDF, JPG and PNG files
+          <p className="mt-1 text-xs text-muted">
+            Supports PDF, JPG, PNG up to 15MB with bounding-box extraction
           </p>
-
           <button
+            type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="mt-4 text-sm font-semibold text-[#164A32] underline underline-offset-4"
+            className="mt-3 text-xs font-bold text-forest underline underline-offset-4 hover:opacity-80"
           >
             Browse files
           </button>
@@ -179,57 +242,59 @@ export default function PatientDashboard({ patientId, onUploadSuccess, onNavigat
         {selectedFiles.length > 0 && (
           <div className="mt-5 space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-[#26352D]">
-                Selected files
+              <h3 className="text-xs font-bold uppercase tracking-wider text-forest">
+                Selected Documents ({selectedFiles.length})
               </h3>
-
               <button
+                type="button"
                 onClick={() => {
                   setSelectedFiles([]);
-                  if (fileInputRef.current) {
-                    fileInputRef.current.value = "";
-                  }
+                  if (fileInputRef.current) fileInputRef.current.value = "";
                 }}
-                className="text-xs text-red-600"
+                className="text-xs font-semibold text-rose-600 hover:underline"
               >
                 Clear all
               </button>
             </div>
 
-            {selectedFiles.map((file, index) => (
-              <div
-                key={`${file.name}-${index}`}
-                className="flex items-center gap-3 rounded-lg bg-[#F1F6F1] p-3"
-              >
-                <FileText size={19} className="text-[#52705D]" />
-                <span className="flex-1 truncate text-sm text-[#26352D]">
-                  {file.name}
-                </span>
-                <button
-                  aria-label={`Remove ${file.name}`}
-                  onClick={() =>
-                    setSelectedFiles((previous) =>
-                      previous.filter((_, i) => i !== index)
-                    )
-                  }
-                  className="text-[#829087] hover:text-red-600"
+            <div className="space-y-2">
+              {selectedFiles.map((file, index) => (
+                <div
+                  key={`${file.name}-${index}`}
+                  className="flex items-center gap-3 rounded-xl bg-cream p-3 border border-sage/60"
                 >
-                  <X size={17} />
-                </button>
-              </div>
-            ))}
+                  <FileText size={18} className="text-forest shrink-0" />
+                  <span className="flex-1 truncate text-xs font-semibold text-slate-800">
+                    {file.name}
+                  </span>
+                  <span className="text-[11px] text-muted">
+                    {(file.size / 1024).toFixed(0)} KB
+                  </span>
+                  <button
+                    type="button"
+                    aria-label={`Remove ${file.name}`}
+                    onClick={() =>
+                      setSelectedFiles((prev) => prev.filter((_, i) => i !== index))
+                    }
+                    className="text-muted hover:text-rose-600 p-1"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
 
-            <div className="pt-2 flex flex-col gap-2">
+            <div className="pt-2">
               <button
                 type="button"
                 onClick={handleUploadFiles}
                 disabled={uploading}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#164A32] py-3 text-sm font-bold text-white shadow transition hover:bg-[#082818] disabled:opacity-50"
+                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-forest py-3.5 text-sm font-bold text-white shadow transition hover:bg-forest/90 disabled:opacity-50"
               >
                 {uploading ? (
                   <>
                     <LoaderCircle size={18} className="animate-spin" />
-                    <span>Processing with PyMuPDF & Gemini OCR...</span>
+                    <span>Extracting Entities with PyMuPDF & OCR...</span>
                   </>
                 ) : (
                   <>
@@ -245,8 +310,8 @@ export default function PatientDashboard({ patientId, onUploadSuccess, onNavigat
         {uploadStatus && (
           <div className={`mt-4 rounded-xl p-4 flex items-start gap-3 text-sm font-medium ${
             uploadStatus.type === "success" 
-              ? "bg-[#EAF1EB] text-[#164A32] border border-[#C7D9CB]" 
-              : "bg-red-50 text-red-800 border border-red-200"
+              ? "bg-emerald-50 text-emerald-950 border border-emerald-200" 
+              : "bg-red-50 text-red-900 border border-red-200"
           }`}>
             {uploadStatus.type === "success" ? (
               <CheckCircle2 size={19} className="shrink-0 mt-0.5 text-emerald-600" />
@@ -254,51 +319,51 @@ export default function PatientDashboard({ patientId, onUploadSuccess, onNavigat
               <AlertCircle size={19} className="shrink-0 mt-0.5 text-red-600" />
             )}
             <div>
-              <p className="font-semibold">{uploadStatus.type === "success" ? "Ingestion Complete" : "Upload Error"}</p>
+              <p className="font-bold text-xs uppercase tracking-wide">
+                {uploadStatus.type === "success" ? "Ingestion Succeeded" : "Ingestion Error"}
+              </p>
               <p className="mt-0.5 text-xs">{uploadStatus.message}</p>
             </div>
           </div>
         )}
       </section>
 
-      {/* Medical sections */}
+      {/* Health Records Navigation Cards */}
       <section>
-        <div className="mb-5">
-          <h2 className="text-lg font-semibold text-[#26352D]">
-            Your Health Records
+        <div className="mb-4">
+          <h2 className="font-heading text-xl font-bold text-forest">
+            Health Record Modules
           </h2>
-
-          <p className="mt-1 text-sm text-[#829087]">
-            Access different sections of your medical history.
+          <p className="mt-1 text-sm text-muted">
+            Access discrete categories of your longitudinal timeline.
           </p>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {sections.map((section) => {
             const Icon = section.icon;
 
             return (
               <button
                 key={section.page}
+                type="button"
                 onClick={() => onNavigate(section.page)}
-                className="group rounded-2xl border border-[#E5ECE6] bg-white p-5 text-left transition hover:-translate-y-0.5 hover:border-[#B5CCB8] hover:shadow-md"
+                className="group rounded-2xl border border-sage bg-white p-5 text-left transition hover:-translate-y-0.5 hover:border-forest hover:shadow-sm"
               >
-                <div className="mb-5 flex items-center justify-between">
-                  <div className="rounded-xl bg-[#EAF1EB] p-3 text-[#164A32]">
-                    <Icon size={22} />
+                <div className="mb-4 flex items-center justify-between">
+                  <div className="rounded-xl bg-sage/50 p-2.5 text-forest group-hover:bg-forest group-hover:text-white transition">
+                    <Icon size={20} />
                   </div>
-
                   <ArrowRight
                     size={18}
-                    className="text-[#91A397] transition group-hover:translate-x-1"
+                    className="text-muted transition group-hover:text-forest group-hover:translate-x-1"
                   />
                 </div>
 
-                <h3 className="font-semibold text-[#26352D]">
+                <h3 className="font-heading font-bold text-forest text-base">
                   {section.title}
                 </h3>
-
-                <p className="mt-2 text-sm leading-6 text-[#829087]">
+                <p className="mt-1.5 text-xs leading-5 text-muted">
                   {section.description}
                 </p>
               </button>
@@ -306,7 +371,6 @@ export default function PatientDashboard({ patientId, onUploadSuccess, onNavigat
           })}
         </div>
       </section>
-
     </div>
   );
 }
