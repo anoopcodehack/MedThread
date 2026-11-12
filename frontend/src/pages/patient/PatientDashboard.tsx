@@ -13,8 +13,10 @@ import {
   LoaderCircle,
   AlertCircle,
   ClipboardList,
+  Camera,
 } from "lucide-react";
 import { api } from "../../services/api";
+import { CameraScannerModal } from "../../components/modals/CameraScannerModal";
 
 interface Props {
   patientId?: number;
@@ -64,6 +66,7 @@ export default function PatientDashboard({ patientId = 101, onUploadSuccess, onN
   const [docCount, setDocCount] = useState<number>(10);
   const [eventCount, setEventCount] = useState<number>(14);
   const [medCount, setMedCount] = useState<number>(3);
+  const [isCameraScannerOpen, setIsCameraScannerOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -141,6 +144,14 @@ export default function PatientDashboard({ patientId = 101, onUploadSuccess, onN
           >
             <History size={17} />
             Medical History
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsCameraScannerOpen(true)}
+            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-white/20 bg-emerald-700/80 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-600 shadow-xs"
+          >
+            <Camera size={18} />
+            Scan with Camera
           </button>
           <button
             type="button"
@@ -230,13 +241,24 @@ export default function PatientDashboard({ patientId = 101, onUploadSuccess, onN
           <p className="mt-1 text-xs text-muted">
             Supports PDF, JPG, PNG up to 15MB with bounding-box extraction
           </p>
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="mt-3 text-xs font-bold text-forest underline underline-offset-4 hover:opacity-80"
-          >
-            Browse files
-          </button>
+          <div className="flex items-center justify-center gap-4 mt-3">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="text-xs font-bold text-forest underline underline-offset-4 hover:opacity-80"
+            >
+              Browse files
+            </button>
+            <span className="text-xs text-muted">&bull;</span>
+            <button
+              type="button"
+              onClick={() => setIsCameraScannerOpen(true)}
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 hover:underline"
+            >
+              <Camera size={14} />
+              Live Camera Scan
+            </button>
+          </div>
         </div>
 
         {selectedFiles.length > 0 && (
@@ -371,6 +393,19 @@ export default function PatientDashboard({ patientId = 101, onUploadSuccess, onN
           })}
         </div>
       </section>
+
+      <CameraScannerModal
+        isOpen={isCameraScannerOpen}
+        patientId={patientId}
+        onClose={() => setIsCameraScannerOpen(false)}
+        onSuccess={() => {
+          onUploadSuccess?.();
+          setUploadStatus({
+            type: "success",
+            message: "Prescription scan successfully ingested and extracted to chronological timeline!",
+          });
+        }}
+      />
     </div>
   );
 }
