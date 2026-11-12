@@ -106,6 +106,56 @@ MedThread has been architected to achieve full rubric marks across all 5 evaluat
 
 ## 🏛️ High-Level System Architecture
 
+```text
+                              ┌────────────────────────────────────────────────────────┐
+                              │            MEDTHREAD SYSTEM ARCHITECTURE               │
+                              │           PS-7: Advanced Data Engineering              │
+                              └────────────────────────────────────────────────────────┘
+                                                           │
+        ┌──────────────────────────────────────────────────┴──────────────────────────────────────────────────┐
+        ▼                                                                                                     ▼
+ 📱 PATIENT PORTAL                                                                                    🩺 DOCTOR COCKPIT
+ • Optical Camera Scanner                                                                             • 45s Clinical Synthesis (-78% Time)
+ • Multi-Document Ingestion Zone                                                                      • 4-Tier Contradiction Radar
+ • Active vs Stopped Med Badges                                                                       • Side-by-Side Split Comparator
+ • Cryptographic QR Consent                                                                           • Epistemic Q&A ("Ask Records")
+        │                                                                                                     ▲
+        │ Uploads (PDF / Scans)                                                                               │ Queries & Overrides
+        ▼                                                                                                     │
+ ═════════════════════════════════════════════════════════════════════════════════════════════════════════════╪══════════════════
+                                              INGESTION & EXTRACTION PIPELINE                                 │
+ ═════════════════════════════════════════════════════════════════════════════════════════════════════════════╪══════════════════
+        │                                                                                                     │
+        ├──▶ ⚡ Fast Digital Text Stream  ───▶ PyMuPDF (fitz) [< 150ms]                                        │
+        └──▶ 📸 Scanned/Camera Fallback   ───▶ Gemini 2.0 Flash Vision OCR                                     │
+                                                           │                                                  │
+                                                           ▼                                                  │
+ ═════════════════════════════════════════════════════════════════════════════════════════════════════════════╪══════════════════
+                                    DETERMINISTIC CLINICAL SAFETY ENGINES (ZERO-LLM)                          │
+ ═════════════════════════════════════════════════════════════════════════════════════════════════════════════╪══════════════════
+  🧮 Zero-LLM Math Normalizer        🔄 Non-Linear Medication FSM       🛡️ Stage 0 Refusal Firewall           │
+  (mmol/L ➔ mg/dL formulas)          (STARTED ➔ HELD ➔ STOPPED)          (Blocks diagnoses/prescribing)       │
+                                                                                                              │
+  🎯 4-Tier Contradiction Radar      ⚪ Two-Stage Epistemic Abstention                                        │
+  (Direct Conflict, Duplicate <72h)  (Returns NOT_DOCUMENTED if entity missing in DB)                         │
+                                                           │                                                  │
+        ┌──────────────────────────────────────────────────┴──────────────────────────────────────────────────┘
+        ▼                                                                                                     ▼
+┌──────────────────────────────────────────┐                                       ┌──────────────────────────────────────────┐
+│        📦 SUPABASE STORAGE BUCKET        │                                       │       🧠 SQLALCHEMY ENGINE & DB          │
+│    (Raw Multi-Format File Storage)       │                                       │  (ACID-Compliant Structured Clinical DB) │
+├──────────────────────────────────────────┤                                       ├──────────────────────────────────────────┤
+│ • Tenant-Isolated Folders:               │                                       │ • `patients` (External ID, Demographics) │
+│   `{patient_id}/{filename}.pdf`          │                                       │ • `documents` (Type, Size, Ingest Time)  │
+│ • PDFs, Scanned Receipts, Lab Slips      │ ◀──────────── Linked by ────────────▶ │ • `timeline_events` (14-Field Schema:    │
+│ • Edge CDN Fast Delivery for             │           `file_path` &               │    entity, status, mg/dL, raw quote,     │
+│   Side-by-Side Document Comparator       │           `page_number`               │    source_doc, page, exact dates)        │
+│ • Local Disk Fallback (`./uploads`)      │                                       │ • `contradictions` (4-Tier Radar Records)│
+│   (Zero downtime during hackathon demo)  │                                       │ • `review_audit_logs` (Clinician review  │
+│                                          │                                       │    overrides without mutating quotes)    │
+└──────────────────────────────────────────┘                                       └──────────────────────────────────────────┘
+```
+
 ```mermaid
 sequenceDiagram
     autonumber
