@@ -70,11 +70,14 @@ export interface Prescription {
   document?: string;
 }
 
+import type { ContradictionItem } from "./clinical";
+
 export interface MedicalDocument {
   id: string;
   name: string;
   type: string;
   date: string;
+  url?: string;
 }
 
 export interface PatientRecords {
@@ -85,4 +88,5 @@ export interface PatientRecords {
   investigations: Investigation[];
   prescriptions: Prescription[];
   documents: MedicalDocument[];
+  conflicts?: ContradictionItem[];
 }
