@@ -1,15 +1,17 @@
-# 🏥 MedThread — Enterprise Evidence-First Medical History Engine
+<div align="center">
+  <img src="assets/logo.jpg" alt="MedThread Logo" width="560" />
 
-> **A clinical-grade data synthesis platform that transforms heterogeneous, unstructured medical documents into a verifiable, dated longitudinal health timeline — with zero hallucinations, strict source passage citations, and deterministic conflict reconciliation.**
+  <p><strong>A clinical-grade data synthesis platform that transforms heterogeneous, unstructured medical documents into a verifiable, dated longitudinal health timeline — with zero hallucinations, strict source passage citations, and deterministic conflict reconciliation.</strong></p>
 
----
-
-[![SOSC Synergy 26](https://img.shields.io/badge/Hackathon-SOSC%20SYNERGY%2026-0284c7?style=for-the-badge&logo=target)](https://sosc.org.in)
-[![Track: PS 7](https://img.shields.io/badge/Problem%20Statement-PS%207%3A%20One%20Patient%2C%20Many%20Records-059669?style=for-the-badge&logo=google-keep)]()
-[![FastAPI](https://img.shields.io/badge/Backend-FastAPI%20%7C%20Python%203.11+-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-[![React](https://img.shields.io/badge/Frontend-React%2018%20%7C%20TypeScript-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
-[![Docker](https://img.shields.io/badge/Containers-Docker%20Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com)
-[![Compliance](https://img.shields.io/badge/Security-HIPAA%20%2F%20Audit%20Trail%20Ready-purple?style=for-the-badge&logo=shield)]()
+  <p>
+    <a href="https://sosc.org.in"><img src="https://img.shields.io/badge/Hackathon-SOSC%20SYNERGY%2026-0284c7?style=for-the-badge&logo=target" alt="SOSC Synergy 26" /></a>
+    <img src="https://img.shields.io/badge/Problem%20Statement-PS%207%3A%20One%20Patient%2C%20Many%20Records-059669?style=for-the-badge&logo=google-keep" alt="Track: PS 7" />
+    <a href="https://fastapi.tiangolo.com"><img src="https://img.shields.io/badge/Backend-FastAPI%20%7C%20Python%203.11+-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI" /></a>
+    <a href="https://react.dev"><img src="https://img.shields.io/badge/Frontend-React%2018%20%7C%20TypeScript-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React" /></a>
+    <a href="https://www.docker.com"><img src="https://img.shields.io/badge/Containers-Docker%20Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" /></a>
+    <img src="https://img.shields.io/badge/Security-HIPAA%20%2F%20Audit%20Trail%20Ready-purple?style=for-the-badge&logo=shield" alt="Compliance" />
+  </p>
+</div>
 
 ---
 

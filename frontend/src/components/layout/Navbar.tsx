@@ -11,16 +11,11 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPatientId, onSelectPatien
   return (
     <header className="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between sticky top-0 z-50 shadow-sm">
       <div className="flex items-center space-x-3">
-        <div className="bg-sky-600 text-white p-2 rounded-lg flex items-center justify-center">
-          <Activity className="h-5 w-5" />
-        </div>
+        <img src="/logo.jpg" alt="MedThread Logo" className="h-9 object-contain" />
         <div>
-          <h1 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            MedThread
-            <span className="text-xs px-2 py-0.5 bg-sky-100 text-sky-800 font-semibold rounded-full">
-              Evidence Engine v1.0
-            </span>
-          </h1>
+          <span className="text-xs px-2 py-0.5 bg-sky-100 text-sky-800 font-semibold rounded-full">
+            Evidence Engine v1.0
+          </span>
           <p className="text-xs text-slate-500">SOSC SYNERGY 26 • PS 7 One Patient, Many Records</p>
         </div>
       </div>
