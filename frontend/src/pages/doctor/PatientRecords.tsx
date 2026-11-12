@@ -1,20 +1,20 @@
 import { 
   ArrowLeft, 
   FileText, 
-  AlertTriangle, 
   ShieldAlert, 
-  CopyCheck, 
-  RefreshCw, 
   Search, 
   CheckCircle2, 
   HelpCircle,
-  ExternalLink 
+  ExternalLink,
+  Edit3,
+  ShieldCheck
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import { getPatientRecords } from "../../services/doctorService";
 import { api } from "../../services/api";
+import { ReviewerModal, type ReviewTargetEvent } from "../../components/modals/ReviewerModal";
 import type { PatientRecords as PatientRecordsType } from "../../types/doctor";
 import type { QAResponse } from "../../types/clinical";
 
@@ -26,11 +26,17 @@ export default function PatientRecords() {
   const [qaQuery, setQaQuery] = useState("");
   const [qaLoading, setQaLoading] = useState(false);
   const [qaResult, setQaResult] = useState<QAResponse | null>(null);
+  const [selectedEventForReview, setSelectedEventForReview] = useState<ReviewTargetEvent | null>(null);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
   const numericId = parseInt(patientId.replace(/\D/g, "")) || 101;
 
+  const reloadRecords = () => {
+    void getPatientRecords(patientId).then(setRecords);
+  };
+
   useEffect(() => { 
-    void getPatientRecords(patientId).then(setRecords); 
+    reloadRecords();
   }, [patientId]);
 
   const handleAskQuestion = async (e: React.FormEvent) => {
@@ -209,11 +215,37 @@ export default function PatientRecords() {
         <h2 className="mb-5 font-heading text-xl font-bold">Medical history timeline</h2>
         <div className="space-y-6">
           {records.timeline.map((item) => (
-            <div key={item.id} className="relative border-l-2 border-sage pl-5">
+            <div key={item.id} className="relative border-l-2 border-sage pl-5 group">
               <span className="absolute -left-[7px] top-1 h-3 w-3 rounded-full bg-forest" />
-              <p className="text-xs font-semibold text-muted">{item.date}</p>
-              <h3 className="mt-1 font-bold text-forest">{item.event}</h3>
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-xs font-semibold text-muted">{item.date}</p>
+                  <h3 className="mt-1 font-bold text-forest">{item.event}</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedEventForReview({
+                      id: parseInt(item.id) || 1,
+                      entity: item.event,
+                      category: "TIMELINE",
+                      status: item.description || "RECORDED",
+                      currentValue: item.description,
+                    });
+                    setIsReviewModalOpen(true);
+                  }}
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-forest bg-sage/30 hover:bg-sage px-2 py-0.5 rounded transition"
+                >
+                  <Edit3 size={11} /> Review
+                </button>
+              </div>
               <p className="mt-1 text-sm text-muted">{valueOrNotDocumented(item.description)}</p>
+              {item.isReviewed && (
+                <div className="mt-2 inline-flex items-center gap-1.5 rounded-md bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-800 border border-emerald-200">
+                  <ShieldCheck size={13} className="text-emerald-600" />
+                  <span>Verified Override: {item.reviewedOverride || "Confirmed by clinician"}</span>
+                </div>
+              )}
               <p className="mt-2 text-xs text-forest">Source: {valueOrNotDocumented(item.source)}</p>
             </div>
           ))}
@@ -226,17 +258,43 @@ export default function PatientRecords() {
             {records.medications.map((item) => (
               <div key={item.id} className="rounded-xl bg-cream p-4">
                 <div className="flex items-start justify-between gap-3">
-                  <p className="font-semibold">{item.name}</p>
-                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                    item.status === "Stopped" ? "bg-red-100 text-red-800" :
-                    item.status === "Changed" ? "bg-amber-100 text-amber-800" :
-                    "bg-sage text-forest"
-                  }`}>
-                    {item.status}
-                  </span>
+                  <div>
+                    <p className="font-semibold">{item.name}</p>
+                    <p className="mt-1 text-sm text-muted">{valueOrNotDocumented(item.dosage)}</p>
+                  </div>
+                  <div className="flex flex-col items-end gap-1.5">
+                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                      item.status === "Stopped" ? "bg-red-100 text-red-800" :
+                      item.status === "Changed" ? "bg-amber-100 text-amber-800" :
+                      "bg-sage text-forest"
+                    }`}>
+                      {item.status}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedEventForReview({
+                          id: parseInt(item.id) || 1,
+                          entity: item.name,
+                          category: "MEDICATION",
+                          status: item.status,
+                          currentValue: item.dosage,
+                        });
+                        setIsReviewModalOpen(true);
+                      }}
+                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-forest hover:underline"
+                    >
+                      <Edit3 size={11} /> Correct
+                    </button>
+                  </div>
                 </div>
-                <p className="mt-2 text-sm text-muted">{valueOrNotDocumented(item.dosage)}</p>
-                <p className="mt-1 text-xs text-muted">Start: {valueOrNotDocumented(item.startDate)} · End: {valueOrNotDocumented(item.endDate)}</p>
+                {item.isReviewed && (
+                  <div className="mt-2 rounded bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-800 border border-emerald-200 flex items-center gap-1">
+                    <ShieldCheck size={12} className="text-emerald-600 shrink-0" />
+                    <span className="truncate">{item.reviewedOverride || "Verified by Clinician"}</span>
+                  </div>
+                )}
+                <p className="mt-2 text-xs text-muted">Start: {valueOrNotDocumented(item.startDate)} · End: {valueOrNotDocumented(item.endDate)}</p>
               </div>
             ))}
           </div>
@@ -311,6 +369,18 @@ export default function PatientRecords() {
           </div>
         </RecordSection>
       </div>
+
+      <ReviewerModal
+        isOpen={isReviewModalOpen}
+        event={selectedEventForReview}
+        onClose={() => {
+          setIsReviewModalOpen(false);
+          setSelectedEventForReview(null);
+        }}
+        onSuccess={() => {
+          reloadRecords();
+        }}
+      />
     </div>
   );
 }
@@ -334,12 +404,4 @@ function DataTable({ headers, rows }: { headers: string[]; rows: Array<Array<str
       </table>
     </div>
   );
-}
-
-function RecordSection({ title, children }: { title: string; children: React.ReactNode }) {
-  return <section className="rounded-2xl border border-sage bg-white p-6 shadow-sm"><h2 className="mb-5 font-heading text-xl font-bold">{title}</h2>{children}</section>;
-}
-
-function DataTable({ headers, rows }: { headers: string[]; rows: Array<Array<string | number>> }) {
-  return <div className="overflow-x-auto"><table className="w-full min-w-[560px] text-left text-sm"><thead className="border-b border-sage text-xs uppercase tracking-wide text-muted"><tr>{headers.map((header) => <th key={header} className="px-3 py-3">{header}</th>)}</tr></thead><tbody className="divide-y divide-sage">{rows.map((row, index) => <tr key={index}>{row.map((cell, cellIndex) => <td key={cellIndex} className="px-3 py-4 text-muted">{cell}</td>)}</tr>)}</tbody></table></div>;
 }
