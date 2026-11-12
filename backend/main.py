@@ -25,6 +25,7 @@ from backend.schemas.evidence_schema import (
 from backend.services.extractor_service import extract_text_from_pdf, parse_clinical_entities
 from backend.services.rules_engine import normalize_clinical_unit, normalize_date
 from backend.services.reconciliation_service import detect_contradictions
+from backend.services.qa_service import answer_clinical_question
 
 Base.metadata.create_all(bind=engine)
 
@@ -232,3 +233,64 @@ def get_patient_documents(patient_id: int, db: Session = Depends(get_db)):
             "uploaded_at": d.uploaded_at.isoformat()
         } for d in docs
     ]
+
+@app.patch("/api/review/{event_id}")
+def review_event(
+    event_id: int,
+    req: ReviewOverrideRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Allows clinician override while preserving immutable machine-extracted evidence.
+    Logs modification into review_audit_logs.
+    """
+    event = db.query(TimelineEvent).filter(TimelineEvent.id == event_id).first()
+    if not event:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"TimelineEvent {event_id} not found."
+        )
+        
+    original_val = getattr(event, req.field_modified, str(event.status))
+    
+    audit_log = ReviewAuditLog(
+        event_id=event.id,
+        reviewer_name=req.reviewer_name,
+        field_modified=req.field_modified,
+        original_value=str(original_val),
+        new_value=req.new_value,
+        reason=req.reason
+    )
+    db.add(audit_log)
+    
+    if hasattr(event, req.field_modified):
+        setattr(event, req.field_modified, req.new_value)
+    event.is_reviewed = 1
+    event.reviewed_override = f"Modified by {req.reviewer_name}: {req.field_modified} set to '{req.new_value}'. Reason: {req.reason or 'Clinician verified'}"
+    
+    db.commit()
+    db.refresh(event)
+    
+    return {
+        "event_id": event.id,
+        "is_reviewed": event.is_reviewed,
+        "reviewed_override": event.reviewed_override
+    }
+
+@app.post("/api/qa", response_model=QAResponse)
+def ask_records(req: QARequest, db: Session = Depends(get_db)):
+    """
+    Two-stage epistemic abstention Q&A answering strictly from patient records.
+    """
+    events = db.query(TimelineEvent).filter(TimelineEvent.patient_id == req.patient_id).all()
+    timeline_items = [
+        TimelineEventItem(
+            id=e.id, patient_id=e.patient_id, document_id=e.document_id,
+            entity=e.entity, category=e.category, status=e.status,
+            raw_value=e.raw_value, raw_unit=e.raw_unit, normalized_value=e.normalized_value,
+            raw_date=e.raw_date, normalized_date=e.normalized_date, date_status=e.date_status,
+            source_doc=e.source_doc, page_number=e.page_number, source_passage=e.source_passage,
+            is_reviewed=e.is_reviewed
+        ) for e in events
+    ]
+    return answer_clinical_question(req, timeline_items)
