@@ -1,30 +1,39 @@
 """
 MedThread FastAPI Backend Application
+Document Ingestion & Multi-Format Ingestion Microservice
 """
 
-from fastapi import FastAPI, Depends, UploadFile, File, Form, HTTPException
+import os
+import shutil
+from pathlib import Path
+from typing import List, Optional
+from fastapi import FastAPI, Depends, UploadFile, File, Form, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from typing import List
+from sqlalchemy.orm import Session
+
 from backend.core.config import settings
 from backend.core.database import Base, engine, get_db
+from backend.models.clinical_models import Patient, Document, TimelineEvent, Contradiction, ReviewAuditLog
 from backend.schemas.evidence_schema import (
     TimelineEventItem,
     ContradictionItem,
     QARequest,
     QAResponse,
-    ReviewOverrideRequest
+    ReviewOverrideRequest,
+    ExtractionReport
 )
+from backend.services.extractor_service import extract_text_from_pdf, parse_clinical_entities
+from backend.services.rules_engine import normalize_clinical_unit, normalize_date
+from backend.services.reconciliation_service import detect_contradictions
 
-# Initialize Database tables
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
-    description="Evidence-first Medical History Builder API"
+    description="Evidence-First Medical History Engine API"
 )
 
-# CORS Middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
@@ -33,66 +42,120 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+PATIENT_REGISTRY = {
+    101: "Rajesh Sharma",
+    102: "Priya Patel",
+    103: "Vikram Malhotra",
+    104: "Mohammed Irfan",
+    105: "David Fernandes"
+}
+
+def get_or_create_patient(db: Session, patient_id: int) -> Patient:
+    patient = db.query(Patient).filter(Patient.id == patient_id).first()
+    if not patient:
+        name = PATIENT_REGISTRY.get(patient_id, f"Patient {patient_id}")
+        patient = Patient(id=patient_id, external_patient_id=f"PAT-{patient_id}", full_name=name)
+        db.add(patient)
+        db.commit()
+        db.refresh(patient)
+    return patient
+
 @app.get("/")
 def root():
-    return {
-        "project": "MedThread",
-        "status": "online",
-        "version": settings.VERSION,
-        "docs": "/docs"
-    }
+    return {"project": "MedThread", "version": settings.VERSION, "status": "online"}
 
 @app.get("/api/health")
 def health_check():
     return {"status": "healthy"}
 
-@app.post("/api/upload")
+@app.post("/api/upload", response_model=ExtractionReport)
 async def upload_document(
     patient_id: int = Form(...),
-    file: UploadFile = File(...)
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db)
 ):
     """
-    Ingest multi-format medical record, run OCR if needed, extract timeline facts.
+    Secure file upload with 15MB cap, extension validation, PyMuPDF text parsing,
+    and fallback to Gemini Vision OCR.
     """
-    return {
-        "patient_id": patient_id,
-        "filename": file.filename,
-        "status": "Document ingested and queued for evidence extraction"
-    }
-
-@app.get("/api/timeline/{patient_id}", response_model=List[TimelineEventItem])
-def get_timeline(patient_id: int):
-    """
-    Fetch chronologically sorted timeline events with source citations.
-    """
-    return []
-
-@app.get("/api/conflicts/{patient_id}", response_model=List[ContradictionItem])
-def get_conflicts(patient_id: int):
-    """
-    Fetch detected contradiction radar items (Direct conflict, Needs review, Duplicates).
-    """
-    return []
-
-@app.patch("/api/review/{event_id}")
-def override_event(event_id: int, req: ReviewOverrideRequest):
-    """
-    Allows clinician override while preserving immutable original evidence.
-    """
-    return {
-        "event_id": event_id,
-        "is_reviewed": 1,
-        "override": req.dict()
-    }
-
-@app.post("/api/qa", response_model=QAResponse)
-def ask_records(req: QARequest):
-    """
-    Two-stage epistemic abstention Q&A answering strictly from patient records.
-    """
-    return QAResponse(
-        question=req.question,
-        answer="MedThread two-stage retrieval initialized.",
-        status="GROUNDED_ANSWER",
-        citations=[]
+    file_ext = Path(file.filename).suffix.lower()
+    if file_ext not in settings.ALLOWED_EXTENSIONS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unsupported format '{file_ext}'. Allowed: {settings.ALLOWED_EXTENSIONS}"
+        )
+        
+    patient_dir = Path(settings.UPLOAD_DIR) / str(patient_id)
+    patient_dir.mkdir(parents=True, exist_ok=True)
+    dest_path = patient_dir / file.filename
+    
+    total_size = 0
+    with open(dest_path, "wb") as buffer:
+        while chunk := await file.read(1024 * 1024):
+            total_size += len(chunk)
+            if total_size > settings.MAX_FILE_SIZE_BYTES:
+                buffer.close()
+                dest_path.unlink(missing_ok=True)
+                raise HTTPException(
+                    status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                    detail="File exceeds maximum allowed size limit of 15MB."
+                )
+            buffer.write(chunk)
+            
+    patient = get_or_create_patient(db, patient_id)
+    full_text, ocr_applied, pages = extract_text_from_pdf(str(dest_path))
+    
+    doc_record = Document(
+        patient_id=patient.id,
+        filename=file.filename,
+        file_path=str(dest_path),
+        file_size_bytes=total_size,
+        file_type="PDF" if file_ext == ".pdf" else "IMAGE",
+        ocr_applied=1 if ocr_applied else 0
+    )
+    db.add(doc_record)
+    db.commit()
+    db.refresh(doc_record)
+    
+    raw_events = parse_clinical_entities(full_text, file.filename, pages)
+    extracted_items = []
+    
+    for item in raw_events:
+        norm_date, date_status = normalize_date(item["raw_date"])
+        norm_val, norm_unit = normalize_clinical_unit(item["entity"], item.get("raw_value"), item.get("raw_unit"))
+        norm_display = f"{norm_val} {norm_unit}".strip() if norm_val else None
+        
+        ev = TimelineEvent(
+            patient_id=patient.id,
+            document_id=doc_record.id,
+            entity=item["entity"],
+            category=item["category"],
+            status=item["status"],
+            raw_value=item.get("raw_value"),
+            raw_unit=item.get("raw_unit"),
+            normalized_value=norm_display,
+            raw_date=item["raw_date"],
+            normalized_date=norm_date,
+            date_status=date_status,
+            source_doc=item["source_doc"],
+            page_number=item.get("page_number", 1),
+            source_passage=item["source_passage"],
+            is_reviewed=0
+        )
+        db.add(ev)
+        db.commit()
+        db.refresh(ev)
+        
+        extracted_items.append(TimelineEventItem(
+            id=ev.id, patient_id=ev.patient_id, document_id=ev.document_id,
+            entity=ev.entity, category=ev.category, status=ev.status,
+            raw_value=ev.raw_value, raw_unit=ev.raw_unit, normalized_value=ev.normalized_value,
+            raw_date=ev.raw_date, normalized_date=ev.normalized_date, date_status=ev.date_status,
+            source_doc=ev.source_doc, page_number=ev.page_number, source_passage=ev.source_passage,
+            is_reviewed=ev.is_reviewed
+        ))
+        
+    return ExtractionReport(
+        patient_id=patient_id, document_id=doc_record.id, filename=file.filename,
+        ocr_applied=ocr_applied, events_extracted=len(extracted_items), events=extracted_items
     )
