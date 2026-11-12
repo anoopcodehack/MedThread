@@ -7,22 +7,17 @@ export default {
   theme: {
     extend: {
       colors: {
-        border: "hsl(214.3 31.8% 91.4%)",
-        background: "hsl(0 0% 100%)",
-        foreground: "hsl(222.2 84% 4.9%)",
-        primary: {
-          DEFAULT: "#0284c7",
-          foreground: "#ffffff",
-        },
-        clinical: {
-          blue: "#0284c7",
-          green: "#059669",
-          amber: "#d97706",
-          rose: "#e11d48",
-          slate: "#475569"
-        }
+        forest: "#16472E",
+        "forest-dark": "#103923",
+        sage: "#DCE9D9",
+        cream: "#F5F7F2",
+        muted: "#78877C",
+      },
+      fontFamily: {
+        sans: ["DM Sans", "sans-serif"],
+        heading: ["Manrope", "sans-serif"],
       },
     },
   },
   plugins: [],
-}
+};
