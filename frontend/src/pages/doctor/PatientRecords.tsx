@@ -7,7 +7,9 @@ import {
   HelpCircle,
   ExternalLink,
   Edit3,
-  ShieldCheck
+  ShieldCheck,
+  Award,
+  ArrowRightLeft
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
@@ -15,6 +17,8 @@ import LoadingSpinner from "../../components/common/LoadingSpinner";
 import { getPatientRecords } from "../../services/doctorService";
 import { api } from "../../services/api";
 import { ReviewerModal, type ReviewTargetEvent } from "../../components/modals/ReviewerModal";
+import { EvidenceViewer, type ContradictionEvidence } from "../../components/cockpit/EvidenceViewer";
+import { BenchmarkModal } from "../../components/modals/BenchmarkModal";
 import type { PatientRecords as PatientRecordsType } from "../../types/doctor";
 import type { QAResponse } from "../../types/clinical";
 
@@ -28,6 +32,8 @@ export default function PatientRecords() {
   const [qaResult, setQaResult] = useState<QAResponse | null>(null);
   const [selectedEventForReview, setSelectedEventForReview] = useState<ReviewTargetEvent | null>(null);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [selectedContradictionForComparison, setSelectedContradictionForComparison] = useState<ContradictionEvidence | null>(null);
+  const [isBenchmarkModalOpen, setIsBenchmarkModalOpen] = useState(false);
 
   const numericId = parseInt(patientId.replace(/\D/g, "")) || 101;
 
@@ -59,9 +65,19 @@ export default function PatientRecords() {
 
   return (
     <div className="space-y-7">
-      <Link to="/doctor/recent-patients" className="inline-flex items-center gap-2 text-sm font-bold text-forest hover:underline">
-        <ArrowLeft size={17} />Back to patients
-      </Link>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <Link to="/doctor/recent-patients" className="inline-flex items-center gap-2 text-sm font-bold text-forest hover:underline">
+          <ArrowLeft size={17} />Back to patients
+        </Link>
+        <button
+          type="button"
+          onClick={() => setIsBenchmarkModalOpen(true)}
+          className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-extrabold bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100 shadow-xs transition"
+        >
+          <Award className="h-4 w-4 text-emerald-600" />
+          <span>PS-7 Benchmark Scorecard (78.1% Time Saved)</span>
+        </button>
+      </div>
       
       <div>
         <p className="text-sm font-semibold text-muted">Read-only patient record</p>
@@ -124,6 +140,25 @@ export default function PatientRecords() {
                       <span className="italic text-slate-800 line-clamp-2">"{conf.quote2}"</span>
                     </div>
                   </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setSelectedContradictionForComparison({
+                      id: idx,
+                      entity: conf.entity,
+                      tier: conf.tier,
+                      category: "CLINICAL",
+                      description: conf.description,
+                      doc1_name: conf.doc1_name,
+                      quote1: conf.quote1,
+                      doc2_name: conf.doc2_name,
+                      quote2: conf.quote2
+                    })}
+                    className="mt-3 w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-[11px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition border border-slate-200"
+                  >
+                    <ArrowRightLeft className="h-3.5 w-3.5 text-forest" />
+                    <span>Compare Evidence Side-by-Side</span>
+                  </button>
                 </div>
               );
             })}
@@ -389,6 +424,27 @@ export default function PatientRecords() {
         onSuccess={() => {
           reloadRecords();
         }}
+      />
+
+      <EvidenceViewer
+        isOpen={Boolean(selectedContradictionForComparison)}
+        contradiction={selectedContradictionForComparison}
+        onClose={() => setSelectedContradictionForComparison(null)}
+        onOpenReviewOverride={() => {
+          setSelectedEventForReview({
+            id: 1,
+            entity: selectedContradictionForComparison?.entity || "Clinical Finding",
+            category: selectedContradictionForComparison?.category || "MEDICATION",
+            status: "REQUIRES_REVIEW",
+            source_passage: selectedContradictionForComparison?.quote1
+          });
+          setIsReviewModalOpen(true);
+        }}
+      />
+
+      <BenchmarkModal
+        isOpen={isBenchmarkModalOpen}
+        onClose={() => setIsBenchmarkModalOpen(false)}
       />
     </div>
   );
