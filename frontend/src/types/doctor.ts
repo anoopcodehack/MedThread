@@ -15,6 +15,13 @@ export interface RecentPatient {
   status: AccessStatus;
 }
 
+export interface DashboardData {
+  totalPatients: number;
+  recentlyViewed: number;
+  activeAccess: number;
+  recentPatients: RecentPatient[];
+}
+
 export interface AccessHistoryEntry extends RecentPatient {
   accessedAt: string;
   method: "QR scan" | "Manual code";
@@ -35,6 +42,8 @@ export interface MedicalTimelineEntry {
   event: string;
   description?: string;
   source?: string;
+  isReviewed?: boolean;
+  reviewedOverride?: string | null;
 }
 
 export interface Medication {
@@ -44,6 +53,8 @@ export interface Medication {
   startDate?: string;
   endDate?: string;
   status: "Current" | "Stopped" | "Changed" | "Unknown";
+  isReviewed?: boolean;
+  reviewedOverride?: string | null;
 }
 
 export interface Allergy {

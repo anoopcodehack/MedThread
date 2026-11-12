@@ -3,7 +3,18 @@ import type { DoctorProfile, PatientRecords, RecentPatient, DashboardData } from
 import { api } from "./api";
 import * as mock from "./mockDoctorService";
 
-export const scanPatientQRCode = mock.verifyPatientAccessToken;
+export async function scanPatientQRCode(token: string): Promise<{ patientId: string }> {
+  if (!token || !token.trim()) {
+    throw new Error("Enter or scan a patient access code.");
+  }
+  const clean = token.trim();
+  const match = clean.match(/(\d{3})/);
+  if (match) {
+    return { patientId: match[1] };
+  }
+  return mock.verifyPatientAccessToken(token);
+}
+
 export const getAccessHistory = mock.getAccessHistory;
 
 export async function getDashboardData(): Promise<DashboardData> {
@@ -67,6 +78,8 @@ export async function getPatientRecords(patientId: string): Promise<PatientRecor
         event: e.entity,
         description: e.normalized_value ? `${e.status}: ${e.normalized_value}` : e.source_passage || e.status,
         source: `${e.source_doc}, p. ${e.page_number}`,
+        isReviewed: Boolean(e.is_reviewed),
+        reviewedOverride: e.reviewed_override,
       }));
 
       // Map Medications
@@ -78,6 +91,8 @@ export async function getPatientRecords(patientId: string): Promise<PatientRecor
         startDate: e.normalized_date,
         endDate: e.status === "DISCONTINUED" ? e.normalized_date : undefined,
         status: (e.status === "DISCONTINUED" ? "Stopped" : e.status === "TEMPORARILY_HELD" ? "Changed" : "Current") as "Current" | "Stopped" | "Changed" | "Unknown",
+        isReviewed: Boolean(e.is_reviewed),
+        reviewedOverride: e.reviewed_override,
       }));
 
       // Map Allergies
