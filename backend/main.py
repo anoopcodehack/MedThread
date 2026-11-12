@@ -69,6 +69,18 @@ def root():
 def health_check():
     return {"status": "healthy"}
 
+@app.get("/api/patients")
+def list_patients(db: Session = Depends(get_db)):
+    """
+    Returns list of all registered patients in the database.
+    """
+    patients = db.query(Patient).all()
+    if not patients:
+        for pid, name in PATIENT_REGISTRY.items():
+            get_or_create_patient(db, pid)
+        patients = db.query(Patient).all()
+    return [{"id": p.id, "external_id": p.external_patient_id, "name": p.full_name} for p in patients]
+
 @app.post("/api/upload", response_model=ExtractionReport)
 async def upload_document(
     patient_id: int = Form(...),
@@ -294,3 +306,107 @@ def ask_records(req: QARequest, db: Session = Depends(get_db)):
         ) for e in events
     ]
     return answer_clinical_question(req, timeline_items)
+
+@app.post("/api/seed/{patient_id}")
+def seed_patient_data(patient_id: int, db: Session = Depends(get_db)):
+    """
+    Helper endpoint for hackathon demo:
+    Automatically ingests the 5 pre-generated synthetic documents from sample_data/
+    into the database for the given patient ID.
+    """
+    patient_folder_map = {
+        101: "patient_1_sharma",
+        102: "patient_2_patel",
+        103: "patient_3_malhotra",
+        104: "patient_4_irfan",
+        105: "patient_5_fernandes"
+    }
+    folder_name = patient_folder_map.get(patient_id)
+    if not folder_name:
+        raise HTTPException(status_code=400, detail="Invalid patient ID for seeding")
+        
+    sample_dir = Path("sample_data") / folder_name
+    if not sample_dir.exists():
+        raise HTTPException(status_code=404, detail=f"Sample directory {sample_dir} not found")
+        
+    patient = get_or_create_patient(db, patient_id)
+    pdf_files = sorted(list(sample_dir.glob("*.pdf")))
+    ingested_count = 0
+    
+    for pdf_path in pdf_files:
+        existing = db.query(Document).filter(
+            Document.patient_id == patient_id,
+            Document.filename == pdf_path.name
+        ).first()
+        if existing:
+            continue
+            
+        full_text, ocr_applied, pages = extract_text_from_pdf(str(pdf_path))
+        doc_record = Document(
+            patient_id=patient.id,
+            filename=pdf_path.name,
+            file_path=str(pdf_path),
+            file_size_bytes=pdf_path.stat().st_size,
+            file_type="PDF",
+            ocr_applied=1 if ocr_applied else 0
+        )
+        db.add(doc_record)
+        db.commit()
+        db.refresh(doc_record)
+        
+        raw_events = parse_clinical_entities(full_text, pdf_path.name, pages)
+        for item in raw_events:
+            norm_date, date_status = normalize_date(item["raw_date"])
+            norm_val, norm_unit = normalize_clinical_unit(item["entity"], item.get("raw_value"), item.get("raw_unit"))
+            norm_display = f"{norm_val} {norm_unit}".strip() if norm_val else None
+            
+            ev = TimelineEvent(
+                patient_id=patient.id,
+                document_id=doc_record.id,
+                entity=item["entity"],
+                category=item["category"],
+                status=item["status"],
+                raw_value=item.get("raw_value"),
+                raw_unit=item.get("raw_unit"),
+                normalized_value=norm_display,
+                raw_date=item["raw_date"],
+                normalized_date=norm_date,
+                date_status=date_status,
+                source_doc=item["source_doc"],
+                page_number=item.get("page_number", 1),
+                source_passage=item["source_passage"],
+                is_reviewed=0
+            )
+            db.add(ev)
+        db.commit()
+        ingested_count += 1
+        
+    all_events = db.query(TimelineEvent).filter(TimelineEvent.patient_id == patient_id).all()
+    event_items = [
+        TimelineEventItem(
+            id=e.id, patient_id=e.patient_id, document_id=e.document_id,
+            entity=e.entity, category=e.category, status=e.status,
+            raw_value=e.raw_value, raw_unit=e.raw_unit, normalized_value=e.normalized_value,
+            raw_date=e.raw_date, normalized_date=e.normalized_date, date_status=e.date_status,
+            source_doc=e.source_doc, page_number=e.page_number, source_passage=e.source_passage,
+            is_reviewed=e.is_reviewed
+        ) for e in all_events
+    ]
+    detected_conflicts = detect_contradictions(event_items)
+    db.query(Contradiction).filter(Contradiction.patient_id == patient_id).delete()
+    for conf in detected_conflicts:
+        c_record = Contradiction(
+            patient_id=patient_id, tier=conf.tier, category=conf.category,
+            entity=conf.entity, description=conf.description, doc1_name=conf.doc1_name,
+            quote1=conf.quote1, doc2_name=conf.doc2_name, quote2=conf.quote2
+        )
+        db.add(c_record)
+    db.commit()
+    
+    return {
+        "status": "success",
+        "patient_id": patient_id,
+        "documents_ingested": ingested_count,
+        "total_events": len(all_events),
+        "conflicts_detected": len(detected_conflicts)
+    }
