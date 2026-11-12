@@ -678,6 +678,29 @@ function EventCard({
         </div>
 
         <div className="flex shrink-0 flex-wrap gap-2 sm:justify-end">
+          {event.status && (
+            <span
+              className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                event.status === "DISCONTINUED"
+                  ? "border border-red-200 bg-red-100 text-red-800"
+                  : event.status === "TEMPORARILY_HELD"
+                    ? "border border-amber-200 bg-amber-100 text-amber-800"
+                    : event.status === "DOSE_CHANGED"
+                      ? "border border-blue-200 bg-blue-100 text-blue-800"
+                      : "border border-emerald-200 bg-emerald-100 text-emerald-800"
+              }`}
+            >
+              {event.status === "DISCONTINUED"
+                ? "Stopped"
+                : event.status === "TEMPORARILY_HELD"
+                  ? "Held"
+                  : event.status === "DOSE_CHANGED"
+                    ? "Changed"
+                    : event.status === "STARTED"
+                      ? "Current"
+                      : event.status}
+            </span>
+          )}
           {event.is_reviewed === 1 && (
             <span className="rounded-full border border-[#C7D9CB] bg-[#EAF1EB] px-2.5 py-1 text-xs font-medium text-[#164A32]">
               Clinician reviewed
