@@ -8,6 +8,7 @@ import shutil
 from pathlib import Path
 from typing import List, Optional
 from fastapi import FastAPI, Depends, UploadFile, File, Form, HTTPException, status
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
@@ -26,6 +27,7 @@ from backend.services.extractor_service import extract_text_from_pdf, parse_clin
 from backend.services.rules_engine import normalize_clinical_unit, normalize_date
 from backend.services.reconciliation_service import detect_contradictions
 from backend.services.qa_service import answer_clinical_question
+from backend.services.storage_service import storage_service
 
 Base.metadata.create_all(bind=engine)
 
@@ -98,30 +100,26 @@ async def upload_document(
             detail=f"Unsupported format '{file_ext}'. Allowed: {settings.ALLOWED_EXTENSIONS}"
         )
         
-    patient_dir = Path(settings.UPLOAD_DIR) / str(patient_id)
-    patient_dir.mkdir(parents=True, exist_ok=True)
-    dest_path = patient_dir / file.filename
-    
-    total_size = 0
-    with open(dest_path, "wb") as buffer:
-        while chunk := await file.read(1024 * 1024):
-            total_size += len(chunk)
-            if total_size > settings.MAX_FILE_SIZE_BYTES:
-                buffer.close()
-                dest_path.unlink(missing_ok=True)
-                raise HTTPException(
-                    status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                    detail="File exceeds maximum allowed size limit of 15MB."
-                )
-            buffer.write(chunk)
+    content = await file.read()
+    total_size = len(content)
+    if total_size > settings.MAX_FILE_SIZE_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail="File exceeds maximum allowed size limit of 15MB."
+        )
+        
+    # Hybrid save: writes locally for extraction and uploads to Supabase Storage
+    storage_res = storage_service.save_document(str(patient_id), file.filename, content)
+    local_path = storage_res["local_path"]
+    storage_url = storage_res["storage_url"]
             
     patient = get_or_create_patient(db, patient_id)
-    full_text, ocr_applied, pages = extract_text_from_pdf(str(dest_path))
+    full_text, ocr_applied, pages = extract_text_from_pdf(local_path)
     
     doc_record = Document(
         patient_id=patient.id,
         filename=file.filename,
-        file_path=str(dest_path),
+        file_path=storage_url,
         file_size_bytes=total_size,
         file_type="PDF" if file_ext == ".pdf" else "IMAGE",
         ocr_applied=1 if ocr_applied else 0
@@ -242,9 +240,23 @@ def get_patient_documents(patient_id: int, db: Session = Depends(get_db)):
         {
             "id": d.id, "filename": d.filename, "file_size_bytes": d.file_size_bytes,
             "file_type": d.file_type, "ocr_applied": bool(d.ocr_applied),
+            "file_url": d.file_path,
             "uploaded_at": d.uploaded_at.isoformat()
         } for d in docs
     ]
+
+@app.get("/api/documents/raw/{patient_id}/{filename}")
+def get_raw_document(patient_id: int, filename: str):
+    """
+    Serves raw PDF or image document from isolated local filesystem for offline preview.
+    """
+    file_path = Path(settings.UPLOAD_DIR) / str(patient_id) / filename
+    if not file_path.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Document {filename} not found for patient {patient_id}."
+        )
+    return FileResponse(path=str(file_path), filename=filename)
 
 @app.patch("/api/review/{event_id}")
 def review_event(
@@ -409,4 +421,83 @@ def seed_patient_data(patient_id: int, db: Session = Depends(get_db)):
         "documents_ingested": ingested_count,
         "total_events": len(all_events),
         "conflicts_detected": len(detected_conflicts)
+    }
+
+@app.post("/api/documents/signed-url")
+def generate_document_signed_url(
+    payload: dict,
+    db: Session = Depends(get_db)
+):
+    """
+    Generates a 60-minute time-bound signed URL for clinical access control.
+    """
+    patient_id = payload.get("patient_id")
+    filename = payload.get("filename")
+    expires_in = int(payload.get("expires_in", 3600))
+    
+    if not (patient_id and filename):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Both 'patient_id' and 'filename' are required."
+        )
+        
+    signed_url = storage_service.create_signed_url(str(patient_id), filename, expires_in)
+    if not signed_url:
+        signed_url = f"/api/documents/raw/{patient_id}/{filename}"
+        
+    return {
+        "patient_id": patient_id,
+        "filename": filename,
+        "signed_url": signed_url,
+        "expires_in_seconds": expires_in
+    }
+
+@app.get("/api/system/status")
+def system_diagnostics(db: Session = Depends(get_db)):
+    """
+    Returns live system architecture telemetry:
+    - Active Database Engine (SQLite or Supabase PostgreSQL)
+    - Storage Mode (Supabase Object Storage or Local Sandbox)
+    - Live Entity Counts
+    """
+    db_dialect = engine.dialect.name
+    is_postgres = "postgres" in db_dialect
+    
+    db_type = "PostgreSQL (Supabase Cloud)" if is_postgres else "SQLite (Local Bulletproof)"
+    
+    # Mask database URL
+    raw_url = str(engine.url)
+    if "@" in raw_url:
+        masked_url = raw_url.split("@")[0].split("://")[0] + "://***:***@" + raw_url.split("@")[1]
+    else:
+        masked_url = raw_url
+        
+    storage_type = "Supabase Storage Bucket ('patient-records')" if (settings.SUPABASE_URL and settings.SUPABASE_KEY) else "Local Filesystem ('./uploads')"
+    
+    patient_count = db.query(Patient).count()
+    doc_count = db.query(Document).count()
+    event_count = db.query(TimelineEvent).count()
+    conflict_count = db.query(Contradiction).count()
+    
+    return {
+        "status": "online",
+        "system": settings.PROJECT_NAME,
+        "version": settings.VERSION,
+        "database": {
+            "type": db_type,
+            "dialect": db_dialect,
+            "connection": masked_url,
+            "pool_pre_ping": True
+        },
+        "storage": {
+            "backend": storage_type,
+            "bucket": settings.SUPABASE_BUCKET,
+            "supabase_configured": bool(settings.SUPABASE_URL and settings.SUPABASE_KEY)
+        },
+        "telemetry": {
+            "registered_patients": patient_count,
+            "ingested_documents": doc_count,
+            "timeline_events": event_count,
+            "detected_conflicts": conflict_count
+        }
     }

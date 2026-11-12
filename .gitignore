@@ -48,6 +48,10 @@ backend/.env
 frontend/.env
 *.env.local
 
+# Uploads & local storage
+uploads/
+backend/uploads/
+
 # Databases & local uploads
 *.sqlite3
 *.db

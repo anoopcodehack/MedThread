@@ -23,6 +23,11 @@ class Settings(BaseSettings):
     # Database
     DATABASE_URL: str = "sqlite:///./medthread.db"
     
+    # Supabase Cloud Storage & Database
+    SUPABASE_URL: str = "https://znwoerjmclnajtxhecek.supabase.co"
+    SUPABASE_KEY: str = "sb_publishable_5OTLaoxwRRuMelY4NyzNxw_ilO0MdVT"
+    SUPABASE_BUCKET: str = "patient-records"
+    
     # Storage & Security
     UPLOAD_DIR: str = "./uploads"
     MAX_FILE_SIZE_BYTES: int = 15 * 1024 * 1024  # 15 MB

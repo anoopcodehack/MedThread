@@ -7,7 +7,16 @@ Tests:
 4. Two-Stage Epistemic Abstention Gate & Refusal Firewall (qa_service.py)
 """
 
-import pytest
+import sys
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
+
+try:
+    import pytest
+except ImportError:
+    pytest = None
 from backend.services.rules_engine import (
     VALID_TRANSITIONS,
     VALID_MEDICATION_TRANSITIONS,
@@ -303,4 +312,37 @@ class TestQAService:
         assert resp.citations[0].source_doc == "01_Prescription_2022.pdf"
         assert resp.citations[0].page_number == 1
         assert "Metformin 500 mg" in resp.citations[0].quote
+
+
+def run_all_tests():
+    test_classes = [
+        TestMedicationFSM,
+        TestUnitNormalizer,
+        TestReconciliationService,
+        TestQAService
+    ]
+    print("=" * 70)
+    print(" 🏥 EXECUTING MEMBER 3 CLINICAL LOGIC TEST SUITE")
+    print("=" * 70)
+    passed = 0
+    total = 0
+    for cls in test_classes:
+        instance = cls()
+        methods = [m for m in dir(instance) if m.startswith("test_")]
+        for m in methods:
+            total += 1
+            func = getattr(instance, m)
+            try:
+                func()
+                print(f"  ✅ [{cls.__name__}] {m} passed")
+                passed += 1
+            except Exception as e:
+                print(f"  ❌ [{cls.__name__}] {m} FAILED: {e}")
+                raise e
+    print("=" * 70)
+    print(f" 🎉 ALL {passed}/{total} CLINICAL LOGIC TESTS PASSED (100%)!")
+    print("=" * 70)
+
+if __name__ == "__main__":
+    run_all_tests()
 
