@@ -154,8 +154,81 @@ async def upload_document(
             source_doc=ev.source_doc, page_number=ev.page_number, source_passage=ev.source_passage,
             is_reviewed=ev.is_reviewed
         ))
+
+    # Evaluate contradictions across all patient events
+    all_events = db.query(TimelineEvent).filter(TimelineEvent.patient_id == patient_id).all()
+    event_items = [
+        TimelineEventItem(
+            id=e.id, patient_id=e.patient_id, document_id=e.document_id,
+            entity=e.entity, category=e.category, status=e.status,
+            raw_value=e.raw_value, raw_unit=e.raw_unit, normalized_value=e.normalized_value,
+            raw_date=e.raw_date, normalized_date=e.normalized_date, date_status=e.date_status,
+            source_doc=e.source_doc, page_number=e.page_number, source_passage=e.source_passage,
+            is_reviewed=e.is_reviewed
+        ) for e in all_events
+    ]
+    detected_conflicts = detect_contradictions(event_items)
+    db.query(Contradiction).filter(Contradiction.patient_id == patient_id).delete()
+    for conf in detected_conflicts:
+        c_record = Contradiction(
+            patient_id=patient_id, tier=conf.tier, category=conf.category,
+            entity=conf.entity, description=conf.description, doc1_name=conf.doc1_name,
+            quote1=conf.quote1, doc2_name=conf.doc2_name, quote2=conf.quote2
+        )
+        db.add(c_record)
+    db.commit()
         
     return ExtractionReport(
         patient_id=patient_id, document_id=doc_record.id, filename=file.filename,
         ocr_applied=ocr_applied, events_extracted=len(extracted_items), events=extracted_items
     )
+
+@app.get("/api/timeline/{patient_id}", response_model=List[TimelineEventItem])
+def get_timeline(patient_id: int, db: Session = Depends(get_db)):
+    """
+    Returns chronologically sorted timeline events for a given patient.
+    """
+    events = (
+        db.query(TimelineEvent)
+        .filter(TimelineEvent.patient_id == patient_id)
+        .order_by(TimelineEvent.normalized_date.asc())
+        .all()
+    )
+    return [
+        TimelineEventItem(
+            id=e.id, patient_id=e.patient_id, document_id=e.document_id,
+            entity=e.entity, category=e.category, status=e.status,
+            raw_value=e.raw_value, raw_unit=e.raw_unit, normalized_value=e.normalized_value,
+            raw_date=e.raw_date, normalized_date=e.normalized_date, date_status=e.date_status,
+            source_doc=e.source_doc, page_number=e.page_number, source_passage=e.source_passage,
+            is_reviewed=e.is_reviewed, reviewed_override=e.reviewed_override
+        ) for e in events
+    ]
+
+@app.get("/api/conflicts/{patient_id}", response_model=List[ContradictionItem])
+def get_conflicts(patient_id: int, db: Session = Depends(get_db)):
+    """
+    Returns detected contradiction radar items (Direct conflict, Needs review, Duplicates).
+    """
+    conflicts = db.query(Contradiction).filter(Contradiction.patient_id == patient_id).all()
+    return [
+        ContradictionItem(
+            id=c.id, patient_id=c.patient_id, tier=c.tier, category=c.category,
+            entity=c.entity, description=c.description, doc1_name=c.doc1_name,
+            quote1=c.quote1, doc2_name=c.doc2_name, quote2=c.quote2
+        ) for c in conflicts
+    ]
+
+@app.get("/api/documents/{patient_id}")
+def get_patient_documents(patient_id: int, db: Session = Depends(get_db)):
+    """
+    Returns all documents uploaded for a specific patient.
+    """
+    docs = db.query(Document).filter(Document.patient_id == patient_id).all()
+    return [
+        {
+            "id": d.id, "filename": d.filename, "file_size_bytes": d.file_size_bytes,
+            "file_type": d.file_type, "ocr_applied": bool(d.ocr_applied),
+            "uploaded_at": d.uploaded_at.isoformat()
+        } for d in docs
+    ]
