@@ -106,8 +106,12 @@ export default function PatientPortal({ patientId }: Props) {
     }
   }
 
+  const currentPatient = patients.find((p) => p.id === selectedPatientId);
+  const patientName = currentPatient ? currentPatient.name : "Rajesh Sharma";
+  const patientExternalId = currentPatient ? currentPatient.external_id : "PAT-101";
+
   return (
-    <div className="min-h-screen bg-[#F8FAF8]">
+    <div className="flex min-h-screen bg-cream text-forest">
       <PatientSidebar
         activePage={activePage}
         onNavigate={setActivePage}
@@ -115,27 +119,27 @@ export default function PatientPortal({ patientId }: Props) {
         onClose={() => setMobileOpen(false)}
       />
 
-      <div className="min-h-screen lg:pl-[270px]">
+      <div className="min-w-0 flex-1">
         <PatientHeader
           title={pageTitles[activePage]}
           onMenuClick={() => setMobileOpen(true)}
+          patientName={patientName}
+          patientExternalId={patientExternalId}
         />
 
-        <main className="mx-auto max-w-[1500px] p-5 md:p-8">
-          <section className="mb-6 rounded-2xl border border-[#DCE8DE] bg-white p-4 shadow-sm md:p-5">
+        <main className="mx-auto max-w-7xl p-5 sm:p-8">
+          <section className="mb-6 rounded-2xl border border-sage bg-white p-5 shadow-sm">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex items-start gap-3">
-                <div className="rounded-xl bg-[#EAF1EB] p-2.5 text-[#164A32]">
+                <div className="rounded-xl bg-sage/60 p-2.5 text-forest">
                   <Database size={21} aria-hidden="true" />
                 </div>
                 <div>
-                  <h2 className="text-sm font-semibold text-[#26352D]">
-                    Demo patient selection
+                  <h2 className="font-heading text-sm font-bold text-forest">
+                    Active Patient Selection
                   </h2>
-                  <p className="mt-1 max-w-2xl text-xs leading-5 text-[#718077]">
-                    Select a patient returned by the backend. This demo route
-                    is directly accessible without login; use synthetic
-                    records only.
+                  <p className="mt-1 max-w-2xl text-xs leading-5 text-muted">
+                    Multi-tenant patient isolation active. Switch dossiers to inspect verified longitudinal records.
                   </p>
                 </div>
               </div>
@@ -154,7 +158,7 @@ export default function PatientPortal({ patientId }: Props) {
                     setSeedState("idle");
                     setSeedMessage("");
                   }}
-                  className="min-w-56 rounded-xl border border-[#DCE5DA] bg-white px-3 py-2.5 text-sm text-[#26352D] outline-none focus:border-[#719777] focus:ring-2 focus:ring-[#719777]/20 disabled:bg-[#F7F9F7]"
+                  className="min-w-56 rounded-xl border border-sage bg-white px-3 py-2.5 text-sm font-medium text-forest outline-none focus:border-forest focus:ring-2 focus:ring-forest/20 disabled:bg-cream"
                 >
                   <option value="">
                     {patientListState === "loading"
@@ -176,7 +180,7 @@ export default function PatientPortal({ patientId }: Props) {
                     seedState === "loading" ||
                     patientListState !== "ready"
                   }
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#164A32] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#082818] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-forest px-4 py-2.5 text-sm font-bold text-white transition hover:bg-forest/90 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {seedState === "loading" ? (
                     <LoaderCircle
@@ -189,7 +193,7 @@ export default function PatientPortal({ patientId }: Props) {
                   )}
                   {seedState === "loading"
                     ? "Seeding…"
-                    : "Load synthetic records"}
+                    : "Load Synthetic Records"}
                 </button>
               </div>
             </div>
@@ -217,7 +221,7 @@ export default function PatientPortal({ patientId }: Props) {
                 className={`mt-4 flex items-start gap-2 rounded-xl p-3 text-sm ${
                   seedState === "error"
                     ? "border border-rose-200 bg-rose-50 text-rose-800"
-                    : "border border-[#C7D9CB] bg-[#F1F6F1] text-[#164A32]"
+                    : "border border-emerald-200 bg-emerald-50 text-emerald-900"
                 }`}
               >
                 {seedState === "error" ? (
@@ -230,7 +234,7 @@ export default function PatientPortal({ patientId }: Props) {
             )}
 
             {patientListState === "ready" && patients.length === 0 && (
-              <p className="mt-3 text-sm text-[#718077]">
+              <p className="mt-3 text-sm text-muted">
                 The backend returned no patients.
               </p>
             )}

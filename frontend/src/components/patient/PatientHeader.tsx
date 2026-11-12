@@ -1,48 +1,55 @@
-
-import { Menu, Bell, ChevronDown } from "lucide-react";
+import { Bell, Menu, UserRound } from "lucide-react";
 
 interface Props {
   title: string;
   onMenuClick: () => void;
+  patientName?: string;
+  patientExternalId?: string;
 }
 
-export default function PatientHeader({ title, onMenuClick }: Props) {
+export default function PatientHeader({
+  title,
+  onMenuClick,
+  patientName = "Rajesh Sharma",
+  patientExternalId = "PAT-101",
+}: Props) {
   return (
-    <header className="sticky top-0 z-30 flex h-[76px] items-center justify-between border-b border-[#E6ECE7] bg-white/95 px-5 backdrop-blur md:px-8">
-      <div className="flex items-center gap-3">
-        <button
-          onClick={onMenuClick}
-          className="rounded-lg p-2 text-[#164A32] hover:bg-[#EAF1EB] lg:hidden"
-          aria-label="Open navigation"
-        >
-          <Menu size={22} />
-        </button>
+    <header className="flex items-center justify-between border-b border-sage bg-white px-5 py-4 sm:px-8">
+      <button
+        onClick={onMenuClick}
+        type="button"
+        className="text-muted hover:text-forest lg:hidden"
+        aria-label="Open navigation"
+      >
+        <Menu size={22} />
+      </button>
 
-        <div>
-          <h2 className="text-lg font-semibold text-[#26352D]">{title}</h2>
-          <p className="hidden text-xs text-[#829087] sm:block">
-            Your personal health space
-          </p>
-        </div>
+      <div className="hidden lg:block">
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted">
+          Patient workspace
+        </p>
+        <p className="font-heading text-lg font-bold text-forest">
+          {title || "Personal health records"}
+        </p>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="ml-auto flex items-center gap-4">
         <button
+          type="button"
+          className="text-muted hover:text-forest transition"
           aria-label="Notifications"
-          className="rounded-full border border-[#E6ECE7] p-2.5 text-[#52705D] hover:bg-[#EAF1EB]"
         >
-          <Bell size={18} />
+          <Bell size={20} />
         </button>
 
-        <button className="flex items-center gap-2 rounded-full border border-[#E6ECE7] p-1.5 pr-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#EAF1EB] text-[#164A32]">
-            <span className="text-sm font-semibold">?</span>
-          </div>
-          <span className="hidden text-xs font-medium text-[#26352D] sm:block">
-            My Account
+        <div className="flex items-center gap-2 text-sm font-semibold text-forest">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-sage">
+            <UserRound size={18} />
           </span>
-          <ChevronDown size={15} className="text-[#829087]" />
-        </button>
+          <span className="hidden sm:inline">
+            {patientName} ({patientExternalId})
+          </span>
+        </div>
       </div>
     </header>
   );
