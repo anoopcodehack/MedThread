@@ -77,7 +77,8 @@ export async function getPatientRecords(patientId: string): Promise<PatientRecor
         date: e.normalized_date,
         event: e.entity,
         description: e.normalized_value ? `${e.status}: ${e.normalized_value}` : e.source_passage || e.status,
-        source: `${e.source_doc}, p. ${e.page_number}`,
+        source: `${e.source_doc} (Page ${e.page_number || 1})`,
+        quote: e.source_passage,
         isReviewed: Boolean(e.is_reviewed),
         reviewedOverride: e.reviewed_override,
       }));
@@ -91,6 +92,8 @@ export async function getPatientRecords(patientId: string): Promise<PatientRecor
         startDate: e.normalized_date,
         endDate: e.status === "DISCONTINUED" ? e.normalized_date : undefined,
         status: (e.status === "DISCONTINUED" ? "Stopped" : e.status === "TEMPORARILY_HELD" ? "Changed" : "Current") as "Current" | "Stopped" | "Changed" | "Unknown",
+        source: `${e.source_doc} (Page ${e.page_number || 1})`,
+        quote: e.source_passage,
         isReviewed: Boolean(e.is_reviewed),
         reviewedOverride: e.reviewed_override,
       }));
@@ -101,7 +104,8 @@ export async function getPatientRecords(patientId: string): Promise<PatientRecor
         id: String(e.id),
         name: e.entity,
         severity: e.normalized_value || e.status || "Severe",
-        source: `${e.source_doc}, p. ${e.page_number}`,
+        source: `${e.source_doc} (Page ${e.page_number || 1})`,
+        quote: e.source_passage,
       }));
 
       // Map Investigations
@@ -122,7 +126,8 @@ export async function getPatientRecords(patientId: string): Promise<PatientRecor
           date: e.normalized_date,
           result: displayResult,
           unit: "",
-          source: `${e.source_doc}, p. ${e.page_number}`,
+          source: `${e.source_doc} (Page ${e.page_number || 1})`,
+          quote: e.source_passage,
         };
       });
 

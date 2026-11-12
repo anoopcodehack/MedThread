@@ -725,9 +725,12 @@ function EventCard({
       </div>
 
       {event.source_passage && (
-        <p className="mt-4 whitespace-pre-wrap break-words text-sm leading-6 text-[#526158]">
-          {event.source_passage}
-        </p>
+        <div className="mt-4 p-3 rounded-xl bg-[#F6F9F6] border border-[#E0EBE2] text-sm text-[#3E5245] font-mono leading-relaxed">
+          <span className="font-sans font-bold text-xs uppercase tracking-wider text-[#6C987F] block mb-1">
+            Verbatim Source Quote:
+          </span>
+          &ldquo;{event.source_passage}&rdquo;
+        </div>
       )}
 
       {(event.raw_value || event.raw_unit || event.normalized_value) && (

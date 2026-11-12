@@ -42,6 +42,7 @@ export interface MedicalTimelineEntry {
   event: string;
   description?: string;
   source?: string;
+  quote?: string;
   isReviewed?: boolean;
   reviewedOverride?: string | null;
 }
@@ -53,6 +54,8 @@ export interface Medication {
   startDate?: string;
   endDate?: string;
   status: "Current" | "Stopped" | "Changed" | "Unknown";
+  source?: string;
+  quote?: string;
   isReviewed?: boolean;
   reviewedOverride?: string | null;
 }
@@ -62,6 +65,7 @@ export interface Allergy {
   name: string;
   severity?: string;
   source?: string;
+  quote?: string;
 }
 
 export interface Investigation {
@@ -71,6 +75,7 @@ export interface Investigation {
   result?: string;
   unit?: string;
   source?: string;
+  quote?: string;
 }
 
 export interface Prescription {

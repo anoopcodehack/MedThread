@@ -290,7 +290,16 @@ export default function PatientRecords() {
                   <span>Verified Override: {item.reviewedOverride || "Confirmed by clinician"}</span>
                 </div>
               )}
-              <p className="mt-2 text-xs text-forest">Source: {valueOrNotDocumented(item.source)}</p>
+              <div className="mt-2 space-y-1">
+                <p className="text-xs font-semibold text-forest flex items-center gap-1">
+                  📄 {valueOrNotDocumented(item.source)}
+                </p>
+                {item.quote && (
+                  <p className="rounded-lg bg-slate-50 p-2 text-xs font-mono text-slate-700 border border-slate-200">
+                    &ldquo;Quote: {item.quote}&rdquo;
+                  </p>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -339,6 +348,18 @@ export default function PatientRecords() {
                   </div>
                 )}
                 <p className="mt-2 text-xs text-muted">Start: {valueOrNotDocumented(item.startDate)} · End: {valueOrNotDocumented(item.endDate)}</p>
+                <div className="mt-2 space-y-1">
+                  {item.source && (
+                    <p className="text-xs font-semibold text-forest flex items-center gap-1">
+                      📄 {item.source}
+                    </p>
+                  )}
+                  {item.quote && (
+                    <p className="rounded-lg bg-white/80 p-2 text-xs font-mono text-slate-700 border border-sage/60">
+                      &ldquo;Quote: {item.quote}&rdquo;
+                    </p>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -350,7 +371,14 @@ export default function PatientRecords() {
               <div key={item.id} className="rounded-xl bg-cream p-4">
                 <p className="font-semibold text-red-700">{item.name}</p>
                 <p className="mt-1 text-sm text-muted">Severity: {valueOrNotDocumented(item.severity)}</p>
-                <p className="mt-2 text-xs text-forest">Source: {valueOrNotDocumented(item.source)}</p>
+                <div className="mt-2 space-y-1">
+                  <p className="text-xs font-semibold text-forest">📄 {valueOrNotDocumented(item.source)}</p>
+                  {item.quote && (
+                    <p className="rounded-lg bg-white/80 p-2 text-xs font-mono text-slate-700 border border-sage/60">
+                      &ldquo;Quote: {item.quote}&rdquo;
+                    </p>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -359,12 +387,14 @@ export default function PatientRecords() {
 
       <RecordSection title="Investigations and lab reports">
         <DataTable 
-          headers={["Investigation", "Date", "Result", "Source"]} 
+          headers={["Investigation", "Date", "Result", "Source & Verbatim Quote"]} 
           rows={records.investigations.map((item) => [
             item.name, 
             item.date, 
             `${valueOrNotDocumented(item.result)} ${item.unit || ""}`.trim(), 
-            valueOrNotDocumented(item.source)
+            item.quote 
+              ? `📄 ${valueOrNotDocumented(item.source)} · Quote: "${item.quote.slice(0, 70)}..."`
+              : valueOrNotDocumented(item.source)
           ])} 
         />
       </RecordSection>
