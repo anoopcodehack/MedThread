@@ -159,42 +159,146 @@ def get_stopped_medications(events: List[Any]) -> List[Dict[str, Any]]:
     return [info for info in med_state.values() if info["is_discontinued"]]
 
 
-def normalize_clinical_unit(entity: str, raw_value: Optional[str], raw_unit: Optional[str]) -> Tuple[Optional[str], Optional[str]]:
+# ==============================================================================
+# 2. DETERMINISTIC CLINICAL UNIT NORMALIZATION (Never use LLMs for Math!)
+# ==============================================================================
+def normalize_clinical_unit(
+    entity: str,
+    raw_value: Optional[str],
+    raw_unit: Optional[str]
+) -> Tuple[Optional[str], Optional[str]]:
+    """
+    Deterministically normalizes laboratory test values and units into standard
+    US/International conventions.
+    Never uses AI for mathematical conversion.
+    """
     if not raw_value or not raw_unit:
         return raw_value, raw_unit
+        
     try:
-        val = float(raw_value.strip())
-        unit = raw_unit.strip().lower()
+        clean_val_str = str(raw_value).strip().replace(",", ".")
+        val = float(clean_val_str)
+        unit = str(raw_unit).strip().lower()
         entity_lower = entity.lower()
-        if any(g in entity_lower for g in ["glucose", "sugar", "fbg", "ppbg"]):
+        
+        # 1. Fasting Blood Glucose / Sugar (mmol/L -> mg/dL)
+        if any(term in entity_lower for term in ["glucose", "sugar", "fbg", "ppbg", "glycemia"]):
             if "mmol/l" in unit:
-                return f"{round(val * 18.0182, 1)}", "mg/dL"
-        if "cholesterol" in entity_lower or "lipid" in entity_lower or "triglyceride" in entity_lower:
+                converted_val = round(val * 18.0182, 1)
+                return f"{converted_val}", "mg/dL"
+            elif "mg/dl" in unit:
+                return f"{round(val, 1)}", "mg/dL"
+                
+        # 2. Total / LDL / HDL Cholesterol & Triglycerides (mmol/L -> mg/dL)
+        if any(term in entity_lower for term in ["cholesterol", "lipid", "triglyceride", "ldl", "hdl"]):
             if "mmol/l" in unit:
-                return f"{round(val * 38.67, 1)}", "mg/dL"
+                converted_val = round(val * 38.67, 1)
+                return f"{converted_val}", "mg/dL"
+            elif "mg/dl" in unit:
+                return f"{round(val, 1)}", "mg/dL"
+                
+        # 3. Serum Creatinine (umol/L -> mg/dL)
         if "creatinine" in entity_lower:
-            if "umol/l" in unit or "µmol/l" in unit:
-                return f"{round(val / 88.42, 2)}", "mg/dL"
+            if any(u in unit for u in ["umol/l", "µmol/l", "micromol/l", "umol/l."]):
+                converted_val = round(val / 88.42, 2)
+                return f"{converted_val}", "mg/dL"
+            elif "mg/dl" in unit:
+                return f"{round(val, 2)}", "mg/dL"
+                
+        # 4. Complete Blood Count (CBC) / White Blood Cell Count (/mcL, /uL)
+        if any(term in entity_lower for term in ["wbc", "white blood", "leukocyte"]):
+            if any(u in unit for u in ["/mcl", "/ul", "/mm3", "cells/mcl", "cells/ul"]):
+                return f"{int(round(val))}", "/mcL"
+                
     except (ValueError, TypeError):
         pass
+        
     return raw_value, raw_unit
 
 
+def format_dual_unit(
+    raw_value: Optional[str],
+    raw_unit: Optional[str],
+    normalized_value: Optional[str],
+    normalized_unit: Optional[str]
+) -> str:
+    """
+    Dual-Unit Display:
+    Formats evidence with both standardized and raw provenance:
+    e.g. '140.5 mg/dL (raw: 7.8 mmol/L)'
+    """
+    if not normalized_value:
+        return f"{raw_value or ''} {raw_unit or ''}".strip()
+        
+    norm_str = f"{normalized_value} {normalized_unit or ''}".strip()
+    if raw_value and raw_unit and (raw_unit.lower() != (normalized_unit or "").lower()):
+        return f"{norm_str} (raw: {raw_value} {raw_unit})"
+    return norm_str
+
+
+# ==============================================================================
+# 3. DETERMINISTIC DATE NORMALIZATION & AMBIGUITY DETECTION
+# ==============================================================================
+MONTH_MAP = {
+    "jan": 1, "january": 1,
+    "feb": 2, "february": 2,
+    "mar": 3, "march": 3,
+    "apr": 4, "april": 4,
+    "may": 5,
+    "jun": 6, "june": 6,
+    "jul": 7, "july": 7,
+    "aug": 8, "august": 8,
+    "sep": 9, "september": 9,
+    "oct": 10, "october": 10,
+    "nov": 11, "november": 11,
+    "dec": 12, "december": 12
+}
+
+
 def normalize_date(raw_date_str: str) -> Tuple[str, str]:
+    """
+    Normalizes clinical date string into ISO-8601 (YYYY-MM-DD).
+    Flags date_status as 'CONFIDENT' or 'AMBIGUOUS'.
+    """
     clean_date = raw_date_str.strip()
+    
+    # German dot format: DD.MM.YYYY
     german_match = re.match(r"^(\d{1,2})\.(\d{1,2})\.(\d{4})$", clean_date)
     if german_match:
-        day, month, year = int(german_match.group(1)), int(german_match.group(2)), int(german_match.group(3))
-        return f"{year:04d}-{month:02d}-{day:02d}", "CONFIDENT"
-    slash_match = re.match(r"^(\d{1,2})/(\d{1,2})/(\d{4})", clean_date)
+        day = int(german_match.group(1))
+        month = int(german_match.group(2))
+        year = int(german_match.group(3))
+        if 1 <= month <= 12 and 1 <= day <= 31:
+            return f"{year:04d}-{month:02d}-{day:02d}", "CONFIDENT"
+            
+    # Text month format: '15 Jan 2022', '10 June 2024', '14-Sep-2021'
+    text_match = re.match(r"^(\d{1,2})[-/\s]+([a-zA-Z]+)[-/\s]+(\d{4})$", clean_date)
+    if text_match:
+        day = int(text_match.group(1))
+        month_name = text_match.group(2).lower()
+        year = int(text_match.group(3))
+        month_num = MONTH_MAP.get(month_name[:3])
+        if month_num and 1 <= day <= 31:
+            return f"{year:04d}-{month_num:02d}-{day:02d}", "CONFIDENT"
+            
+    # Slash / Dash format: DD/MM/YYYY or MM/DD/YYYY
+    slash_match = re.match(r"^(\d{1,2})[/-](\d{1,2})[/-](\d{4})", clean_date)
     if slash_match:
-        n1, n2, year = int(slash_match.group(1)), int(slash_match.group(2)), int(slash_match.group(3))
+        n1 = int(slash_match.group(1))
+        n2 = int(slash_match.group(2))
+        year = int(slash_match.group(3))
         if n1 > 12 and n2 <= 12:
             return f"{year:04d}-{n2:02d}-{n1:02d}", "CONFIDENT"
         elif n2 > 12 and n1 <= 12:
             return f"{year:04d}-{n1:02d}-{n2:02d}", "CONFIDENT"
         else:
             return f"{year:04d}-{n2:02d}-{n1:02d}", "AMBIGUOUS"
+            
+    # Standard ISO-8601 format: YYYY-MM-DD
+    iso_match = re.match(r"^(\d{4})-(\d{2})-(\d{2})", clean_date)
+    if iso_match:
+        return f"{iso_match.group(1)}-{iso_match.group(2)}-{iso_match.group(3)}", "CONFIDENT"
+        
     try:
         dt = datetime.fromisoformat(clean_date[:10])
         return dt.strftime("%Y-%m-%d"), "CONFIDENT"
