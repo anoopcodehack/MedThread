@@ -1,27 +1,27 @@
 export interface TimelineEventItem {
-  id: number;
+  id?: number | null;
   patient_id: number;
-  document_id: number;
+  document_id?: number | null;
   entity: string;
-  category: "MEDICATION" | "LAB" | "CONDITION" | "ALLERGY" | "PROCEDURE";
-  status: "STARTED" | "DOSE_CHANGED" | "TEMPORARILY_HELD" | "DISCONTINUED" | "COMPLETED";
-  raw_value?: string;
-  raw_unit?: string;
-  normalized_value?: string;
+  category: string;
+  status: string;
+  raw_value?: string | null;
+  raw_unit?: string | null;
+  normalized_value?: string | null;
   raw_date: string;
   normalized_date: string;
-  date_status: "CONFIDENT" | "AMBIGUOUS";
+  date_status?: string;
   source_doc: string;
-  page_number: number;
+  page_number?: number;
   source_passage: string;
   is_reviewed: number;
-  reviewed_override?: string;
+  reviewed_override?: string | null;
 }
 
 export interface ContradictionItem {
-  id: number;
+  id?: number | null;
   patient_id: number;
-  tier: "UPDATED" | "NEEDS_REVIEW" | "DIRECT_CONFLICT" | "DUPLICATE_INVESTIGATION";
+  tier: string;
   category: string;
   entity: string;
   description: string;
