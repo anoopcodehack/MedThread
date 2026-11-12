@@ -238,6 +238,8 @@ export default function PatientPortal({ patientId }: Props) {
 
           {activePage === "dashboard" ? (
             <PatientDashboard
+              patientId={selectedPatientId}
+              onUploadSuccess={() => setDataRevision((r) => r + 1)}
               onNavigate={(page) => setActivePage(page as PatientPage)}
             />
           ) : activePage === "history" ? (

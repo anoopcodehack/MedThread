@@ -10,9 +10,15 @@ import {
   FilePlus2,
   FileText,
   X,
+  CheckCircle2,
+  LoaderCircle,
+  AlertCircle
 } from "lucide-react";
+import { api } from "../../services/api";
 
 interface Props {
+  patientId?: number;
+  onUploadSuccess?: () => void;
   onNavigate: (page: string) => void;
 }
 
@@ -35,18 +41,60 @@ const sections = [
     icon: Pill,
     page: "medications",
   },
- 
+  {
+    title: "Tests & Investigations",
+    description: "Track lab results, blood glucose, and vitals over time.",
+    icon: Activity,
+    page: "investigations",
+  },
+  {
+    title: "Medical Documents",
+    description: "Access and view all uploaded clinical records and PDFs.",
+    icon: FolderOpen,
+    page: "documents",
+  },
 ];
 
-export default function PatientDashboard({ onNavigate }: Props) {
+export default function PatientDashboard({ patientId, onUploadSuccess, onNavigate }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   const handleFileSelection = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const files = Array.from(event.target.files || []);
     setSelectedFiles(files);
+    setUploadStatus(null);
+  };
+
+  const handleUploadFiles = async () => {
+    if (selectedFiles.length === 0) return;
+    const pid = patientId || 101;
+    setUploading(true);
+    setUploadStatus(null);
+    try {
+      let count = 0;
+      for (const file of selectedFiles) {
+        await api.uploadDocument(pid, file);
+        count++;
+      }
+      setUploadStatus({
+        type: "success",
+        message: `Successfully uploaded and ingested ${count} document${count > 1 ? "s" : ""} for Patient ${pid}. Extracted into longitudinal timeline!`
+      });
+      setSelectedFiles([]);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      onUploadSuccess?.();
+    } catch (err: any) {
+      setUploadStatus({
+        type: "error",
+        message: err?.response?.data?.detail || "Failed to upload document. Max size is 15MB (.pdf, .png, .jpg)."
+      });
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -171,10 +219,44 @@ export default function PatientDashboard({ onNavigate }: Props) {
               </div>
             ))}
 
-            <p className="text-xs text-[#829087]">
-              Files are selected locally. They have not been uploaded yet.
-              Backend upload integration is pending.
-            </p>
+            <div className="pt-2 flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={handleUploadFiles}
+                disabled={uploading}
+                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#164A32] py-3 text-sm font-bold text-white shadow transition hover:bg-[#082818] disabled:opacity-50"
+              >
+                {uploading ? (
+                  <>
+                    <LoaderCircle size={18} className="animate-spin" />
+                    <span>Processing with PyMuPDF & Gemini OCR...</span>
+                  </>
+                ) : (
+                  <>
+                    <Upload size={18} />
+                    <span>Upload & Process {selectedFiles.length} Document{selectedFiles.length > 1 ? "s" : ""}</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {uploadStatus && (
+          <div className={`mt-4 rounded-xl p-4 flex items-start gap-3 text-sm font-medium ${
+            uploadStatus.type === "success" 
+              ? "bg-[#EAF1EB] text-[#164A32] border border-[#C7D9CB]" 
+              : "bg-red-50 text-red-800 border border-red-200"
+          }`}>
+            {uploadStatus.type === "success" ? (
+              <CheckCircle2 size={19} className="shrink-0 mt-0.5 text-emerald-600" />
+            ) : (
+              <AlertCircle size={19} className="shrink-0 mt-0.5 text-red-600" />
+            )}
+            <div>
+              <p className="font-semibold">{uploadStatus.type === "success" ? "Ingestion Complete" : "Upload Error"}</p>
+              <p className="mt-0.5 text-xs">{uploadStatus.message}</p>
+            </div>
           </div>
         )}
       </section>
