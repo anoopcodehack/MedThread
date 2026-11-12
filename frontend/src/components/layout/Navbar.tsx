@@ -1,5 +1,5 @@
 import React from 'react';
-import { Activity, ShieldCheck, QrCode, Clock } from 'lucide-react';
+import { QrCode, Clock } from 'lucide-react';
 
 interface NavbarProps {
   currentPatientId: number;
