@@ -142,6 +142,46 @@ def scope_patient_events(
     return matched_events
 
 
+# Predefined specialty referral recommendations for undocumented clinical inquiries
+SPECIALTY_LOOKUP = {
+    "asthma": "Pulmonology (Respiratory Medicine)",
+    "respiratory": "Pulmonology",
+    "lung": "Pulmonology",
+    "inhaler": "Pulmonology",
+    "cough": "Pulmonology",
+    "wheeze": "Pulmonology",
+    "kidney": "Nephrology",
+    "renal": "Nephrology",
+    "creatinine": "Nephrology",
+    "diabetes": "Endocrinology",
+    "thyroid": "Endocrinology",
+    "sugar": "Endocrinology",
+    "heart": "Cardiology",
+    "cardiac": "Cardiology",
+    "coronary": "Cardiology",
+    "chest pain": "Cardiology",
+    "hypertension": "Cardiology / Internal Medicine",
+    "blood pressure": "Cardiology / Internal Medicine",
+    "skin": "Dermatology",
+    "rash": "Dermatology / Allergy & Immunology",
+    "allergy": "Allergy & Clinical Immunology",
+    "penicillin": "Allergy & Clinical Immunology",
+    "anaphylaxis": "Allergy & Clinical Immunology",
+    "bone": "Orthopedics",
+    "joint": "Orthopedics / Rheumatology",
+    "fracture": "Orthopedics",
+    "x-ray": "Radiology",
+    "brain": "Neurology",
+    "migraine": "Neurology",
+    "seizure": "Neurology",
+    "stomach": "Gastroenterology",
+    "liver": "Gastroenterology / Hepatology",
+    "eye": "Ophthalmology",
+    "vision": "Ophthalmology",
+    "ear": "ENT (Otolaryngology)",
+}
+
+
 # ==============================================================================
 # STAGE 2 & 3: TWO-STAGE EPISTEMIC ABSTENTION GATE & ANSWER SYNTHESIS
 # ==============================================================================
@@ -156,7 +196,7 @@ def answer_clinical_question(
     1. Refusal Firewall: Rejects treatment/prescribing queries.
     2. Stage 1 (Entity Scoping): Searches verified patient records for relevant facts.
     3. Stage 2 (Hard Abstention Gate): If 0 facts found, DO NOT CALL LLM.
-       Immediately return 'NOT_DOCUMENTED'.
+       Immediately return 'NOT_DOCUMENTED' with suggested clinical specialty for evaluation.
     4. Stage 3 (Grounded Synthesis): Formats response exclusively from verified facts
        with exact document name and page citation.
     """
@@ -199,9 +239,28 @@ def answer_clinical_question(
     # --------------------------------------------------------------------------
     # If 0 facts match in database, NEVER call an LLM. Zero hallucination guarantee!
     if not relevant_events:
+        q_lower = req.question.lower()
+        matched_specialty = None
+        for term, spec in SPECIALTY_LOOKUP.items():
+            if term in q_lower:
+                matched_specialty = spec
+                break
+                
+        if matched_specialty:
+            answer = (
+                f"The requested clinical fact is not documented in the uploaded medical records. "
+                f"(Note: Absence of documentation is distinguished from an explicit negative test). "
+                f"For clinical investigation of this concern, evaluation by a specialist in {matched_specialty} is suggested."
+            )
+        else:
+            answer = (
+                "The requested clinical fact is not documented in the uploaded medical records. "
+                "(Note: Absence of documentation is distinguished from an explicit negative finding)."
+            )
+
         return QAResponse(
             question=req.question,
-            answer="The requested clinical fact is not documented in the uploaded medical records.",
+            answer=answer,
             status="NOT_DOCUMENTED",
             citations=[]
         )
