@@ -10,6 +10,7 @@ from typing import List, Optional
 from fastapi import FastAPI, Depends, UploadFile, File, Form, HTTPException, status
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 
 from backend.core.config import settings
@@ -44,6 +45,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Mount local uploads directory for static file serving & browser PDF viewing
+os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
 
 PATIENT_REGISTRY = {
     101: "Rajesh Sharma",
