@@ -422,3 +422,82 @@ def seed_patient_data(patient_id: int, db: Session = Depends(get_db)):
         "total_events": len(all_events),
         "conflicts_detected": len(detected_conflicts)
     }
+
+@app.post("/api/documents/signed-url")
+def generate_document_signed_url(
+    payload: dict,
+    db: Session = Depends(get_db)
+):
+    """
+    Generates a 60-minute time-bound signed URL for clinical access control.
+    """
+    patient_id = payload.get("patient_id")
+    filename = payload.get("filename")
+    expires_in = int(payload.get("expires_in", 3600))
+    
+    if not (patient_id and filename):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Both 'patient_id' and 'filename' are required."
+        )
+        
+    signed_url = storage_service.create_signed_url(str(patient_id), filename, expires_in)
+    if not signed_url:
+        signed_url = f"/api/documents/raw/{patient_id}/{filename}"
+        
+    return {
+        "patient_id": patient_id,
+        "filename": filename,
+        "signed_url": signed_url,
+        "expires_in_seconds": expires_in
+    }
+
+@app.get("/api/system/status")
+def system_diagnostics(db: Session = Depends(get_db)):
+    """
+    Returns live system architecture telemetry:
+    - Active Database Engine (SQLite or Supabase PostgreSQL)
+    - Storage Mode (Supabase Object Storage or Local Sandbox)
+    - Live Entity Counts
+    """
+    db_dialect = engine.dialect.name
+    is_postgres = "postgres" in db_dialect
+    
+    db_type = "PostgreSQL (Supabase Cloud)" if is_postgres else "SQLite (Local Bulletproof)"
+    
+    # Mask database URL
+    raw_url = str(engine.url)
+    if "@" in raw_url:
+        masked_url = raw_url.split("@")[0].split("://")[0] + "://***:***@" + raw_url.split("@")[1]
+    else:
+        masked_url = raw_url
+        
+    storage_type = "Supabase Storage Bucket ('patient-records')" if (settings.SUPABASE_URL and settings.SUPABASE_KEY) else "Local Filesystem ('./uploads')"
+    
+    patient_count = db.query(Patient).count()
+    doc_count = db.query(Document).count()
+    event_count = db.query(TimelineEvent).count()
+    conflict_count = db.query(Contradiction).count()
+    
+    return {
+        "status": "online",
+        "system": settings.PROJECT_NAME,
+        "version": settings.VERSION,
+        "database": {
+            "type": db_type,
+            "dialect": db_dialect,
+            "connection": masked_url,
+            "pool_pre_ping": True
+        },
+        "storage": {
+            "backend": storage_type,
+            "bucket": settings.SUPABASE_BUCKET,
+            "supabase_configured": bool(settings.SUPABASE_URL and settings.SUPABASE_KEY)
+        },
+        "telemetry": {
+            "registered_patients": patient_count,
+            "ingested_documents": doc_count,
+            "timeline_events": event_count,
+            "detected_conflicts": conflict_count
+        }
+    }
