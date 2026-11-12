@@ -1,11 +1,13 @@
-import { Bell, Menu, UserRound } from "lucide-react";
+import { Bell, Menu, UserRound, Award } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getDoctorProfile } from "../../services/doctorService";
+import { BenchmarkModal } from "../modals/BenchmarkModal";
 import type { DoctorProfile } from "../../types/doctor";
 
 export default function DoctorHeader() {
   const [profile, setProfile] = useState<DoctorProfile | null>(null);
+  const [isBenchmarkOpen, setIsBenchmarkOpen] = useState(false);
 
   useEffect(() => {
     void getDoctorProfile().then(setProfile);
@@ -37,6 +39,15 @@ export default function DoctorHeader() {
         <p className="font-heading text-lg font-bold text-forest">Evidence-first care</p>
       </div>
       <div className="ml-auto flex items-center gap-4">
+        <button
+          type="button"
+          onClick={() => setIsBenchmarkOpen(true)}
+          className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100 shadow-xs transition"
+          title="SOSC SYNERGY 26 (PS-7) Quantitative Benchmark Scorecard"
+        >
+          <Award className="h-4 w-4 text-emerald-600" />
+          <span>Benchmark Scorecard (-78% Time)</span>
+        </button>
         <button type="button" className="text-muted" aria-label="Notifications">
           <Bell size={20} />
         </button>
@@ -50,6 +61,11 @@ export default function DoctorHeader() {
           <span className="hidden sm:inline">{doctorName}</span>
         </Link>
       </div>
+
+      <BenchmarkModal
+        isOpen={isBenchmarkOpen}
+        onClose={() => setIsBenchmarkOpen(false)}
+      />
     </header>
   );
 }
