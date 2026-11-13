@@ -4,12 +4,16 @@ import {
   AlertCircle,
   ArrowDownWideNarrow,
   CalendarDays,
+  Clock,
   FileText,
   FilterX,
   History,
   LoaderCircle,
+  Pill,
+  Quote,
   RotateCcw,
   Search,
+  ShieldCheck,
 } from "lucide-react";
 import { api } from "../../services/api";
 import type { ContradictionItem, TimelineEventItem } from "../../types/clinical";
@@ -470,51 +474,55 @@ export default function MedicalHistoryPage({ patientId }: Props) {
               <li key={`${event.id ?? "event"}-${event.source_doc}-${event.entity}`} className="relative">
                 <span
                   aria-hidden="true"
-                  className="absolute -left-[27px] top-6 h-3 w-3 rounded-full border-2 border-white bg-[#6C987F] ring-2 ring-[#C7D9CB] sm:-left-[35px]"
+                  className="absolute -left-[27px] top-6 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-600 ring-4 ring-emerald-100 sm:-left-[35px]"
                 />
-                <article className="rounded-2xl border border-[#E5ECE6] bg-white p-5 shadow-sm transition hover:border-[#B5CCB8] md:p-6">
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        {event.raw_date && (
-                          <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#164A32]">
-                            <CalendarDays size={15} aria-hidden="true" />
-                            {event.raw_date}
-                          </span>
-                        )}
-                        {event.category && (
-                          <span className="rounded-full bg-[#EAF1EB] px-2.5 py-1 text-xs font-medium text-[#45634E]">
-                            {event.category}
-                          </span>
-                        )}
-                        {event.date_status &&
-                          event.date_status !== "CONFIDENT" && (
-                            <span className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs text-amber-800">
-                              Date status: {event.date_status}
-                            </span>
-                          )}
-                      </div>
-
-                      {event.entity && (
-                        <h2 className="mt-3 break-words text-lg font-semibold text-[#26352D]">
-                          {event.entity}
-                        </h2>
+                <article className="rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-xs transition-all duration-200 hover:shadow-md hover:border-emerald-300">
+                  {/* Top Badges Row */}
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex flex-wrap items-center gap-2">
+                      {event.raw_date && (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold">
+                          <CalendarDays size={13} className="text-slate-500" />
+                          {event.raw_date}
+                        </span>
+                      )}
+                      {event.category && (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/60 text-xs font-bold uppercase tracking-wider">
+                          <Pill size={11} className="text-emerald-700" />
+                          {event.category}
+                        </span>
+                      )}
+                      {event.date_status && event.date_status !== "CONFIDENT" && (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-medium">
+                          Date status: {event.date_status}
+                        </span>
                       )}
                     </div>
 
-                    <div className="flex shrink-0 flex-wrap gap-2 sm:justify-end">
+                    <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
                       {event.status && (
                         <span
-                          className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
                             event.status === "DISCONTINUED"
-                              ? "border border-red-200 bg-red-100 text-red-800"
+                              ? "border border-red-200 bg-red-50 text-red-700"
                               : event.status === "TEMPORARILY_HELD"
-                                ? "border border-amber-200 bg-amber-100 text-amber-800"
+                                ? "border border-amber-200 bg-amber-50 text-amber-700"
                                 : event.status === "DOSE_CHANGED"
-                                  ? "border border-blue-200 bg-blue-100 text-blue-800"
-                                  : "border border-emerald-200 bg-emerald-100 text-emerald-800"
+                                  ? "border border-blue-200 bg-blue-50 text-blue-700"
+                                  : "border border-emerald-200 bg-emerald-50 text-emerald-800"
                           }`}
                         >
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              event.status === "DISCONTINUED"
+                                ? "bg-red-500"
+                                : event.status === "TEMPORARILY_HELD"
+                                  ? "bg-amber-500"
+                                  : event.status === "DOSE_CHANGED"
+                                    ? "bg-blue-500"
+                                    : "bg-emerald-600 animate-pulse"
+                            }`}
+                          />
                           {event.status === "DISCONTINUED"
                             ? "Stopped"
                             : event.status === "TEMPORARILY_HELD"
@@ -527,13 +535,15 @@ export default function MedicalHistoryPage({ patientId }: Props) {
                         </span>
                       )}
                       {event.is_reviewed === 1 && (
-                        <span className="rounded-full border border-[#C7D9CB] bg-[#EAF1EB] px-2.5 py-1 text-xs font-medium text-[#164A32]">
-                          Clinician reviewed
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">
+                          <ShieldCheck size={13} className="text-emerald-700" />
+                          Clinician Reviewed
                         </span>
                       )}
                       {event.is_reviewed === 0 && (
-                        <span className="rounded-full border border-[#E5ECE6] bg-[#F8FAF8] px-2.5 py-1 text-xs text-[#718077]">
-                          Not reviewed
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-slate-100 text-slate-500 border border-slate-200">
+                          <Clock size={12} className="text-slate-400" />
+                          Pending Review
                         </span>
                       )}
                       {eventConflicts.map((conflict, index) => (
@@ -549,41 +559,61 @@ export default function MedicalHistoryPage({ patientId }: Props) {
                     </div>
                   </div>
 
-                  {event.source_passage && (
-                    <div className="mt-4 p-3 rounded-xl bg-[#F6F9F6] border border-[#E0EBE2] text-sm text-[#3E5245] font-mono leading-relaxed">
-                      <span className="font-sans font-bold text-xs uppercase tracking-wider text-[#6C987F] block mb-1">
-                        Verbatim Source Quote:
-                      </span>
-                      &ldquo;{event.source_passage}&rdquo;
+                  {/* Entity Name */}
+                  {event.entity && (
+                    <div className="mt-3.5 mb-1">
+                      <h2 className="break-words font-heading text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">
+                        {event.entity}
+                      </h2>
                     </div>
                   )}
 
+                  {/* Verbatim Source Quote (Clinical Evidence Provenance) */}
+                  {event.source_passage && (
+                    <div className="mt-3.5 rounded-xl bg-gradient-to-r from-emerald-50/50 via-slate-50 to-white border border-emerald-200/70 p-3.5 sm:p-4 shadow-2xs">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-800">
+                          <Quote size={13} className="text-emerald-600 fill-emerald-600/20" />
+                          <span>Verbatim Grounded Source Quote</span>
+                        </div>
+                        <span className="text-[10px] font-mono text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200 shadow-2xs">
+                          Evidence Grounding
+                        </span>
+                      </div>
+                      <p className="text-xs sm:text-sm font-medium text-slate-800 italic leading-relaxed pl-3 border-l-2 border-emerald-600">
+                        &ldquo;{event.source_passage}&rdquo;
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Bottom Metadata & Provenance Strip */}
                   {(event.status || event.source_doc) && (
-                    <div className="mt-5 flex flex-col gap-3 border-t border-[#EEF2EE] pt-4 sm:flex-row sm:items-end sm:justify-between">
+                    <div className="mt-4 pt-3.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs">
                       {event.status && (
-                        <p className="text-xs text-[#718077]">
-                          Event status:{" "}
-                          <span className="font-medium text-[#526158]">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                            Lifecycle State:
+                          </span>
+                          <span className="font-bold text-slate-800 bg-slate-100 border border-slate-200/80 px-2 py-0.5 rounded-md text-[11px] font-mono">
                             {event.status}
                           </span>
-                        </p>
+                        </div>
                       )}
                       {event.source_doc && (
-                        <div className="flex min-w-0 items-start gap-2 text-xs text-[#718077] sm:max-w-[55%]">
+                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-700 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-900 transition group cursor-pointer max-w-full">
                           <FileText
-                            size={15}
-                            className="mt-0.5 shrink-0 text-[#6C987F]"
+                            size={14}
+                            className="shrink-0 text-emerald-700"
                             aria-hidden="true"
                           />
-                          <p className="min-w-0 break-words">
-                            <span className="font-medium text-[#526158]">
-                              Source document
-                            </span>
-                            <br />
+                          <span className="font-semibold text-xs text-slate-900 group-hover:text-emerald-950 truncate max-w-xs sm:max-w-md">
                             {event.source_doc}
-                            {typeof event.page_number === "number" &&
-                              ` · Page ${event.page_number}`}
-                          </p>
+                          </span>
+                          {typeof event.page_number === "number" && (
+                            <span className="text-[10px] font-mono font-bold bg-white px-1.5 py-0.5 rounded text-slate-600 border border-slate-200 shrink-0">
+                              Page {event.page_number}
+                            </span>
+                          )}
                         </div>
                       )}
                     </div>
