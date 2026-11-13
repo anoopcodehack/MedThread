@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { ShieldCheck } from "lucide-react";
-import { BrandLogo } from "../common/BrandLogo";
 import LoginForm from "./LoginForm";
 import SignupForm from "./SignupForm";
 
@@ -9,14 +8,6 @@ export default function AuthForm() {
 
   return (
     <div className="w-full max-w-lg rounded-3xl border border-[#E5EBE2] bg-white/95 p-6 shadow-2xl shadow-forest/10 sm:p-9">
-      <div className="mb-4 flex justify-center">
-        <BrandLogo theme="dark" size="lg" showSubtitle />
-      </div>
-
-      <p className="mb-7 text-center text-xs text-muted">
-        Your medical records, connected.
-      </p>
-
       <div className="mb-7 grid grid-cols-2 rounded-xl bg-[#EDF2EB] p-1">
         <button
           type="button"
