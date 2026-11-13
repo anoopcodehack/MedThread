@@ -7,7 +7,6 @@ import {
   Users,
   QrCode,
   ShieldCheck,
-  Hospital,
   Activity,
   FileSpreadsheet,
 } from "lucide-react";
@@ -103,119 +102,66 @@ export default function DoctorHeader() {
                 )}
               </Link>
 
-              {/* Mega-Menu Flyout (Clean 3-column Coder.com-style layout) */}
+              {/* Patient Records Dropdown Flyout */}
               {openDropdown === "patients" && (
                 <div
-                  className="absolute left-1/2 -translate-x-1/2 top-full mt-3 w-[720px] rounded-2xl bg-white border border-slate-200 shadow-2xl p-6 grid grid-cols-12 gap-6 animate-in fade-in slide-in-from-top-2 duration-150 z-50 text-left"
+                  className="absolute left-1/2 -translate-x-1/2 top-full mt-3 w-72 rounded-2xl bg-white border border-slate-200 shadow-2xl p-3 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150 z-50 text-left"
                   onMouseEnter={() => handleMouseEnter("patients")}
                   onMouseLeave={handleMouseLeave}
                 >
-                  {/* Col 1: Spotlight (Left Column) */}
-                  <div className="col-span-4 pr-3 border-r border-slate-100 flex flex-col justify-between">
+                  <Link
+                    to="/doctor/recent-patients"
+                    onClick={() => setOpenDropdown(null)}
+                    className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 text-slate-800 transition group text-left"
+                  >
+                    <div className="p-2 rounded-lg bg-emerald-50 text-emerald-800 group-hover:bg-forest group-hover:text-white transition">
+                      <Users size={15} />
+                    </div>
                     <div>
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded">
-                        Clinical Dossier
+                      <span className="block text-xs font-bold text-slate-900 group-hover:text-forest">
+                        Recent Patients
                       </span>
-                      <h4 className="font-heading font-extrabold text-sm text-slate-900 mt-2">
-                        Patient Longitudinal Chart
-                      </h4>
-                      <p className="text-xs text-slate-500 leading-relaxed mt-1.5">
-                        Synthesized records from 4 hospital networks with instant evidence citations.
-                      </p>
+                      <span className="block text-[10px] text-slate-500">
+                        Active clinical consultations
+                      </span>
                     </div>
+                  </Link>
 
-                    <Link
-                      to="/doctor/recent-patients"
-                      onClick={() => setOpenDropdown(null)}
-                      className="text-xs font-bold text-forest hover:underline mt-4 pt-2 border-t border-slate-100 text-left block"
-                    >
-                      View Active Patients
-                    </Link>
-                  </div>
-
-                  {/* Col 2: Category Links (Middle Column) */}
-                  <div className="col-span-4 space-y-1">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-2">
-                      Clinical Operations
-                    </span>
-
-                    <Link
-                      to="/doctor/recent-patients"
-                      onClick={() => setOpenDropdown(null)}
-                      className="w-full flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-slate-50 text-slate-800 transition group text-left"
-                    >
-                      <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-800 group-hover:bg-forest group-hover:text-white transition">
-                        <Users size={14} />
-                      </div>
-                      <div>
-                        <span className="block text-xs font-bold text-slate-900 group-hover:text-forest">
-                          Recent Patients
-                        </span>
-                        <span className="block text-[10px] text-slate-500">
-                          Active clinical consultations
-                        </span>
-                      </div>
-                    </Link>
-
-                    <Link
-                      to="/doctor/patients/101"
-                      onClick={() => setOpenDropdown(null)}
-                      className="w-full flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-slate-50 text-slate-800 transition group text-left"
-                    >
-                      <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-800 group-hover:bg-forest group-hover:text-white transition">
-                        <FileSpreadsheet size={14} />
-                      </div>
-                      <div>
-                        <span className="block text-xs font-bold text-slate-900 group-hover:text-forest">
-                          Patient Chart (Rajesh)
-                        </span>
-                        <span className="block text-[10px] text-slate-500">
-                          Deep-dive verifiable records
-                        </span>
-                      </div>
-                    </Link>
-
-                    <Link
-                      to="/doctor/scan"
-                      onClick={() => setOpenDropdown(null)}
-                      className="w-full flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-slate-50 text-slate-800 transition group text-left"
-                    >
-                      <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-800 group-hover:bg-forest group-hover:text-white transition">
-                        <QrCode size={14} />
-                      </div>
-                      <div>
-                        <span className="block text-xs font-bold text-slate-900 group-hover:text-forest">
-                          QR &amp; Vitals Scanner
-                        </span>
-                        <span className="block text-[10px] text-slate-500">
-                          Camera ingestion &amp; heart rate
-                        </span>
-                      </div>
-                    </Link>
-                  </div>
-
-                  {/* Col 3: Visual Feature Card (Right Column - NO AI icons) */}
-                  <div className="col-span-4 pl-3 border-l border-slate-100 flex flex-col justify-between">
-                    <div className="rounded-xl bg-gradient-to-br from-[#0B2818] via-[#0E351F] to-[#082214] p-4 text-white flex flex-col justify-between h-full shadow-sm">
-                      <div>
-                        <div className="flex items-center gap-1.5 text-emerald-300 text-[10px] font-bold uppercase tracking-wider">
-                          <Hospital size={13} />
-                          <span>NABH Quality Grounding</span>
-                        </div>
-                        <h5 className="font-heading font-extrabold text-xs text-white mt-2 leading-snug">
-                          Deterministic Verification
-                        </h5>
-                        <p className="text-[11px] text-white/75 mt-1.5 leading-relaxed">
-                          Replaces paper files with instantaneous clinical verification in under 60 seconds.
-                        </p>
-                      </div>
-
-                      <div className="mt-4 pt-2.5 border-t border-white/15 flex items-center justify-between text-[10px] font-semibold text-emerald-300">
-                        <span>-78% Time Saved</span>
-                        <span>DISHA Compliant</span>
-                      </div>
+                  <Link
+                    to="/doctor/patients/101"
+                    onClick={() => setOpenDropdown(null)}
+                    className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 text-slate-800 transition group text-left"
+                  >
+                    <div className="p-2 rounded-lg bg-emerald-50 text-emerald-800 group-hover:bg-forest group-hover:text-white transition">
+                      <FileSpreadsheet size={15} />
                     </div>
-                  </div>
+                    <div>
+                      <span className="block text-xs font-bold text-slate-900 group-hover:text-forest">
+                        Patient Chart (Rajesh)
+                      </span>
+                      <span className="block text-[10px] text-slate-500">
+                        Deep-dive verifiable records
+                      </span>
+                    </div>
+                  </Link>
+
+                  <Link
+                    to="/doctor/scan"
+                    onClick={() => setOpenDropdown(null)}
+                    className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 text-slate-800 transition group text-left"
+                  >
+                    <div className="p-2 rounded-lg bg-emerald-50 text-emerald-800 group-hover:bg-forest group-hover:text-white transition">
+                      <QrCode size={15} />
+                    </div>
+                    <div>
+                      <span className="block text-xs font-bold text-slate-900 group-hover:text-forest">
+                        QR &amp; Vitals Scanner
+                      </span>
+                      <span className="block text-[10px] text-slate-500">
+                        Camera ingestion &amp; heart rate
+                      </span>
+                    </div>
+                  </Link>
                 </div>
               )}
             </div>
