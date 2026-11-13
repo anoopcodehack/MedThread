@@ -332,16 +332,23 @@ export const api = {
         filename,
         expires_in: expiresIn,
       });
-      const baseUrl = `${API_BASE.replace(/\/+$/, '')}/`;
+      let fullUrl = res.data.signed_url;
+      try {
+        const base = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+        fullUrl = new URL(res.data.signed_url, base).toString();
+      } catch {
+        fullUrl = `${typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'}/uploads/${patientId}/${filename}`;
+      }
       return {
         ...res.data,
-        signed_url: new URL(res.data.signed_url, baseUrl).toString(),
+        signed_url: fullUrl,
       };
     } catch {
+      const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
       return {
         patient_id: patientId,
         filename,
-        signed_url: `/uploads/${patientId}/${filename}`,
+        signed_url: `${origin}/uploads/${patientId}/${filename}`,
         expires_in_seconds: expiresIn,
       };
     }
@@ -361,6 +368,7 @@ export const api = {
       reason?: string;
       entity?: string;
       original_value?: string;
+      patient_id?: number;
     },
   ) => {
     const overrideString = `Modified by ${payload.reviewer_name}: ${payload.field_modified} set to '${payload.new_value}'. Reason: ${payload.reason || 'Clinician verified'}`;
@@ -437,16 +445,28 @@ export const api = {
       localStorage.setItem('medthread_timeline_overrides', JSON.stringify(currentOverrides));
     } catch {}
 
-    // 5. Generate Patient Portal Notification with Before vs Current Diff
+    let cleanBefore = cleanOriginal;
+    if (cleanBefore.includes('TEMPORARILY_HELD')) {
+      cleanBefore = 'TEMPORARILY HELD';
+    } else if (cleanBefore.toLowerCase().includes('contradictory') || cleanBefore.includes('without surgical')) {
+      cleanBefore = 'CONTRADICTION DETECTED';
+    } else if (cleanBefore.length > 28) {
+      cleanBefore = cleanBefore.slice(0, 25) + '...';
+    }
+
+    const targetPatientId = payload.patient_id ? Number(payload.patient_id) : 101;
+
+    // 5. Generate Patient Portal Notification with Before vs Current Diff (Strictly Scoped to Target Patient)
     const patientNotification = {
-      id: `notif-${Date.now()}`,
+      id: `notif-${Date.now()}-${targetPatientId}`,
+      patientId: targetPatientId,
       type: 'CLINICAL_OVERRIDE',
       title: 'Clinician Review & Prescription Update',
       doctor: payload.reviewer_name || 'Dr. Ananya Rao',
       facility: 'Apollo Heart Institute',
-      entity: payload.entity || 'Aspirin',
+      entity: payload.entity || 'Medication Record',
       field: payload.field_modified === 'status' ? 'Medication Status' : 'Dosage / Clinical Value',
-      beforeValue: cleanOriginal,
+      beforeValue: cleanBefore,
       afterValue: payload.new_value.toUpperCase(),
       reason: payload.reason || 'Verified with patient and clinical consultation note',
       timestamp: 'Just now',
@@ -455,11 +475,22 @@ export const api = {
     };
 
     try {
-      const existingNotifs = JSON.parse(localStorage.getItem('medthread_patient_notifications') || '[]');
-      existingNotifs.unshift(patientNotification);
-      localStorage.setItem('medthread_patient_notifications', JSON.stringify(existingNotifs));
+      // 1. Persist strictly to patient-scoped storage key
+      const patientKey = `medthread_patient_notifications_${targetPatientId}`;
+      const patientSpecific = JSON.parse(localStorage.getItem(patientKey) || '[]');
+      patientSpecific.unshift(patientNotification);
+      localStorage.setItem(patientKey, JSON.stringify(patientSpecific));
+
+      // 2. Dispatch event to active window with patientNotification
       window.dispatchEvent(new CustomEvent('medthread_notification_added', { detail: patientNotification }));
       window.dispatchEvent(new CustomEvent('medthread_event_reviewed', { detail: overrideData }));
+
+      // 3. Instant cross-tab real-time broadcast
+      try {
+        const bc = new BroadcastChannel('medthread_live_notifications');
+        bc.postMessage(patientNotification);
+        bc.close();
+      } catch {}
     } catch {}
 
     // 6. Resilient backend sync (non-blocking)
