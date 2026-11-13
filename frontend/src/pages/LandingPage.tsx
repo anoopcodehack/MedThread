@@ -695,49 +695,35 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Newsletter / Stay Updated Bar (From Image 1) */}
-          <div className="py-12 border-t border-b border-white/10 flex flex-col md:flex-row items-center justify-between gap-6">
+          {/* Newsletter / Stay Updated Bar (Exact Reference Image Style) */}
+          <div className="py-12 border-t border-b border-white/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div>
-              <span className="font-heading font-bold text-xs uppercase tracking-widest text-white block">
-                SUBSCRIBE TO UPDATES
-              </span>
-              <span className="text-[11px] text-white/60">
-                Receive health insights, platform updates and clinical guides.
-              </span>
+              <h3 className="font-heading font-black text-2xl sm:text-3xl uppercase tracking-wider text-white">
+                SUBSCRIBE TO OUR NEWSLETTER
+              </h3>
+              <p className="text-[11px] text-white/60 mt-1">
+                Receive health insights, clinical provenance updates and medicine intelligence.
+              </p>
             </div>
 
-            <div className="flex w-full md:w-auto max-w-md items-center gap-2">
+            <div className="flex w-full md:w-auto items-center gap-2">
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="bg-white/10 border border-white/20 text-xs px-4 py-2.5 rounded-full text-white placeholder-white/40 focus:outline-none focus:border-emerald-400 flex-1 md:w-64"
+                className="bg-black/40 border border-white/20 text-xs px-5 py-3 rounded-full text-white placeholder-white/40 focus:outline-none focus:border-emerald-400 w-full sm:w-64 md:w-72 shadow-inner"
               />
               <button
                 type="button"
-                className="bg-white text-[#0A2A18] text-xs font-bold pl-4 pr-1.5 py-1.5 rounded-full hover:bg-slate-100 transition whitespace-nowrap uppercase tracking-wider flex items-center gap-2 group cursor-pointer shadow-sm"
+                className="bg-white hover:bg-slate-100 text-[#0A2A18] text-xs font-bold px-6 py-3 rounded-full transition uppercase tracking-wider whitespace-nowrap shadow-md cursor-pointer shrink-0"
               >
-                <span>Subscribe</span>
-                <span className="relative overflow-hidden h-5 w-5 rounded-full bg-[#0A2A18] text-white flex items-center justify-center shrink-0">
-                  <ArrowUpRight size={11} className="stroke-[2.5] transition-transform duration-300 group-hover:translate-x-3 group-hover:-translate-y-3" />
-                  <ArrowUpRight size={11} className="stroke-[2.5] absolute transition-transform duration-300 -translate-x-3 translate-y-3 group-hover:translate-x-0 group-hover:translate-y-0" />
-                </span>
+                Subscribe Now
               </button>
             </div>
           </div>
 
-          {/* Navigation Links Columns (From Image 1) with Right-Slide Hover Animation */}
-          <div className="pt-12 grid grid-cols-2 md:grid-cols-4 gap-8 text-xs">
-            {/* Col 1 */}
-            <div>
-              <div className="mb-3">
-                <BrandLogo theme="light" size="sm" />
-              </div>
-              <p className="text-[11px] text-white/60 leading-relaxed">
-                Clean, science-backed medical intelligence designed for everyday wellness and verifiable health history.
-              </p>
-            </div>
-
-            {/* Col 2 */}
+          {/* 5-Column Navigation Links with Center Luxury Bottle on Grassy Meadow (From Reference Image) */}
+          <div className="pt-12 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 items-end relative text-xs">
+            {/* Col 1: PLATFORM */}
             <div>
               <h4 className="font-heading font-bold uppercase tracking-widest text-white text-[11px] mb-3">
                 PLATFORM
@@ -798,7 +784,118 @@ export default function LandingPage() {
               </ul>
             </div>
 
-            {/* Col 3 */}
+            {/* Col 2: CLINICAL */}
+            <div>
+              <h4 className="font-heading font-bold uppercase tracking-widest text-white text-[11px] mb-3">
+                CLINICAL
+              </h4>
+              <ul className="space-y-2 text-white/60">
+                <li className="group">
+                  <a
+                    href="#features"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      document.getElementById("features")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }}
+                    className="transition-all duration-200 hover:translate-x-2 hover:text-white inline-flex items-center gap-1.5"
+                  >
+                    <span>Evidence Engine</span>
+                    <ArrowUpRight size={11} className="opacity-0 -translate-x-1.5 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-[#A3C4AE]" />
+                  </a>
+                </li>
+                <li className="group">
+                  <a
+                    href="#how-it-works"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }}
+                    className="transition-all duration-200 hover:translate-x-2 hover:text-white inline-flex items-center gap-1.5"
+                  >
+                    <span>Allergy Radar</span>
+                    <ArrowUpRight size={11} className="opacity-0 -translate-x-1.5 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-[#A3C4AE]" />
+                  </a>
+                </li>
+                <li className="group">
+                  <a
+                    href="#how-it-works"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }}
+                    className="transition-all duration-200 hover:translate-x-2 hover:text-white inline-flex items-center gap-1.5"
+                  >
+                    <span>OCR Extraction</span>
+                    <ArrowUpRight size={11} className="opacity-0 -translate-x-1.5 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-[#A3C4AE]" />
+                  </a>
+                </li>
+                <li className="group">
+                  <a
+                    href="#essentials"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      document.getElementById("essentials")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }}
+                    className="transition-all duration-200 hover:translate-x-2 hover:text-white inline-flex items-center gap-1.5"
+                  >
+                    <span>Unit Normalization</span>
+                    <ArrowUpRight size={11} className="opacity-0 -translate-x-1.5 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-[#A3C4AE]" />
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Col 3 (CENTER): The Centerpiece Luxury Bottle Mockup on Grassy Meadow (Exact Reference Image) */}
+            <div className="order-last lg:order-none col-span-2 lg:col-span-1 flex flex-col items-center justify-end relative pt-4 -mb-8">
+              {/* Subtle ambient green glow behind bottle */}
+              <div className="absolute top-10 w-44 h-44 bg-emerald-500/20 rounded-full blur-2xl pointer-events-none" />
+
+              {/* Upright Realistic Luxury Bottle */}
+              <div className="relative z-10 w-36 sm:w-40 h-56 bg-gradient-to-r from-[#17221C] via-[#2A372E] to-[#141E18] rounded-[28px] shadow-2xl border border-white/15 p-3.5 flex flex-col justify-between text-center overflow-hidden">
+                {/* Specular bottle light reflection line */}
+                <div className="absolute top-0 bottom-0 left-3 w-5 bg-gradient-to-r from-transparent via-white/15 to-transparent pointer-events-none" />
+
+                {/* Silver/Bronze Metallic Screw Cap */}
+                <div className="mx-auto w-20 h-7 bg-gradient-to-b from-[#8C7456] via-[#BFA47E] to-[#705A3D] rounded-t-xl shadow-inner border-t border-white/30" />
+
+                {/* Bottle Label Area */}
+                <div className="py-3 px-1 flex flex-col items-center">
+                  <span className="font-heading font-black tracking-[3px] text-xs text-white uppercase">
+                    MEDTHREAD
+                  </span>
+                  <span className="text-[6.5px] tracking-[1.5px] text-white/70 uppercase mt-0.5">
+                    CLINICAL HEALTH ENGINE
+                  </span>
+
+                  <div className="my-2.5 w-7 h-px bg-white/25" />
+
+                  <span className="text-[8.5px] font-bold text-white uppercase tracking-wider">
+                    DAILY MULTIVITAMIN
+                  </span>
+                  <span className="text-[6px] text-white/60 tracking-widest uppercase mt-0.5">
+                    ENERGY • IMMUNITY • CLARITY
+                  </span>
+                </div>
+
+                {/* Bottom Bottle Base */}
+                <div className="text-[6.5px] tracking-widest text-white/40 uppercase pb-1">
+                  60 CAPSULES • VERIFIED
+                </div>
+              </div>
+
+              {/* Scattered Floating Medical Capsules around bottle (From Reference Image) */}
+              <div className="absolute -left-4 top-24 w-7 h-3.5 rounded-full bg-gradient-to-r from-[#205C38] to-[#123822] shadow-lg border border-white/20 transform -rotate-45" />
+              <div className="absolute -left-6 bottom-10 w-8 h-4 rounded-full bg-gradient-to-r from-[#A86F4C] to-[#6E4228] shadow-lg border border-white/20 transform rotate-12" />
+              <div className="absolute -right-4 top-28 w-7 h-3.5 rounded-full bg-gradient-to-r from-[#205C38] to-[#123822] shadow-lg border border-white/20 transform rotate-45" />
+              <div className="absolute -right-6 bottom-8 w-8 h-4 rounded-full bg-gradient-to-r from-[#2A6B42] to-[#123822] shadow-lg border border-white/20 transform -rotate-20" />
+
+              {/* Grassy Meadow Dome Mound at Base */}
+              <div className="w-52 sm:w-60 h-14 sm:h-16 -mt-6 bg-gradient-to-t from-[#0A2214] via-[#163D23] to-[#255C35] rounded-t-full shadow-2xl border-t border-emerald-400/30 relative overflow-hidden flex items-center justify-center">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-400/25 via-transparent to-transparent" />
+              </div>
+            </div>
+
+            {/* Col 4: ACCESS & PORTALS */}
             <div>
               <h4 className="font-heading font-bold uppercase tracking-widest text-white text-[11px] mb-3">
                 ACCESS &amp; PORTALS
@@ -831,7 +928,7 @@ export default function LandingPage() {
               </ul>
             </div>
 
-            {/* Col 4 */}
+            {/* Col 5: SECURITY & COMPLIANCE */}
             <div>
               <h4 className="font-heading font-bold uppercase tracking-widest text-white text-[11px] mb-3">
                 SECURITY &amp; COMPLIANCE
@@ -890,26 +987,29 @@ export default function LandingPage() {
                   </a>
                 </li>
               </ul>
-              <div className="flex items-center gap-3 text-white/80 mt-4">
-                <a href="#instagram" className="h-7 w-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition">
-                  <Instagram size={13} />
-                </a>
-                <a href="#twitter" className="h-7 w-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition">
-                  <Twitter size={13} />
-                </a>
-                <a href="#linkedin" className="h-7 w-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition">
-                  <Linkedin size={13} />
-                </a>
-                <a href="#facebook" className="h-7 w-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition">
-                  <Facebook size={13} />
-                </a>
-              </div>
             </div>
           </div>
 
-          {/* Bottom Copyright */}
-          <div className="mt-12 pt-8 border-t border-white/10 text-center text-[10px] text-white/40">
-            © 2026 MedThread Health Technologies, Inc. All rights reserved.
+          {/* Bottom Bar: Copyright on Left, Social Icons on Right (Exact Reference Image Style) */}
+          <div className="mt-12 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/50">
+            <div>
+              Copyright © MedThread | All rights reserved
+            </div>
+
+            <div className="flex items-center gap-3 text-white/80">
+              <a href="#instagram" className="h-7 w-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition" title="Instagram">
+                <Instagram size={13} />
+              </a>
+              <a href="#facebook" className="h-7 w-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition" title="Facebook">
+                <Facebook size={13} />
+              </a>
+              <a href="#twitter" className="h-7 w-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition" title="X (Twitter)">
+                <Twitter size={13} />
+              </a>
+              <a href="#linkedin" className="h-7 w-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition" title="LinkedIn">
+                <Linkedin size={13} />
+              </a>
+            </div>
           </div>
 
         </div>
