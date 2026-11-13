@@ -241,14 +241,18 @@ def get_patient_documents(patient_id: int, db: Session = Depends(get_db)):
     Returns all documents uploaded for a specific patient.
     """
     docs = db.query(Document).filter(Document.patient_id == patient_id).all()
-    return [
-        {
+    results = []
+    for d in docs:
+        file_url = d.file_path
+        if not (file_url.startswith("http://") or file_url.startswith("https://") or file_url.startswith("/")):
+            file_url = f"/api/documents/raw/{patient_id}/{d.filename}"
+        results.append({
             "id": d.id, "filename": d.filename, "file_size_bytes": d.file_size_bytes,
             "file_type": d.file_type, "ocr_applied": bool(d.ocr_applied),
-            "file_url": d.file_path,
+            "file_url": file_url,
             "uploaded_at": d.uploaded_at.isoformat()
-        } for d in docs
-    ]
+        })
+    return results
 
 @app.get("/api/documents/raw/{patient_id}/{filename}")
 def get_raw_document(patient_id: int, filename: str):
@@ -256,6 +260,21 @@ def get_raw_document(patient_id: int, filename: str):
     Serves raw PDF or image document from isolated local filesystem for offline preview.
     """
     file_path = Path(settings.UPLOAD_DIR) / str(patient_id) / filename
+    if not file_path.exists():
+        # Fallback check in sample_data
+        patient_map = {
+            101: "patient_1_sharma",
+            102: "patient_2_patel",
+            103: "patient_3_malhotra",
+            104: "patient_4_irfan",
+            105: "patient_5_fernandes"
+        }
+        folder_name = patient_map.get(patient_id)
+        if folder_name:
+            alt_path = Path("sample_data") / folder_name / filename
+            if alt_path.exists():
+                file_path = alt_path
+
     if not file_path.exists():
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
