@@ -110,7 +110,10 @@ export default function PatientPortal({ patientId }: Props) {
         </main>
       </div>
 
-      <PlatformFooter currentRole="patient" />
+      <PlatformFooter
+        currentRole="patient"
+        onNavigate={(p) => setActivePage(p as PatientPage)}
+      />
     </div>
   );
 }
