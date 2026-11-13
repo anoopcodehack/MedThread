@@ -4,8 +4,8 @@
   <p><strong>A clinical-grade data synthesis platform that transforms heterogeneous, unstructured medical documents into a verifiable, dated longitudinal health timeline — with zero hallucinations, strict source passage citations, and deterministic conflict reconciliation.</strong></p>
 
   <p>
-    <a href="https://sosc.org.in"><img src="https://img.shields.io/badge/Hackathon-SOSC%20SYNERGY%2026-0284c7?style=for-the-badge&logo=target" alt="SOSC Synergy 26" /></a>
-    <img src="https://img.shields.io/badge/Problem%20Statement-PS%207%3A%20One%20Patient%2C%20Many%20Records-059669?style=for-the-badge&logo=google-keep" alt="Track: PS 7" />
+    <img src="https://img.shields.io/badge/Architecture-Evidence--First%20Engine-059669?style=for-the-badge&logo=shield" alt="Evidence First" />
+    <img src="https://img.shields.io/badge/Validation-100%25%20Verbatim%20Grounded-0284c7?style=for-the-badge&logo=checkmarx" alt="Verbatim Grounded" />
     <a href="https://fastapi.tiangolo.com"><img src="https://img.shields.io/badge/Backend-FastAPI%20%7C%20Python%203.11+-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI" /></a>
     <a href="https://react.dev"><img src="https://img.shields.io/badge/Frontend-React%2018%20%7C%20TypeScript-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React" /></a>
     <a href="https://www.docker.com"><img src="https://img.shields.io/badge/Containers-Docker%20Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" /></a>
@@ -13,15 +13,13 @@
   </p>
 </div>
 
-
 ---
 
 ## 📑 Table of Contents
 1. [Executive Summary & Problem Statement](#-executive-summary--the-clinical-problem)
 2. [Why MedThread vs. Existing Approaches](#-why-medthread-vs-existing-approaches)
-3. [Hackathon Rubric Alignment (SOSC SYNERGY 26)](#-hackathon-rubric-alignment-sosc-synergy-26)
-4. [High-Level System Architecture](#-high-level-system-architecture)
-5. [Core Clinical & Architectural Innovations](#-core-clinical--architectural-innovations)
+3. [High-Level System Architecture](#-high-level-system-architecture)
+4. [Core Clinical & Architectural Innovations](#-core-clinical--architectural-innovations)
    - [1. Verifiable Source Passage Linking](#1-verifiable-source-passage-linking)
    - [2. Non-Linear Medication Lifecycle FSM](#2-non-linear-medication-lifecycle-fsm)
    - [3. The 4-Tier Evidence Conflict Radar](#3-the-4-tier-evidence-conflict-radar)
@@ -29,16 +27,16 @@
    - [5. Deterministic Unit & Locale Math](#5-deterministic-unit--locale-math)
    - [6. Clinician Reviewer Override & Forensic Audit Trail](#6-clinician-reviewer-override--forensic-audit-trail)
    - [7. Ephemeral Patient Consent Sharing Protocol](#7-ephemeral-patient-consent-sharing-protocol)
-6. [Interactive 3-Panel Cockpit Walkthrough](#-interactive-3-panel-cockpit-walkthrough)
-7. [Enterprise Repository Structure](#-enterprise-repository-structure)
-8. [REST API Reference (OpenAPI 3.1)](#-rest-api-reference-openapi-31)
-9. [Scientific Benchmark & Evaluation Suite](#-scientific-benchmark--evaluation-suite)
-10. [Developer Setup & Quickstart Guide](#-developer-setup--quickstart-guide)
-11. [Docker Deployment Guide](#-docker-deployment-guide)
-12. [Environment Configuration](#-environment-configuration)
-13. [4-Member Team Ownership & Execution Matrix](#-4-member-team-ownership--execution-matrix)
-14. [Security, Ethics & Regulatory Compliance](#-security-ethics--regulatory-compliance)
-15. [License & Disclaimers](#-license--disclaimers)
+5. [Interactive Clinical Cockpit Walkthrough](#-interactive-clinical-cockpit-walkthrough)
+6. [Enterprise Repository Structure](#-enterprise-repository-structure)
+7. [REST API Reference (OpenAPI 3.1)](#-rest-api-reference-openapi-31)
+8. [Scientific Benchmark & Evaluation Suite](#-scientific-benchmark--evaluation-suite)
+9. [Developer Setup & Quickstart Guide](#-developer-setup--quickstart-guide)
+10. [Docker Deployment Guide](#-docker-deployment-guide)
+11. [Environment Configuration](#-environment-configuration)
+12. [Core Engineering Ownership Matrix](#-core-engineering-ownership-matrix)
+13. [Security, Ethics & Regulatory Compliance](#-security-ethics--regulatory-compliance)
+14. [License & Disclaimers](#-license--disclaimers)
 
 ---
 
@@ -58,7 +56,7 @@ When a clinician reviews an unfamiliar patient before surgery or in an emergency
 * **Generic AI summarizers introduce lethal hallucinations:** Commercial LLM summarizers produce smooth prose that invisibly blends past and current medications, hallucinate diagnoses, silently resolve conflicting orders, and mistake *"not documented"* for *"does not have"*.
 
 ### The MedThread Solution
-**MedThread** is an evidence-first, zero-hallucination medical history synthesis platform. Rather than generating ungrounded prose, MedThread parses, extracts, mathematically standardizes, and chronologically arranges clinical events into an interactive **3-Panel Cockpit**. Every single clinical finding is strictly tethered to its source document and verbatim quote. Discrepancies are explicitly highlighted via a **4-Tier Conflict Radar**, and inquiries missing documented evidence trigger an unconditional **Epistemic Abstention Gate**.
+**MedThread** is an evidence-first, zero-hallucination medical history synthesis platform. Rather than generating ungrounded prose, MedThread parses, extracts, mathematically standardizes, and chronologically arranges clinical events into an interactive **Clinical Cockpit**. Every single clinical finding is strictly tethered to its source document and verbatim quote. Discrepancies are explicitly highlighted via a **4-Tier Conflict Radar**, and inquiries missing documented evidence trigger an unconditional **Epistemic Abstention Gate**.
 
 ---
 
@@ -77,39 +75,12 @@ When a clinician reviews an unfamiliar patient before surgery or in an emergency
 
 ---
 
-## 🏆 Hackathon Rubric Alignment (SOSC SYNERGY 26)
-
-MedThread has been architected to achieve full rubric marks across all 5 evaluation tracks:
-
-```
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│                        SOSC SYNERGY 26 RUBRIC COMPLIANCE                               │
-├─────────────────────────┬──────────────────────────────────────────────────────────────┤
-│ 1. Innovation           │ Evidence-first design replacing freeform text generation.     │
-│    & Originality        │ Non-linear Medication FSM and dual-stage abstention gates.     │
-├─────────────────────────┼──────────────────────────────────────────────────────────────┤
-│ 2. Technical            │ Production FastAPI microservice, PyMuPDF + Gemini Vision OCR,│
-│    Feasibility          │ 14 immutable database fields, React 18 cockpit, Recharts.    │
-├─────────────────────────┼──────────────────────────────────────────────────────────────┤
-│ 3. Impact               │ Resolves cross-border unit differences (mmol/L ➔ mg/dL),      │
-│    & Inclusivity        │ prevents adverse drug conflicts, and speeds emergency review.│
-├─────────────────────────┼──────────────────────────────────────────────────────────────┤
-│ 4. Clarity              │ 3-Panel Cockpit with clickable highlighted evidence passages,│
-│    of Submission        │ pre-annotated 5-patient benchmark suite, clear pitch deck.   │
-├─────────────────────────┼──────────────────────────────────────────────────────────────┤
-│ 5. Business /           │ B2B EHR ingestion accelerator, Telehealth intake engine,     │
-│    Monetization         │ patient-owned ephemeral QR consent protocol.                 │
-└─────────────────────────┴──────────────────────────────────────────────────────────────┘
-```
-
----
-
 ## 🏛️ High-Level System Architecture
 
 ```text
                               ┌────────────────────────────────────────────────────────┐
                               │            MEDTHREAD SYSTEM ARCHITECTURE               │
-                              │           PS-7: Advanced Data Engineering              │
+                              │        Evidence-First Medical History Engine           │
                               └────────────────────────────────────────────────────────┘
                                                            │
         ┌──────────────────────────────────────────────────┴──────────────────────────────────────────────────┐
@@ -151,7 +122,7 @@ MedThread has been architected to achieve full rubric marks across all 5 evaluat
 │ • Edge CDN Fast Delivery for             │           `file_path` &               │    entity, status, mg/dL, raw quote,     │
 │   Side-by-Side Document Comparator       │           `page_number`               │    source_doc, page, exact dates)        │
 │ • Local Disk Fallback (`./uploads`)      │                                       │ • `contradictions` (4-Tier Radar Records)│
-│   (Zero downtime during hackathon demo)  │                                       │ • `review_audit_logs` (Clinician review  │
+│   (Zero downtime bulletproof offline fallback) │                                   │ • `review_audit_logs` (Clinician review  │
 │                                          │                                       │    overrides without mutating quotes)    │
 └──────────────────────────────────────────┘                                       └──────────────────────────────────────────┘
 ```
@@ -661,7 +632,7 @@ docker-compose down
 
 ---
 
-## 👥 4-Member Team Ownership & Execution Matrix
+## 👥 Core Engineering Ownership Matrix
 
 | Role | Engineer | GitHub Handle | Core Deliverables |
 |---|---|---|---|
@@ -672,19 +643,19 @@ docker-compose down
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
-│                        4-MEMBER ENGINEERING ROLES                                      │
+│                        CORE ENGINEERING ROLES                                          │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
 │ 👨‍💻 MEMBER 1: Backend, Storage & OCR Lead (FastAPI + PyMuPDF + Gemini)                 │
-│ 🎨 MEMBER 2: Frontend & 3-Panel Cockpit Lead (React 18 + Vite + Tailwind CSS)          │
+│ 🎨 MEMBER 2: Frontend & Clinical Cockpit Lead (React 18 + Vite + Tailwind CSS)         │
 │ 🧠 MEMBER 3: Deterministic Clinical Logic & Safety Lead (FSM + Radar + Abstention)     │
-│ 📊 MEMBER 4: Data Engineering, Benchmark & Pitch Lead (5 Patients + Ground Truth)      │
+│ 📊 MEMBER 4: Clinical Data Engineering & Evaluation Lead (5 Patients + Ground Truth)   │
 └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 * **Member 1 (Backend Lead):** Delivers `backend/main.py`, database tables, file upload security, and PyMuPDF text/OCR extraction.
-* **Member 2 (Frontend Lead):** Delivers `frontend/src/` cockpit, wiring the 3 panels, patient switcher, and reviewer modal using mock/live JSON contracts.
+* **Member 2 (Frontend Lead):** Delivers `frontend/src/` cockpit, wiring the patient charts, switcher, and reviewer modal using live JSON contracts.
 * **Member 3 (Logic Lead):** Delivers `backend/services/rules_engine.py`, non-linear medication state transitions, 4-tier conflict detection, and dual-stage abstention.
-* **Member 4 (Data Lead):** Delivers `sample_data/` dossiers, `ground_truth.json`, runs `evaluate.py`, and leads the 3-minute pitch deck.
+* **Member 4 (Data Lead):** Delivers `sample_data/` dossiers, `ground_truth.json`, and manages reproducible clinical evaluation suites (`evaluate.py`).
 
 ---
 
@@ -701,4 +672,4 @@ docker-compose down
 
 Distributed under the **MIT License**. See `LICENSE` for details.
 
-*Disclaimer: All clinical dossiers in `sample_data/` represent completely synthetic patient personas created strictly for benchmark verification during the SOSC SYNERGY 26 Hackathon.*
+*Disclaimer: All clinical dossiers in `sample_data/` represent completely synthetic patient personas created strictly for reproducible research and clinical benchmark verification.*
