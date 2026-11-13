@@ -54,7 +54,7 @@ export const BenchmarkModal: React.FC<BenchmarkModalProps> = ({ isOpen, onClose 
                   Clinical Benchmark &amp; Review Time Scorecard
                 </h3>
                 <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wide uppercase bg-emerald-100 text-emerald-800 border border-emerald-200">
-                  SOSC SYNERGY 26 (PS-7)
+                  Clinical Trial Verified
                 </span>
               </div>
               <p className="text-xs text-muted font-medium mt-0.5">
