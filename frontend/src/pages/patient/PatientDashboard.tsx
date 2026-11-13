@@ -170,90 +170,77 @@ export default function PatientDashboard({ patientId = 101, onUploadSuccess, onN
 
   return (
     <div className="space-y-8">
-      {/* Real-World Caregiver & Multi-Hospital Banner (Caring for Elderly Parent) */}
-      <section className="rounded-3xl border border-emerald-200/80 bg-gradient-to-r from-emerald-50 via-teal-50 to-white p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="space-y-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-emerald-800 text-white shadow-xs">
-              {banner.badge}
-            </span>
-            <span className="text-xs font-bold text-emerald-950">
-              {banner.sub}
-            </span>
-          </div>
-          <h2 className="font-heading font-extrabold text-xl sm:text-2xl text-slate-900">
-            {banner.name} (Age {banner.age}) • {banner.hospitalCount} Hospital Files Unified
-          </h2>
-          <p className="text-xs text-slate-600 max-w-2xl leading-relaxed">
-            {banner.desc}
-          </p>
-          <div className="flex flex-wrap items-center gap-4 pt-1 text-[11px] font-semibold text-slate-700">
-            <span className="flex items-center gap-1.5 text-emerald-800">
-              <CheckCircle2 size={14} className="text-emerald-600" /> {banner.hospitalCount} Hospital Files Unified
-            </span>
-            <span className="flex items-center gap-1.5 text-emerald-800">
-              <CheckCircle2 size={14} className="text-emerald-600" /> Active vs Discontinued Meds Clarified
-            </span>
-            <span className="flex items-center gap-1.5 text-emerald-800">
-              <CheckCircle2 size={14} className="text-emerald-600" /> Emergency QR Pass Ready
-            </span>
-          </div>
-        </div>
+      {/* Unified Patient Header Banner */}
+      <section className="relative overflow-hidden rounded-3xl bg-forest p-6 text-white sm:p-8 shadow-sm">
+        <div className="relative z-10 flex flex-col justify-between gap-6 lg:flex-row lg:items-center">
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                {banner.badge}
+              </span>
+              <span className="text-xs font-semibold text-emerald-200">
+                {banner.sub}
+              </span>
+            </div>
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0">
-          <button
-            type="button"
-            onClick={() => onNavigate("history")}
-            className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition"
-          >
-            Explore Timeline
-          </button>
-          <button
-            type="button"
-            onClick={() => onNavigate("access")}
-            className="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 font-bold text-xs transition"
-          >
-            Emergency Access
-          </button>
-        </div>
-      </section>
+            <div>
+              <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-white">
+                {banner.name} (Age {banner.age})
+              </h1>
+              <p className="mt-1.5 max-w-2xl text-xs sm:text-sm leading-relaxed text-white/80">
+                {banner.desc}
+              </p>
+            </div>
 
-      {/* Hero Welcome Banner (Identical to DoctorDashboard style) */}
-      <section className="flex flex-col justify-between gap-5 rounded-3xl bg-forest p-6 text-white sm:flex-row sm:items-center sm:p-8">
-        <div>
-          <p className="mb-2 text-sm font-medium text-sage">Personal Health Record</p>
-          <h1 className="font-heading text-3xl font-extrabold">
-            Your Medical History, in One Place
-          </h1>
-          <p className="mt-3 max-w-xl text-sm leading-6 text-white/75">
-            Organize prescriptions, lab reports, and discharge summaries into one verifiable longitudinal timeline with zero lost evidence.
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            onClick={() => onNavigate("history")}
-            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/20"
-          >
-            <History size={17} />
-            Medical History
-          </button>
-          <button
-            type="button"
-            onClick={() => setIsCameraScannerOpen(true)}
-            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-white/20 bg-emerald-700/80 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-600 shadow-xs"
-          >
-            <Camera size={18} />
-            Scan with Camera
-          </button>
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-forest transition hover:bg-sage"
-          >
-            <FilePlus2 size={18} />
-            Upload Document
-          </button>
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-1 text-xs text-white/90">
+              <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-2.5 py-1 backdrop-blur-xs">
+                <CheckCircle2 size={14} className="text-emerald-400" />
+                <span>{banner.hospitalCount} Hospital Files Unified</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-2.5 py-1 backdrop-blur-xs">
+                <CheckCircle2 size={14} className="text-emerald-400" />
+                <span>Active vs Discontinued Meds Clarified</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-2.5 py-1 backdrop-blur-xs">
+                <CheckCircle2 size={14} className="text-emerald-400" />
+                <span>Emergency QR Pass Ready</span>
+              </span>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 shrink-0">
+            <button
+              type="button"
+              onClick={() => onNavigate("history")}
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-xs sm:text-sm font-semibold text-white transition hover:bg-white/20"
+            >
+              <History size={16} />
+              <span>Medical History</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsCameraScannerOpen(true)}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 border border-emerald-400/30 px-4 py-2.5 text-xs sm:text-sm font-semibold text-white transition shadow-xs"
+            >
+              <Camera size={16} />
+              <span>Scan with Camera</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-xs sm:text-sm font-bold text-forest transition hover:bg-sage shadow-xs"
+            >
+              <FilePlus2 size={16} />
+              <span>Upload Document</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => onNavigate("access")}
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-xs sm:text-sm font-semibold text-white transition hover:bg-white/20"
+            >
+              <span>Emergency Access</span>
+            </button>
+          </div>
         </div>
       </section>
 
