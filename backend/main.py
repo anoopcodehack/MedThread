@@ -3,9 +3,19 @@ MedThread FastAPI Backend Application
 Document Ingestion & Multi-Format Ingestion Microservice
 """
 
+import sys
 import os
 import shutil
 from pathlib import Path
+
+# Ensure root directory and backend directory are in sys.path
+_ROOT = Path(__file__).resolve().parent.parent
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
+_BACKEND = Path(__file__).resolve().parent
+if str(_BACKEND) not in sys.path:
+    sys.path.insert(0, str(_BACKEND))
+
 from typing import List, Optional
 from fastapi import FastAPI, Depends, UploadFile, File, Form, HTTPException, status
 from fastapi.responses import FileResponse
