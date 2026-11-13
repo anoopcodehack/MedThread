@@ -90,7 +90,7 @@ export const EvidenceViewer: React.FC<EvidenceViewerProps> = ({
                 {getTierBadge(contradiction.tier)}
               </div>
               <p className="text-xs text-muted font-medium mt-0.5">
-                Rubric PS-7 Compliance: Direct side-by-side evidence inspection with highlighted raw passages
+                Clinical Verification Standard: Direct side-by-side evidence inspection with highlighted raw passages
               </p>
             </div>
           </div>
