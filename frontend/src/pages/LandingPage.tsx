@@ -12,7 +12,9 @@ import {
   Linkedin,
   Facebook,
   Award,
-  RefreshCw
+  RefreshCw,
+  FileText,
+  Activity
 } from "lucide-react";
 import { SplashLoader } from "../components/common/SplashLoader";
 import { BrandLogo } from "../components/common/BrandLogo";
@@ -51,29 +53,29 @@ export default function LandingPage() {
             </Link>
           </div>
 
-          {/* Navigation Links */}
+          {/* Navigation Links - MedThread Product Focus */}
           <nav className="hidden md:flex items-center gap-8 text-xs font-semibold tracking-wider text-white/90 uppercase">
             <Link to="/" className="text-white border-b-2 border-white pb-0.5">
               Home
             </Link>
-            <a href="#solutions" className="hover:text-white transition">
-              Platform
+            <a href="#features" className="hover:text-white transition">
+              Features
+            </a>
+            <a href="#how-it-works" className="hover:text-white transition">
+              How It Works
             </a>
             <a href="#essentials" className="hover:text-white transition">
-              Our Story
+              Health Essentials
             </a>
-            <a href="#ingredients" className="hover:text-white transition">
-              Intelligence
-            </a>
-            <a href="#wellness" className="hover:text-white transition">
-              Wellness
+            <a href="#security" className="hover:text-white transition">
+              Security
             </a>
             <a href="#faq" className="hover:text-white transition">
               FAQ
             </a>
           </nav>
 
-          {/* Right Icons & Shop Now (Sign Up / Login) */}
+          {/* Right Icons & Sign Up / Login */}
           <div className="flex items-center gap-4">
             <button
               onClick={() => setShowSplash(true)}
@@ -85,10 +87,11 @@ export default function LandingPage() {
 
             <Link
               to="/login"
-              className="text-white/90 hover:text-white transition p-1.5"
+              className="text-white/90 hover:text-white transition p-1.5 flex items-center gap-1 text-xs font-semibold"
               title="Login"
             >
               <User size={18} />
+              <span className="hidden sm:inline">Login</span>
             </Link>
 
             <Link
@@ -106,10 +109,10 @@ export default function LandingPage() {
           {/* Top Text Grid: Left Heading, Center Paragraph & Button, Right Heading */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
             
-            {/* Top Left: FEEL GOOD & Rating */}
+            {/* Top Left: FEEL SECURE & Rating */}
             <div className="md:col-span-4">
               <h1 className="font-heading font-black text-6xl sm:text-7xl lg:text-8xl tracking-tight text-white uppercase leading-[0.9]">
-                FEEL GOOD
+                FEEL SECURE
               </h1>
 
               <div className="mt-5 space-y-1">
@@ -124,7 +127,7 @@ export default function LandingPage() {
                   </div>
                 </div>
                 <div className="font-heading font-bold text-sm text-white tracking-wide">
-                  Latest Platform 5.0 Rating
+                  Clinical Safety 5.0 Rating
                 </div>
               </div>
             </div>
@@ -132,7 +135,7 @@ export default function LandingPage() {
             {/* Top Center: Clean Paragraph & Circular Action Button */}
             <div className="md:col-span-4 text-center flex flex-col items-center pt-2">
               <p className="text-xs text-white/95 max-w-xs leading-relaxed font-medium">
-                Clean, science-backed medical intelligence designed to support your records, recovery, focus, and everyday wellness.
+                Clean, science-backed medical intelligence designed to unify your prescriptions, lab reports, and doctor visits into one verified timeline.
               </p>
 
               {/* Floating Circular Button (Exact VYORA Shop Now circle with arrow) */}
@@ -147,17 +150,17 @@ export default function LandingPage() {
               </Link>
             </div>
 
-            {/* Top Right: WORK EXCELLENT */}
+            {/* Top Right: CARE EXCELLENT */}
             <div className="md:col-span-4 text-left md:text-right">
               <h2 className="font-heading font-black text-5xl sm:text-6xl lg:text-7xl tracking-tight text-white/95 uppercase leading-[0.95]">
-                WORK
+                CARE
                 <br />
                 EXCELLENT
               </h2>
             </div>
           </div>
 
-          {/* Centerpiece Visual: Floating Luxury Supplement / Intelligence Bottle */}
+          {/* Centerpiece Visual: Floating Luxury Supplement / Intelligence Bottle (UNTOUCHED AS REQUESTED) */}
           <div className="relative mt-8 sm:mt-12 flex items-center justify-center">
             
             {/* Floating Info Pill on the Left */}
@@ -172,7 +175,7 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Realistic Luxury Bottle Mockup Container */}
+            {/* Realistic Luxury Bottle Mockup Container (UNTOUCHED) */}
             <div className="relative group cursor-pointer transition-transform duration-500 hover:scale-[1.02]">
               {/* Subtle bottle ambient glow */}
               <div className="absolute inset-0 bg-emerald-400/20 rounded-full blur-3xl transform scale-90" />
@@ -235,63 +238,63 @@ export default function LandingPage() {
       </section>
 
       {/* ========================================================================= */}
-      {/* 2. CLEAN WHITE SECTION (Exact 3-Pillar Layout from Image 1) */}
+      {/* 2. CLEAN WHITE SECTION: 3 CORE PRODUCT PILLARS (MedThread Technology) */}
       {/* ========================================================================= */}
-      <section id="ingredients" className="py-24 bg-white">
+      <section id="features" className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-6">
           
-          {/* Top Row: Big Left-Aligned Heading & Right "Guidelines" Pill Button */}
+          {/* Top Row: Big Left-Aligned Heading & Right "Explore Platform" Pill Button */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-16 border-b border-slate-100">
             <h2 className="font-heading font-bold text-2xl sm:text-3xl lg:text-4xl text-slate-900 max-w-2xl leading-tight">
-              Clean, science-backed intelligence designed to support your care, recovery, focus, and everyday wellness —without the unnecessary extras.
+              Clean, science-backed medical intelligence designed to support your care, recovery, focus, and everyday wellness —without the unnecessary paperwork.
             </h2>
 
             <Link
               to="/auth"
               className="bg-[#0A2A18] hover:bg-[#124227] text-white text-xs font-bold px-6 py-2.5 rounded-full transition-all self-start md:self-auto uppercase tracking-wider"
             >
-              Guidelines
+              Explore Platform
             </Link>
           </div>
 
-          {/* 3-Column Minimalist Line-Art Features (From Image 1) */}
+          {/* 3-Column Minimalist Line-Art Features (MedThread Focus) */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 pt-16">
-            {/* Feature 1: Clean Ingredients */}
+            {/* Feature 1: Unified Timeline */}
             <div>
               <div className="h-12 w-12 rounded-2xl bg-[#F0F5F2] text-[#0A2A18] flex items-center justify-center mb-6">
                 <Pill size={24} />
               </div>
               <h3 className="font-heading font-bold text-slate-900 text-lg mb-2">
-                Clean Ingredients
+                Unified Timeline
               </h3>
               <p className="text-xs text-slate-600 leading-relaxed font-normal">
-                Thoughtfully sourced records with nothing unnecessary. Complete prescription timelines without stale discontinued drugs.
+                Thoughtfully organized health history. Complete chronological record of all your prescriptions, consultations, and hospital visits without stale discontinued drugs.
               </p>
             </div>
 
-            {/* Feature 2: Third-Party Tested */}
+            {/* Feature 2: Prescription Safety */}
             <div>
               <div className="h-12 w-12 rounded-2xl bg-[#F0F5F2] text-[#0A2A18] flex items-center justify-center mb-6">
                 <ShieldCheck size={24} />
               </div>
               <h3 className="font-heading font-bold text-slate-900 text-lg mb-2">
-                Third-Party Tested
+                Prescription Safety
               </h3>
               <p className="text-xs text-slate-600 leading-relaxed font-normal">
-                Every formula and lab number is verified for quality and clinical purity. 100% deterministic unit conversions.
+                Every medication lifecycle is tracked: started, titrated, held, and stopped. Automatically catches conflicting drugs, duplicate tests, and historical allergy gaps.
               </p>
             </div>
 
-            {/* Feature 3: Science-Backed */}
+            {/* Feature 3: Science-Backed Evidence */}
             <div>
               <div className="h-12 w-12 rounded-2xl bg-[#F0F5F2] text-[#0A2A18] flex items-center justify-center mb-6">
                 <FlaskConical size={24} />
               </div>
               <h3 className="font-heading font-bold text-slate-900 text-lg mb-2">
-                Science-Backed
+                100% Verifiable Evidence
               </h3>
               <p className="text-xs text-slate-600 leading-relaxed font-normal">
-                Formulated around clinical medicine with established research. Every finding links to original source evidence.
+                Formulated around clinical informatics standards. Every finding, allergy, and lab result links directly to its original source document with zero math drift.
               </p>
             </div>
           </div>
@@ -300,54 +303,123 @@ export default function LandingPage() {
       </section>
 
       {/* ========================================================================= */}
-      {/* 3. ESSENTIALS & CLINICAL PREVIEW (Top-Right Section from Image 1) */}
+      {/* 2.5 HOW IT WORKS: 4-STEP EVIDENCE SYNTHESIS ENGINE */}
+      {/* ========================================================================= */}
+      <section id="how-it-works" className="py-24 bg-[#F8FAF9] border-t border-slate-100">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-[#0A2A18] bg-emerald-100/80 px-3.5 py-1 rounded-full border border-emerald-200">
+              Architecture &amp; Flow
+            </span>
+            <h2 className="mt-4 font-heading font-black text-3xl sm:text-4xl text-slate-900 tracking-tight">
+              HOW MEDTHREAD WORKS
+            </h2>
+            <p className="mt-2 text-xs sm:text-sm text-slate-600 max-w-lg mx-auto">
+              From disparate hospital documents to an actionable, verified chronological clinical history in four steps.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            {/* Step 1 */}
+            <div className="bg-white p-7 rounded-3xl border border-slate-200/80 shadow-xs hover:shadow-md transition">
+              <span className="font-heading font-black text-2xl text-emerald-800">01</span>
+              <h3 className="font-heading font-bold text-slate-900 text-base mt-3 mb-2">Ingest Records</h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Upload discharge summaries, outpatient notes, and lab PDFs. Optical scan support parses multi-format clinical files securely.
+              </p>
+            </div>
+
+            {/* Step 2 */}
+            <div className="bg-white p-7 rounded-3xl border border-slate-200/80 shadow-xs hover:shadow-md transition">
+              <span className="font-heading font-black text-2xl text-emerald-800">02</span>
+              <h3 className="font-heading font-bold text-slate-900 text-base mt-3 mb-2">Harmonize &amp; Reconcile</h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Standardize clinical units (e.g. mmol/L to mg/dL) with zero rounding error. Flags conflicting medications and duplicate lab tests automatically.
+              </p>
+            </div>
+
+            {/* Step 3 */}
+            <div className="bg-white p-7 rounded-3xl border border-slate-200/80 shadow-xs hover:shadow-md transition">
+              <span className="font-heading font-black text-2xl text-emerald-800">03</span>
+              <h3 className="font-heading font-bold text-slate-900 text-base mt-3 mb-2">Verifiable Citations</h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Every medication, allergy, and test result links directly to its source document page and bounding box for complete clinician auditability.
+              </p>
+            </div>
+
+            {/* Step 4 */}
+            <div className="bg-white p-7 rounded-3xl border border-slate-200/80 shadow-xs hover:shadow-md transition">
+              <span className="font-heading font-black text-2xl text-emerald-800">04</span>
+              <h3 className="font-heading font-bold text-slate-900 text-base mt-3 mb-2">Unified Care Access</h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Doctors review records in 30 seconds via the Clinical Cockpit. Patients manage their lifetime health journey with self-sovereign control.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* 3. ESSENTIALS & CLINICAL PREVIEW (MedThread Health Essentials) */}
       {/* ========================================================================= */}
       <section id="essentials" className="py-20 bg-[#F4F7F4] border-t border-slate-200">
         <div className="max-w-7xl mx-auto px-6">
           
           <div className="text-center max-w-xl mx-auto mb-16">
             <span className="text-[10px] font-bold uppercase tracking-widest text-[#0A2A18] bg-emerald-100 px-3 py-1 rounded-full">
-              Your Daily Routine
+              Your Health Routine
             </span>
             <h2 className="mt-3 font-heading font-bold text-3xl text-slate-900">
-              Your Daily Essentials
+              Your Health Essentials
             </h2>
             <p className="mt-2 text-xs text-slate-600">
-              Simple formulas. Purposeful health synthesis.
+              Simple formulas. Purposeful health record synthesis.
             </p>
           </div>
 
-          {/* Product Cards Row */}
+          {/* Product Cards Row - MedThread Pillars */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-16">
-            {/* Card 1: Gold Pill */}
+            {/* Card 1: Prescription Timeline */}
             <div className="bg-white p-6 rounded-3xl border border-slate-200 text-center shadow-sm hover:shadow-md transition">
               <div className="h-28 flex items-center justify-center">
-                <div className="w-16 h-8 rounded-full bg-gradient-to-r from-[#D4AF37] to-[#AA7C11] shadow-lg transform rotate-12" />
+                <div className="w-16 h-8 rounded-full bg-gradient-to-r from-[#D4AF37] to-[#AA7C11] shadow-lg transform rotate-12 flex items-center justify-center text-white">
+                  <Pill size={16} />
+                </div>
               </div>
-              <h3 className="font-heading font-bold text-slate-900 text-sm mt-3">Daily Multivitamin</h3>
-              <p className="text-[11px] text-slate-500 mt-1">A complete day-to-day formula designed to support your everyday energy &amp; immunity.</p>
+              <h3 className="font-heading font-bold text-slate-900 text-sm mt-3">Prescription Timeline</h3>
+              <p className="text-[11px] text-slate-500 mt-1">
+                Track every active medication, dosage titration, and held drug across doctors without confusing past medications as active.
+              </p>
             </div>
 
-            {/* Card 2: Bronze Pill */}
+            {/* Card 2: Laboratory Panels */}
             <div className="bg-white p-6 rounded-3xl border border-slate-200 text-center shadow-sm hover:shadow-md transition">
               <div className="h-28 flex items-center justify-center">
-                <div className="w-16 h-8 rounded-full bg-gradient-to-r from-[#B87333] to-[#7A3E1D] shadow-lg transform -rotate-12" />
+                <div className="w-16 h-8 rounded-full bg-gradient-to-r from-[#B87333] to-[#7A3E1D] shadow-lg transform -rotate-12 flex items-center justify-center text-white">
+                  <Activity size={16} />
+                </div>
               </div>
-              <h3 className="font-heading font-bold text-slate-900 text-sm mt-3">Daily Recovery</h3>
-              <p className="text-[11px] text-slate-500 mt-1">A recovery-focused formula designed to support post-workout muscle and joint rest.</p>
+              <h3 className="font-heading font-bold text-slate-900 text-sm mt-3">Laboratory Panels</h3>
+              <p className="text-[11px] text-slate-500 mt-1">
+                Automated unit conversions for Glucose, Cholesterol, and Renal markers (mmol/L to mg/dL) with zero rounding drift.
+              </p>
             </div>
 
-            {/* Card 3: Purple Pill */}
+            {/* Card 3: Care Summaries */}
             <div className="bg-white p-6 rounded-3xl border border-slate-200 text-center shadow-sm hover:shadow-md transition">
               <div className="h-28 flex items-center justify-center">
-                <div className="w-16 h-8 rounded-full bg-gradient-to-r from-[#5B3A70] to-[#2D163D] shadow-lg transform rotate-6" />
+                <div className="w-16 h-8 rounded-full bg-gradient-to-r from-[#5B3A70] to-[#2D163D] shadow-lg transform rotate-6 flex items-center justify-center text-white">
+                  <FileText size={16} />
+                </div>
               </div>
-              <h3 className="font-heading font-bold text-slate-900 text-sm mt-3">Daily Sleep</h3>
-              <p className="text-[11px] text-slate-500 mt-1">A gentle evening formula designed to promote deep sleep and cellular restoration.</p>
+              <h3 className="font-heading font-bold text-slate-900 text-sm mt-3">Care Summaries</h3>
+              <p className="text-[11px] text-slate-500 mt-1">
+                Unified discharge summaries and specialist consultation notes linked with page-level verifiable citations.
+              </p>
             </div>
           </div>
 
-          {/* Testimonial & Clinician Card (From Image 1) */}
+          {/* Testimonial & Clinician Card */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-white p-8 sm:p-12 rounded-3xl border border-slate-200 shadow-sm">
             {/* Clinician Gauge Box */}
             <div className="lg:col-span-5 bg-[#F4F7F4] p-6 rounded-2xl flex items-center gap-6">
@@ -371,13 +443,13 @@ export default function LandingPage() {
             {/* Testimonial Quote */}
             <div className="lg:col-span-7">
               <span className="text-[10px] font-bold uppercase tracking-widest text-[#0A2A18] block mb-2">
-                TESTIMONIAL
+                CLINICIAN TESTIMONIAL
               </span>
               <p className="text-sm sm:text-base font-medium text-slate-700 leading-relaxed italic">
-                "I've been really happy with the quality and overall experience. The product information was clear, the ordering process was simple, and everything arrived exactly as expected. I'll definitely be coming back for more."
+                "I've been really happy with the quality and overall experience. The medical records were clear, the organization was simple, and everything my team needed was verified with instant source evidence."
               </p>
               <div className="mt-4 font-heading font-bold text-xs text-slate-900">
-                Albert Flores • Toronto, Canada
+                Dr. Sarah Mitchell • Chief of Internal Medicine
               </div>
             </div>
           </div>
@@ -386,9 +458,66 @@ export default function LandingPage() {
       </section>
 
       {/* ========================================================================= */}
+      {/* 3.5 FAQ: FREQUENTLY ASKED QUESTIONS */}
+      {/* ========================================================================= */}
+      <section id="faq" className="py-24 bg-white border-t border-slate-200">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-[#0A2A18] bg-emerald-100/80 px-3.5 py-1 rounded-full border border-emerald-200">
+              Questions &amp; Answers
+            </span>
+            <h2 className="mt-4 font-heading font-black text-3xl sm:text-4xl text-slate-900 tracking-tight">
+              FREQUENTLY ASKED QUESTIONS
+            </h2>
+            <p className="mt-2 text-xs sm:text-sm text-slate-600">
+              Everything you need to know about MedThread's clinical data engine.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <div className="bg-[#F8FAF9] p-6 rounded-2xl border border-slate-200">
+              <h3 className="font-heading font-bold text-sm text-slate-900">
+                What makes MedThread different from standard EHR portals?
+              </h3>
+              <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                Traditional portals keep data fragmented in separate hospital silos. MedThread unifies medical history across all encounters, providers, and lab facilities into a single verified timeline with zero duplicate clutter and exact source document citations.
+              </p>
+            </div>
+
+            <div className="bg-[#F8FAF9] p-6 rounded-2xl border border-slate-200">
+              <h3 className="font-heading font-bold text-sm text-slate-900">
+                How does MedThread prevent prescription contradictions?
+              </h3>
+              <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                MedThread tracks the complete medication lifecycle: started, titrated, held, or stopped. When two providers prescribe contradictory treatments or repeat identical diagnostic tests, MedThread flags the conflict with side-by-side evidence inspection.
+              </p>
+            </div>
+
+            <div className="bg-[#F8FAF9] p-6 rounded-2xl border border-slate-200">
+              <h3 className="font-heading font-bold text-sm text-slate-900">
+                Are laboratory unit measurements standardized?
+              </h3>
+              <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                Yes. Lab results across different hospital networks often use varied units (e.g. mmol/L vs mg/dL). MedThread normalizes units mathematically according to clinical standards with zero rounding drift, preserving original reported values alongside converted figures.
+              </p>
+            </div>
+
+            <div className="bg-[#F8FAF9] p-6 rounded-2xl border border-slate-200">
+              <h3 className="font-heading font-bold text-sm text-slate-900">
+                How is patient privacy protected?
+              </h3>
+              <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                MedThread adheres to strict HIPAA and zero-knowledge encryption principles. Doctors can only view records after cryptographic patient consent or authenticated QR verification, maintaining an immutable access audit trail.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
       {/* 4. DARK FOREST CTA & FOOTER (Exact Bottom-Right Section from Image 1) */}
       {/* ========================================================================= */}
-      <footer className="bg-gradient-to-b from-[#0B2818] via-[#082214] to-[#04140B] text-white pt-24 pb-16 overflow-hidden relative">
+      <footer id="security" className="bg-gradient-to-b from-[#0B2818] via-[#082214] to-[#04140B] text-white pt-24 pb-16 overflow-hidden relative">
         
         {/* Soft Ambient Light Glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-emerald-500/10 rounded-full blur-[140px] pointer-events-none" />
@@ -398,13 +527,13 @@ export default function LandingPage() {
           {/* Big CTA Headline */}
           <div className="text-center max-w-2xl mx-auto mb-16">
             <h2 className="font-heading font-black text-3xl sm:text-4xl lg:text-5xl uppercase tracking-tight text-white leading-tight">
-              READY TO FEEL YOUR BEST EVERY DAY?
+              READY TO FEEL IN CONTROL OF YOUR HEALTH EVERY DAY?
             </h2>
             <p className="mt-4 text-xs sm:text-sm text-white/80 max-w-md mx-auto leading-relaxed">
-              Join thousands who trust MedThread for clean, science-backed daily health intelligence —without the unnecessary extras.
+              Join thousands who trust MedThread for clean, science-backed daily health intelligence —without the paperwork.
             </p>
 
-            {/* Dual VYORA Buttons */}
+            {/* Dual Action Buttons */}
             <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
               <Link
                 to="/auth"
@@ -426,10 +555,10 @@ export default function LandingPage() {
           <div className="py-12 border-t border-b border-white/10 flex flex-col md:flex-row items-center justify-between gap-6">
             <div>
               <span className="font-heading font-bold text-xs uppercase tracking-widest text-white block">
-                SUBSCRIBE TO NEWSLETTER
+                SUBSCRIBE TO UPDATES
               </span>
               <span className="text-[11px] text-white/60">
-                Receive health insights, updates and clinical guides.
+                Receive health insights, platform updates and clinical guides.
               </span>
             </div>
 
@@ -456,32 +585,32 @@ export default function LandingPage() {
                 <BrandLogo theme="light" size="sm" />
               </div>
               <p className="text-[11px] text-white/60 leading-relaxed">
-                Clean, science-backed health intelligence designed for everyday wellness.
+                Clean, science-backed medical intelligence designed for everyday wellness and verifiable health history.
               </p>
             </div>
 
             {/* Col 2 */}
             <div>
               <h4 className="font-heading font-bold uppercase tracking-widest text-white text-[11px] mb-3">
-                LEARN
+                PLATFORM
               </h4>
               <ul className="space-y-2 text-white/60">
-                <li>Our Story</li>
-                <li>Ingredients</li>
-                <li>Wellness Journal</li>
-                <li>FAQ</li>
+                <li>Unified Timeline</li>
+                <li>Prescription Safety</li>
+                <li>Laboratory Panels</li>
+                <li>Verifiable Citations</li>
               </ul>
             </div>
 
             {/* Col 3 */}
             <div>
               <h4 className="font-heading font-bold uppercase tracking-widest text-white text-[11px] mb-3">
-                SHOP &amp; ACCESS
+                ACCESS &amp; PORTALS
               </h4>
               <ul className="space-y-2 text-white/60">
                 <li><Link to="/auth" className="hover:text-white">Create Account</Link></li>
-                <li><Link to="/login" className="hover:text-white">Sign In</Link></li>
-                <li><Link to="/doctor/patients/101" className="hover:text-white">Clinical Cockpit</Link></li>
+                <li><Link to="/login" className="hover:text-white">Provider Sign In</Link></li>
+                <li><Link to="/doctor/dashboard" className="hover:text-white">Clinical Cockpit</Link></li>
                 <li><Link to="/patient" className="hover:text-white">Patient Portal</Link></li>
               </ul>
             </div>
@@ -489,20 +618,26 @@ export default function LandingPage() {
             {/* Col 4 */}
             <div>
               <h4 className="font-heading font-bold uppercase tracking-widest text-white text-[11px] mb-3">
-                SOCIAL
+                SECURITY &amp; COMPLIANCE
               </h4>
-              <div className="flex items-center gap-3 text-white/80">
-                <a href="#instagram" className="h-8 w-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition">
-                  <Instagram size={14} />
+              <ul className="space-y-2 text-white/60">
+                <li>HIPAA Aligned</li>
+                <li>SOC-2 Ready</li>
+                <li>Encrypted Storage</li>
+                <li>Immutable Audit Trail</li>
+              </ul>
+              <div className="flex items-center gap-3 text-white/80 mt-4">
+                <a href="#instagram" className="h-7 w-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition">
+                  <Instagram size={13} />
                 </a>
-                <a href="#twitter" className="h-8 w-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition">
-                  <Twitter size={14} />
+                <a href="#twitter" className="h-7 w-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition">
+                  <Twitter size={13} />
                 </a>
-                <a href="#linkedin" className="h-8 w-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition">
-                  <Linkedin size={14} />
+                <a href="#linkedin" className="h-7 w-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition">
+                  <Linkedin size={13} />
                 </a>
-                <a href="#facebook" className="h-8 w-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition">
-                  <Facebook size={14} />
+                <a href="#facebook" className="h-7 w-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition">
+                  <Facebook size={13} />
                 </a>
               </div>
             </div>
@@ -510,7 +645,7 @@ export default function LandingPage() {
 
           {/* Bottom Copyright */}
           <div className="mt-12 pt-8 border-t border-white/10 text-center text-[10px] text-white/40">
-            © 2026 MedThread. All rights reserved.
+            © 2026 MedThread Health Technologies, Inc. All rights reserved.
           </div>
 
         </div>

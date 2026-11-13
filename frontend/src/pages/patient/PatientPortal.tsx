@@ -111,7 +111,7 @@ export default function PatientPortal({ patientId }: Props) {
   const patientExternalId = currentPatient ? currentPatient.external_id : "PAT-101";
 
   return (
-    <div className="flex min-h-screen bg-cream text-forest">
+    <div className="flex min-h-screen bg-[#F0F4F8] text-slate-900">
       <PatientSidebar
         activePage={activePage}
         onNavigate={setActivePage}

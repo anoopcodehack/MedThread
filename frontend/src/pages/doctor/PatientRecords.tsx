@@ -75,7 +75,7 @@ export default function PatientRecords() {
           className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-extrabold bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100 shadow-xs transition"
         >
           <Award className="h-4 w-4 text-emerald-600" />
-          <span>PS-7 Benchmark Scorecard (78.1% Time Saved)</span>
+          <span>Clinical Benchmark Scorecard (78.1% Time Saved)</span>
         </button>
       </div>
       
