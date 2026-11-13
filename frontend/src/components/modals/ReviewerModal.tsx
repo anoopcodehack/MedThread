@@ -16,6 +16,7 @@ export interface ReviewTargetEvent {
 interface ReviewerModalProps {
   isOpen: boolean;
   event: ReviewTargetEvent | null;
+  patientId?: number;
   onClose: () => void;
   onSuccess: (updatedEventId: number) => void;
 }
@@ -23,6 +24,7 @@ interface ReviewerModalProps {
 export const ReviewerModal: React.FC<ReviewerModalProps> = ({
   isOpen,
   event,
+  patientId,
   onClose,
   onSuccess,
 }) => {
@@ -53,6 +55,7 @@ export const ReviewerModal: React.FC<ReviewerModalProps> = ({
         reason: reason.trim(),
         entity: event.entity,
         original_value: event.currentValue || event.status,
+        patient_id: patientId,
       });
       onSuccess(event.id);
       onClose();

@@ -635,6 +635,7 @@ export default function PatientRecords() {
       <ReviewerModal
         isOpen={isReviewModalOpen}
         event={selectedEventForReview}
+        patientId={numericId}
         onClose={() => {
           setIsReviewModalOpen(false);
           setSelectedEventForReview(null);
