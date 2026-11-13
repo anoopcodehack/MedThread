@@ -9,7 +9,10 @@ import {
   Edit3,
   ShieldCheck,
   Award,
-  ArrowRightLeft
+  ArrowRightLeft,
+  Clock,
+  AlertCircle,
+  Activity
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
@@ -85,16 +88,17 @@ export default function PatientRecords() {
         <p className="mt-2 text-sm text-muted">{profile.id}</p>
       </div>
 
-      {/* ⚡ 60-SECOND EMERGENCY & MULTI-SPECIALIST TRIAGE HUD */}
-      <section className="rounded-2xl border border-amber-300 bg-gradient-to-r from-amber-50 via-orange-50 to-white p-5 shadow-xs">
+      {/* IMMEDIATE CRITICAL TRIAGE SUMMARY */}
+      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1.5">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-amber-800 text-white">
-                60-Second Emergency Window
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-bold tracking-wide uppercase bg-slate-100 text-slate-800 border border-slate-200">
+                <Clock className="h-3.5 w-3.5 text-slate-600" />
+                Emergency &amp; Specialist Triage
               </span>
-              <span className="text-xs font-bold text-amber-950">
-                Unfamiliar / Emergency Consultation Mode
+              <span className="text-xs font-semibold text-slate-700">
+                Unfamiliar Patient Consultation Protocol
               </span>
               <span className="text-[11px] text-slate-500 font-medium">
                 • Primary Caregiver: Anoop Sharma (+91 98765 43210)
@@ -109,43 +113,49 @@ export default function PatientRecords() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2 shrink-0">
-            <span className="px-3 py-1.5 rounded-xl bg-white border border-amber-300 text-xs font-bold text-amber-900 shadow-xs">
-              ⚡ 60s Review Ready
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-800">
+              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+              Triage Dossier Ready
             </span>
           </div>
         </div>
 
         {/* 3 Critical Emergency Pillars */}
-        <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-amber-200/80 text-xs">
-          <div className="p-3 rounded-xl bg-white border border-red-200">
-            <div className="text-[10px] font-bold text-red-700 uppercase tracking-wide">
-              Critical Allergies
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-slate-100 text-xs">
+          <div className="p-3.5 rounded-xl bg-slate-50 border border-rose-200">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold text-rose-700 uppercase tracking-wide">
+              <AlertCircle className="h-3.5 w-3.5 text-rose-600 shrink-0" />
+              <span>Critical Allergies</span>
             </div>
-            <div className="font-bold text-slate-900 mt-1">
+            <div className="font-bold text-slate-900 mt-1.5">
               Penicillin &amp; NSAIDs
             </div>
-            <div className="text-[10px] text-slate-500 mt-0.5">
-              Source: City Hospital Discharge 2021 (p. 2)
+            <div className="text-[10px] text-slate-500 mt-0.5 flex items-center gap-1">
+              <FileText className="h-3 w-3 text-slate-400 shrink-0" />
+              <span>City Hospital Discharge 2021 (p. 2)</span>
             </div>
           </div>
 
-          <div className="p-3 rounded-xl bg-white border border-amber-200">
-            <div className="text-[10px] font-bold text-amber-800 uppercase tracking-wide">
-              Active High-Risk Meds
+          <div className="p-3.5 rounded-xl bg-slate-50 border border-amber-200">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold text-amber-800 uppercase tracking-wide">
+              <ShieldAlert className="h-3.5 w-3.5 text-amber-600 shrink-0" />
+              <span>Active High-Risk Meds</span>
             </div>
-            <div className="font-bold text-slate-900 mt-1">
+            <div className="font-bold text-slate-900 mt-1.5">
               Warfarin 5mg daily (Blood Thinner)
             </div>
-            <div className="text-[10px] text-slate-500 mt-0.5">
-              Prescribed: Apollo Cardiology (Hold prior to surgery)
+            <div className="text-[10px] text-slate-500 mt-0.5 flex items-center gap-1">
+              <FileText className="h-3 w-3 text-slate-400 shrink-0" />
+              <span>Apollo Cardiology (Hold prior to surgery)</span>
             </div>
           </div>
 
-          <div className="p-3 rounded-xl bg-white border border-blue-200">
-            <div className="text-[10px] font-bold text-blue-800 uppercase tracking-wide">
-              Unit Standardized Labs
+          <div className="p-3.5 rounded-xl bg-slate-50 border border-blue-200">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold text-blue-800 uppercase tracking-wide">
+              <Activity className="h-3.5 w-3.5 text-blue-600 shrink-0" />
+              <span>Unit Standardized Labs</span>
             </div>
-            <div className="font-bold text-slate-900 mt-1">
+            <div className="font-bold text-slate-900 mt-1.5">
               Glucose 142 mg/dL (7.88 mmol/L)
             </div>
             <div className="text-[10px] text-slate-500 mt-0.5">
@@ -155,17 +165,23 @@ export default function PatientRecords() {
         </div>
       </section>
 
-      {/* 🔴 4-TIER CONTRADICTION & RECONCILIATION RADAR */}
+      {/* CROSS-RECORD CONTRADICTIONS & DISCREPANCIES */}
       {conflicts.length > 0 && (
-        <section className="rounded-2xl border-2 border-red-200 bg-red-50/50 p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2 text-red-700">
-              <ShieldAlert className="h-5 w-5" />
-              <h2 className="font-heading text-lg font-extrabold tracking-wide uppercase">
-                4-Tier Contradiction Radar ({conflicts.length} Detected)
-              </h2>
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-slate-100">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-rose-600 shrink-0" />
+              <div>
+                <h2 className="font-heading text-base font-bold text-slate-900">
+                  Cross-Record Discrepancies &amp; Contradictions ({conflicts.length} Flagged)
+                </h2>
+                <p className="text-xs text-slate-500">
+                  Conflicting diagnoses, medication statuses, or duplicate tests requiring clinician review.
+                </p>
+              </div>
             </div>
-            <span className="text-xs font-semibold px-2.5 py-1 bg-red-100 text-red-800 rounded-full">
+            <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 bg-rose-50 text-rose-700 rounded-md border border-rose-200 self-start sm:self-auto">
+              <ShieldAlert className="h-3.5 w-3.5 text-rose-600" />
               Clinical Safety Alert
             </span>
           </div>
@@ -179,23 +195,23 @@ export default function PatientRecords() {
               return (
                 <div 
                   key={idx} 
-                  className={`rounded-xl border p-4 bg-white shadow-xs ${
-                    isDirect ? "border-red-300 ring-1 ring-red-400" :
+                  className={`rounded-xl border p-4 bg-white shadow-2xs ${
+                    isDirect ? "border-rose-300 ring-1 ring-rose-300" :
                     isReview ? "border-amber-300" :
-                    isDup ? "border-orange-300" : "border-blue-200"
+                    isDup ? "border-orange-200" : "border-slate-200"
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
                       <span className={`text-[11px] font-bold uppercase px-2 py-0.5 rounded ${
-                        isDirect ? "bg-red-100 text-red-800" :
-                        isReview ? "bg-amber-100 text-amber-800" :
-                        isDup ? "bg-orange-100 text-orange-800" : "bg-blue-100 text-blue-800"
+                        isDirect ? "bg-rose-50 text-rose-800 border border-rose-200" :
+                        isReview ? "bg-amber-50 text-amber-800 border border-amber-200" :
+                        isDup ? "bg-orange-50 text-orange-800 border border-orange-200" : "bg-blue-50 text-blue-800 border border-blue-200"
                       }`}>
                         {conf.tier.replace(/_/g, " ")}
                       </span>
                       {Boolean(conf.resolved) && (
-                        <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
+                        <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-300 flex items-center gap-1">
                           <CheckCircle2 size={11} className="text-emerald-600" /> Resolved
                         </span>
                       )}
@@ -207,14 +223,20 @@ export default function PatientRecords() {
                     {conf.description}
                   </p>
 
-                  <div className="mt-3 grid grid-cols-2 gap-2 text-[11px] bg-slate-50 p-2 rounded border border-slate-200">
+                  <div className="mt-3 grid grid-cols-2 gap-2 text-[11px] bg-slate-50 p-2.5 rounded-lg border border-slate-200">
                     <div>
-                      <span className="font-semibold text-slate-500 block truncate">📄 {conf.doc1_name}</span>
-                      <span className="italic text-slate-800 line-clamp-2">"{conf.quote1}"</span>
+                      <span className="font-semibold text-slate-600 flex items-center gap-1 truncate mb-0.5">
+                        <FileText className="h-3 w-3 text-slate-400 shrink-0" />
+                        {conf.doc1_name}
+                      </span>
+                      <span className="italic text-slate-700 line-clamp-2">&ldquo;{conf.quote1}&rdquo;</span>
                     </div>
                     <div className="border-l border-slate-200 pl-2">
-                      <span className="font-semibold text-slate-500 block truncate">📄 {conf.doc2_name}</span>
-                      <span className="italic text-slate-800 line-clamp-2">"{conf.quote2}"</span>
+                      <span className="font-semibold text-slate-600 flex items-center gap-1 truncate mb-0.5">
+                        <FileText className="h-3 w-3 text-slate-400 shrink-0" />
+                        {conf.doc2_name}
+                      </span>
+                      <span className="italic text-slate-700 line-clamp-2">&ldquo;{conf.quote2}&rdquo;</span>
                     </div>
                   </div>
 
@@ -243,7 +265,7 @@ export default function PatientRecords() {
         </section>
       )}
 
-      {/* 🔍 ASK PATIENT RECORDS CONSOLE (TWO-STAGE EPISTEMIC ABSTENTION GATE) */}
+      {/* ASK PATIENT RECORDS CONSOLE (TWO-STAGE EPISTEMIC ABSTENTION GATE) */}
       <section className="rounded-2xl border border-sage bg-white p-6 shadow-sm">
         <div className="flex items-center gap-2 mb-3">
           <Search className="h-5 w-5 text-forest" />
@@ -308,8 +330,11 @@ export default function PatientRecords() {
                 <span className="text-[11px] font-bold text-emerald-800 uppercase block">Source Citations:</span>
                 {qaResult.citations.map((c, i) => (
                   <div key={i} className="text-xs text-emerald-900 bg-white/70 p-2 rounded border border-emerald-200">
-                    <span className="font-semibold">📄 {c.source_doc} (Page {c.page_number})</span>:
-                    <span className="italic block mt-0.5">"{c.quote}"</span>
+                    <span className="font-semibold flex items-center gap-1.5">
+                      <FileText className="h-3 w-3 text-emerald-700 shrink-0" />
+                      {c.source_doc} (Page {c.page_number})
+                    </span>
+                    <span className="italic block mt-0.5">&ldquo;{c.quote}&rdquo;</span>
                   </div>
                 ))}
               </div>
@@ -368,8 +393,9 @@ export default function PatientRecords() {
                 </div>
               )}
               <div className="mt-2 space-y-1">
-                <p className="text-xs font-semibold text-forest flex items-center gap-1">
-                  📄 {valueOrNotDocumented(item.source)}
+                <p className="text-xs font-semibold text-forest flex items-center gap-1.5">
+                  <FileText size={12} className="text-forest/70 shrink-0" />
+                  <span>{valueOrNotDocumented(item.source)}</span>
                 </p>
                 {item.quote && (
                   <p className="rounded-lg bg-slate-50 p-2 text-xs font-mono text-slate-700 border border-slate-200">
@@ -427,8 +453,9 @@ export default function PatientRecords() {
                 <p className="mt-2 text-xs text-muted">Start: {valueOrNotDocumented(item.startDate)} · End: {valueOrNotDocumented(item.endDate)}</p>
                 <div className="mt-2 space-y-1">
                   {item.source && (
-                    <p className="text-xs font-semibold text-forest flex items-center gap-1">
-                      📄 {item.source}
+                    <p className="text-xs font-semibold text-forest flex items-center gap-1.5">
+                      <FileText size={12} className="text-forest/70 shrink-0" />
+                      <span>{item.source}</span>
                     </p>
                   )}
                   {item.quote && (
@@ -449,7 +476,10 @@ export default function PatientRecords() {
                 <p className="font-semibold text-red-700">{item.name}</p>
                 <p className="mt-1 text-sm text-muted">Severity: {valueOrNotDocumented(item.severity)}</p>
                 <div className="mt-2 space-y-1">
-                  <p className="text-xs font-semibold text-forest">📄 {valueOrNotDocumented(item.source)}</p>
+                  <p className="text-xs font-semibold text-forest flex items-center gap-1.5">
+                    <FileText size={12} className="text-forest/70 shrink-0" />
+                    <span>{valueOrNotDocumented(item.source)}</span>
+                  </p>
                   {item.quote && (
                     <p className="rounded-lg bg-white/80 p-2 text-xs font-mono text-slate-700 border border-sage/60">
                       &ldquo;Quote: {item.quote}&rdquo;
@@ -469,9 +499,19 @@ export default function PatientRecords() {
             item.name, 
             item.date, 
             `${valueOrNotDocumented(item.result)} ${item.unit || ""}`.trim(), 
-            item.quote 
-              ? `📄 ${valueOrNotDocumented(item.source)} · Quote: "${item.quote.slice(0, 70)}..."`
-              : valueOrNotDocumented(item.source)
+            item.quote ? (
+              <span className="flex items-center gap-1.5 text-xs text-slate-700">
+                <FileText size={12} className="text-slate-400 shrink-0" />
+                <span className="font-medium text-slate-800">{valueOrNotDocumented(item.source)}</span>
+                <span className="text-slate-400">·</span>
+                <span className="italic text-slate-600 truncate max-w-xs">&ldquo;{item.quote.slice(0, 70)}...&rdquo;</span>
+              </span>
+            ) : (
+              <span className="flex items-center gap-1.5 text-xs text-slate-700">
+                <FileText size={12} className="text-slate-400 shrink-0" />
+                <span>{valueOrNotDocumented(item.source)}</span>
+              </span>
+            )
           ])} 
         />
       </RecordSection>
@@ -574,7 +614,7 @@ function RecordSection({ title, children }: { title: string; children: React.Rea
   return <section className="rounded-2xl border border-sage bg-white p-6 shadow-sm"><h2 className="mb-5 font-heading text-xl font-bold">{title}</h2>{children}</section>;
 }
 
-function DataTable({ headers, rows }: { headers: string[]; rows: Array<Array<string | number>> }) {
+function DataTable({ headers, rows }: { headers: string[]; rows: Array<Array<React.ReactNode>> }) {
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[560px] text-left text-sm">

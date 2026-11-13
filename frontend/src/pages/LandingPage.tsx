@@ -14,7 +14,8 @@ import {
   Award,
   RefreshCw,
   FileText,
-  Activity
+  Activity,
+  CheckCircle2
 } from "lucide-react";
 import { SplashLoader } from "../components/common/SplashLoader";
 import { BrandLogo } from "../components/common/BrandLogo";
@@ -327,8 +328,9 @@ export default function LandingPage() {
                     Adult children managing 10–15 years of complicated illness across 4 different hospital files. No more carrying thick plastic bags of crumpled papers to remember which dose was stopped or changed.
                   </p>
                 </div>
-                <div className="mt-4 pt-3 border-t border-slate-200/60 text-[11px] font-semibold text-emerald-800">
-                  ✓ Multi-Hospital Stitching
+                <div className="mt-4 pt-3 border-t border-slate-200/60 text-[11px] font-semibold text-emerald-800 flex items-center gap-1.5">
+                  <CheckCircle2 size={13} className="text-emerald-600 shrink-0" />
+                  <span>Multi-Hospital Stitching</span>
                 </div>
               </div>
 
@@ -345,8 +347,9 @@ export default function LandingPage() {
                     Seeing a Diabetologist at Clinic A, a Cardiologist at Hospital B, and an Orthopedic Surgeon at Hospital C? Doctors rarely talk to each other; MedThread flags conflicting prescriptions and duplicate tests.
                   </p>
                 </div>
-                <div className="mt-4 pt-3 border-t border-slate-200/60 text-[11px] font-semibold text-emerald-800">
-                  ✓ Cross-Specialty Conflict Radar
+                <div className="mt-4 pt-3 border-t border-slate-200/60 text-[11px] font-semibold text-emerald-800 flex items-center gap-1.5">
+                  <CheckCircle2 size={13} className="text-emerald-600 shrink-0" />
+                  <span>Cross-Specialty Conflict Detection</span>
                 </div>
               </div>
 
@@ -363,8 +366,9 @@ export default function LandingPage() {
                     An ER doctor at 2 AM with an unfamiliar or unconscious patient has less than 60 seconds. Instant triage HUD surfaces allergies, active blood-thinners, and surgical history immediately.
                   </p>
                 </div>
-                <div className="mt-4 pt-3 border-t border-slate-200/60 text-[11px] font-semibold text-emerald-800">
-                  ✓ 60-Second ER Triage HUD
+                <div className="mt-4 pt-3 border-t border-slate-200/60 text-[11px] font-semibold text-emerald-800 flex items-center gap-1.5">
+                  <CheckCircle2 size={13} className="text-emerald-600 shrink-0" />
+                  <span>Emergency Triage Dossier</span>
                 </div>
               </div>
 
@@ -381,8 +385,9 @@ export default function LandingPage() {
                     Expats and travelers moving between health systems with different units (mmol/L vs mg/dL) and date formats (DD/MM/YYYY vs MM/DD/YYYY). Automated mathematical harmonization with zero rounding error.
                   </p>
                 </div>
-                <div className="mt-4 pt-3 border-t border-slate-200/60 text-[11px] font-semibold text-emerald-800">
-                  ✓ International Unit Standardizer
+                <div className="mt-4 pt-3 border-t border-slate-200/60 text-[11px] font-semibold text-emerald-800 flex items-center gap-1.5">
+                  <CheckCircle2 size={13} className="text-emerald-600 shrink-0" />
+                  <span>International Unit Standardizer</span>
                 </div>
               </div>
             </div>

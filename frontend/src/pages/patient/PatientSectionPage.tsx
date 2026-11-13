@@ -21,7 +21,6 @@ import {
   Share2,
   Stethoscope,
   Users,
-  Zap,
 } from "lucide-react";
 import type { LucideProps } from "lucide-react";
 import { api } from "../../services/api";
@@ -1173,16 +1172,16 @@ function EmergencyTriageQueueBalancer({
   };
 
   return (
-    <section className="rounded-3xl border border-amber-300 bg-gradient-to-br from-amber-50/60 via-white to-emerald-50/40 p-6 sm:p-8 shadow-sm space-y-6">
+    <section className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-xs space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-amber-200/80 pb-5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
         <div className="flex items-start gap-3">
-          <div className="p-3 rounded-2xl bg-amber-500 text-white shadow-md shrink-0">
-            <Zap size={22} className="animate-pulse" />
+          <div className="p-3 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 shrink-0">
+            <Stethoscope size={22} className="text-forest" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-amber-200 text-amber-900 border border-amber-300">
+              <span className="px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-slate-100 text-slate-800 border border-slate-200">
                 Distributed Queue Load Balancer
               </span>
               <span className="text-xs text-slate-500 font-semibold hidden sm:inline">
@@ -1203,10 +1202,10 @@ function EmergencyTriageQueueBalancer({
             type="button"
             onClick={handleRunBalancer}
             disabled={isProcessing}
-            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-emerald-700 hover:from-amber-700 hover:to-emerald-800 text-white text-xs font-bold transition shadow-md flex items-center justify-center gap-2"
+            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shadow-xs flex items-center justify-center gap-2"
           >
-            <Zap size={15} />
-            <span>{isProcessing ? "Computing Optimal Route..." : "⚡ Run Autonomous Queue Balancer"}</span>
+            <Activity size={15} />
+            <span>{isProcessing ? "Calculating Optimal Specialist..." : "Execute Queue Allocation"}</span>
           </button>
         </div>
       </div>
@@ -1222,14 +1221,14 @@ function EmergencyTriageQueueBalancer({
               key={c.id}
               type="button"
               onClick={() => setSelectedCase(c.id as any)}
-              className={`p-3.5 rounded-2xl border text-left transition flex flex-col justify-between ${
+              className={`p-3.5 rounded-xl border text-left transition flex flex-col justify-between ${
                 selectedCase === c.id
-                  ? "bg-white border-amber-500 ring-2 ring-amber-400/30 shadow-xs"
-                  : "bg-white/80 border-slate-200 hover:border-slate-300"
+                  ? "bg-slate-50 border-forest ring-1 ring-forest/30 shadow-xs"
+                  : "bg-white border-slate-200 hover:border-slate-300"
               }`}
             >
               <div>
-                <span className="text-[10px] font-extrabold text-amber-700 uppercase tracking-wider block mb-1">
+                <span className="text-[10px] font-extrabold text-forest uppercase tracking-wider block mb-1">
                   Required: {c.specialty}
                 </span>
                 <h4 className="font-heading font-bold text-xs text-slate-900 leading-snug">
@@ -1261,19 +1260,19 @@ function EmergencyTriageQueueBalancer({
             return (
               <div
                 key={doc.id}
-                className={`p-4 rounded-2xl border transition relative ${
+                className={`p-4 rounded-xl border transition relative ${
                   isAssigned
-                    ? "bg-emerald-50/80 border-emerald-400 ring-2 ring-emerald-400/40 shadow-sm"
+                    ? "bg-emerald-50/80 border-emerald-400 ring-1 ring-emerald-400/40 shadow-xs"
                     : doc.isMatch && doc.status === "OVERLOADED"
                     ? "bg-rose-50/60 border-rose-200"
                     : doc.isMatch
                     ? "bg-white border-slate-200 shadow-xs"
-                    : "bg-slate-50/80 border-slate-200 opacity-60"
+                    : "bg-slate-50 border-slate-200 opacity-60"
                 }`}
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2">
-                    <div className="p-2 rounded-xl bg-white border border-slate-200 text-slate-700 shadow-2xs">
+                    <div className="p-2 rounded-lg bg-white border border-slate-200 text-slate-700 shadow-2xs">
                       <Stethoscope size={16} />
                     </div>
                     <div>
@@ -1298,7 +1297,7 @@ function EmergencyTriageQueueBalancer({
                     }`}
                   >
                     {isAssigned
-                      ? "Assigned ✓"
+                      ? "Allocated"
                       : doc.isMatch && doc.status === "OVERLOADED"
                       ? "Overloaded (5)"
                       : doc.isMatch

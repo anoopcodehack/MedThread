@@ -6,7 +6,7 @@ import {
   Clock, 
   ShieldCheck, 
   Database, 
-  Zap, 
+  AlertCircle, 
   Play, 
   Loader2 
 } from 'lucide-react';
@@ -58,7 +58,7 @@ export const BenchmarkModal: React.FC<BenchmarkModalProps> = ({ isOpen, onClose 
                 </span>
               </div>
               <p className="text-xs text-muted font-medium mt-0.5">
-                Verifiable quantitative evaluation across 5 patients, 25 documents, and multi-facility contradiction radars.
+                Verifiable quantitative evaluation across 5 patients, 25 documents, and multi-facility contradiction resolution.
               </p>
             </div>
           </div>
@@ -107,7 +107,7 @@ export const BenchmarkModal: React.FC<BenchmarkModalProps> = ({ isOpen, onClose 
             <div className="p-4 rounded-xl bg-white border border-purple-200 shadow-xs">
               <div className="flex items-center justify-between text-muted text-xs font-semibold mb-1">
                 <span>Conflict Recall</span>
-                <Zap className="h-4 w-4 text-purple-600" />
+                <AlertCircle className="h-4 w-4 text-purple-600" />
               </div>
               <div className="text-2xl font-black text-purple-700 font-heading">
                 100.0%
@@ -152,7 +152,7 @@ export const BenchmarkModal: React.FC<BenchmarkModalProps> = ({ isOpen, onClose 
 
               <div>
                 <div className="flex justify-between text-xs font-semibold text-slate-700 mb-1">
-                  <span>MedThread Unified Cockpit: Timeline + Contradiction Radar</span>
+                  <span>MedThread Unified Cockpit: Timeline + Contradiction Resolution</span>
                   <span className="font-mono text-emerald-700 font-bold">42 seconds (-78.1%)</span>
                 </div>
                 <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">

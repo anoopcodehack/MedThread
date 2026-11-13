@@ -10,6 +10,7 @@ import {
   LoaderCircle,
   RotateCcw,
   Search,
+  ScanLine,
 } from "lucide-react";
 import { api } from "../../services/api";
 import type {
@@ -246,7 +247,7 @@ export default function PatientDocumentsPage({ patientId }: Props) {
         ) : (
           <>
             <p className="mt-5 rounded-xl border border-[#DCE8DE] bg-[#F7F9F7] p-4 text-sm leading-6 text-[#526158]">
-              <strong>Two-Tier Ingestion Bridge:</strong> Native digital PDFs and electronic reports are parsed directly via PyMuPDF in &lt;55ms (<span className="text-emerald-700 font-semibold">⚡ Direct Text</span>). Scanned camera photos or image-only documents automatically trigger multimodal Gemini 2.0 Flash Vision OCR (<span className="text-purple-700 font-semibold">📷 Vision OCR Applied</span>).
+              <strong>Two-Tier Ingestion Bridge:</strong> Native digital PDFs and electronic reports are parsed directly via PyMuPDF in &lt;55ms (<span className="text-emerald-700 font-semibold inline-flex items-center gap-1"><FileText size={13} /> Direct Text</span>). Scanned camera photos or image-only documents automatically trigger multimodal Gemini 2.0 Flash Vision OCR (<span className="text-purple-700 font-semibold inline-flex items-center gap-1"><ScanLine size={13} /> Multimodal Vision OCR</span>).
             </p>
 
             <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -478,9 +479,15 @@ export default function PatientDocumentsPage({ patientId }: Props) {
                             ? "border-purple-200 bg-purple-50 text-purple-700"
                             : "border-emerald-200 bg-emerald-50 text-emerald-700"
                         }`}>
-                          {document.ocr_applied
-                            ? "📷 Vision OCR Applied"
-                            : "⚡ Direct Text (<55ms)"}
+                          {document.ocr_applied ? (
+                            <span className="inline-flex items-center gap-1">
+                              <ScanLine size={12} /> Multimodal Vision OCR
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1">
+                              <FileText size={12} /> Direct Text (&lt;55ms)
+                            </span>
+                          )}
                         </span>
                       </div>
                       <p className="mt-2 flex items-center gap-1.5 text-xs text-[#829087]">

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, X, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { ShieldCheck, X, CheckCircle, AlertCircle, Loader2, FileText } from 'lucide-react';
 import { api } from '../../services/api';
 
 export interface ReviewTargetEvent {
@@ -101,8 +101,9 @@ export const ReviewerModal: React.FC<ReviewerModalProps> = ({
                 <span className="font-semibold text-slate-600">Raw Source Quote:</span>
                 <p className="italic text-slate-800 mt-0.5">"{event.source_passage}"</p>
                 {event.source_doc && (
-                  <span className="text-[11px] text-forest/80 font-medium block mt-1">
-                    📄 {event.source_doc} {event.page_number ? `(p. ${event.page_number})` : ''}
+                  <span className="text-[11px] text-forest/80 font-medium flex items-center gap-1 mt-1">
+                    <FileText size={12} className="text-forest/70 shrink-0" />
+                    <span>{event.source_doc} {event.page_number ? `(p. ${event.page_number})` : ''}</span>
                   </span>
                 )}
               </div>

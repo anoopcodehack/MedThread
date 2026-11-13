@@ -12,6 +12,7 @@ import {
   ArrowUpRight, 
   Activity,
   AlertTriangle,
+  AlertCircle,
   ArrowRight,
   X
 } from "lucide-react";
@@ -129,35 +130,38 @@ export default function DoctorDashboard() {
         </div>
       </div>
 
-      {/* 🚨 Emergency Queue-Balanced Dispatch Alert Banner */}
+      {/* Emergency Queue-Balanced Dispatch Alert Banner */}
       {emergencyAlert && (
-        <div className="bg-gradient-to-r from-red-600 via-rose-700 to-amber-600 text-white p-5 rounded-3xl shadow-xl border border-red-400/80 animate-in fade-in slide-in-from-top-2 duration-300">
+        <div className="bg-white border-2 border-rose-300 text-slate-900 p-5 rounded-2xl shadow-xs">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-start gap-3.5">
-              <div className="p-3 rounded-2xl bg-white/20 border border-white/30 text-white shrink-0">
-                <AlertTriangle size={24} className="text-amber-300 animate-pulse" />
+              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 shrink-0">
+                <AlertTriangle size={22} className="text-rose-600" />
               </div>
               <div className="space-y-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider bg-white/20 px-2.5 py-0.5 rounded-full border border-white/30 text-white">
-                    🚨 URGENT EMERGENCY DISPATCH ASSIGNED
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider bg-rose-50 text-rose-800 px-2.5 py-0.5 rounded border border-rose-200">
+                    Emergency Dispatch Assigned
                   </span>
-                  <span className="text-xs text-amber-200 font-bold">
-                    via Distributed Queue Balancer
+                  <span className="text-xs text-slate-600 font-medium">
+                    via Distributed Queue Allocation
                   </span>
-                  <span className="text-[10px] text-white/70 font-mono bg-black/20 px-2 py-0.5 rounded">
+                  <span className="text-[10px] text-slate-500 font-mono bg-slate-100 border border-slate-200 px-2 py-0.5 rounded">
                     Token: {emergencyAlert.token}
                   </span>
                 </div>
-                <h3 className="font-heading font-extrabold text-base text-white">
+                <h3 className="font-heading font-extrabold text-base text-slate-900">
                   Patient Rajesh Sharma (PAT-101) routed to {emergencyAlert.doctor}
                 </h3>
-                <p className="text-xs text-white/90 leading-relaxed max-w-2xl">
-                  <strong>Queue Balancer Decision:</strong> {emergencyAlert.bypassedDoctor} was overloaded ({emergencyAlert.bypassedQueue} patients in queue). Emergency rerouted to {emergencyAlert.doctor} ({emergencyAlert.queueDepth} waiting) for immediate care.
+                <p className="text-xs text-slate-600 leading-relaxed max-w-2xl">
+                  <strong>Queue Allocation Decision:</strong> {emergencyAlert.bypassedDoctor} was at capacity ({emergencyAlert.bypassedQueue} patients in queue). Emergency routed to {emergencyAlert.doctor} ({emergencyAlert.queueDepth} waiting) for immediate care.
                 </p>
-                <div className="pt-1 flex items-center gap-3 text-[11px] text-amber-200 font-semibold">
-                  <span>⚠️ Critical Grounded Alert: Aspirin temporarily held for hernia surgery (Feb 2024)</span>
-                  <span>•</span>
+                <div className="pt-1 flex flex-wrap items-center gap-3 text-[11px] text-slate-700 font-medium">
+                  <span className="inline-flex items-center gap-1 text-rose-700 font-semibold">
+                    <AlertCircle size={13} className="text-rose-600" />
+                    Critical Alert: Aspirin temporarily held for hernia surgery (Feb 2024)
+                  </span>
+                  <span className="text-slate-300">•</span>
                   <span>T2D on Metformin</span>
                 </div>
               </div>
@@ -166,15 +170,15 @@ export default function DoctorDashboard() {
             <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
               <Link
                 to="/doctor/patients/101"
-                className="bg-white hover:bg-slate-100 text-red-700 text-xs font-bold px-4 py-2.5 rounded-xl transition shadow-md whitespace-nowrap flex items-center gap-1.5"
+                className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition shadow-xs whitespace-nowrap flex items-center gap-1.5"
               >
-                <span>Review Patient Dossier (42s Triage)</span>
+                <span>Open Patient Triage Dossier</span>
                 <ArrowRight size={14} />
               </Link>
               <button
                 type="button"
                 onClick={() => setEmergencyAlert(null)}
-                className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition"
+                className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition"
                 title="Dismiss Alert"
               >
                 <X size={16} />
