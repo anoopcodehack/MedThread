@@ -11,7 +11,6 @@ import {
   ScanLine, 
   ArrowUpRight, 
   Activity,
-  AlertTriangle,
   AlertCircle,
   ArrowRight,
   X
@@ -169,92 +168,112 @@ export default function DoctorDashboard() {
         </div>
       </div>
 
-      {/* Specialist Referral / Emergency Queue Alert Banner */}
+      {/* Specialist Referral / Queue Dispatch HUD Banner */}
       {emergencyAlert && (
         <div
-          className={`bg-white border-2 p-5 rounded-2xl shadow-xs transition ${
+          className={`rounded-2xl border transition shadow-xs overflow-hidden ${
             emergencyAlert.isRevoked
-              ? "border-amber-400 bg-amber-50/30"
-              : "border-rose-300"
+              ? "border-amber-300 bg-amber-50/20 border-l-4 border-l-amber-500"
+              : "border-slate-200/90 bg-white border-l-4 border-l-forest"
           }`}
         >
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="flex items-start gap-3.5">
-              <div
-                className={`p-3 rounded-xl border shrink-0 ${
-                  emergencyAlert.isRevoked
-                    ? "bg-amber-100 border-amber-300 text-amber-800"
-                    : "bg-rose-50 border-rose-200 text-rose-700"
-                }`}
-              >
-                <AlertTriangle size={22} className={emergencyAlert.isRevoked ? "text-amber-700" : "text-rose-600"} />
+          <div className="p-4 sm:p-5">
+            {/* Top Row: Meta Header + Actions */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3.5 mb-3.5">
+              <div className="flex flex-wrap items-center gap-2">
+                <span
+                  className={`text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full ${
+                    emergencyAlert.isRevoked
+                      ? "bg-rose-100 text-rose-800 border border-rose-200"
+                      : "bg-forest/10 text-forest border border-forest/20"
+                  }`}
+                >
+                  {emergencyAlert.isRevoked ? "Access Revoked" : "Specialist Referral Active"}
+                </span>
+                <span className="text-xs font-bold text-slate-800">
+                  Patient Rajesh Sharma (PAT-101)
+                </span>
+                <span className="text-slate-300 hidden sm:inline">•</span>
+                <span className="text-[11px] font-mono text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                  {emergencyAlert.token}
+                </span>
               </div>
-              <div className="space-y-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span
-                    className={`text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded border ${
-                      emergencyAlert.isRevoked
-                        ? "bg-rose-100 text-rose-900 border-rose-300"
-                        : "bg-rose-50 text-rose-800 border border-rose-200"
-                    }`}
-                  >
-                    {emergencyAlert.isRevoked ? "Access Revoked by Patient" : "Specialist Referral Dispatched"}
-                  </span>
-                  <span className="text-xs text-slate-600 font-medium">
-                    via Distributed Queue Allocation
-                  </span>
-                  <span className="text-[10px] text-slate-500 font-mono bg-slate-100 border border-slate-200 px-2 py-0.5 rounded">
-                    Token: {emergencyAlert.token}
-                  </span>
-                </div>
-                <h3 className="font-heading font-extrabold text-base text-slate-900">
-                  {emergencyAlert.isRevoked
-                    ? `Session Terminated: Record access revoked at ${emergencyAlert.revokedAt || "recently"}`
-                    : `Patient Rajesh Sharma (PAT-101) routed to ${emergencyAlert.doctor}`}
-                </h3>
-                <p className="text-xs text-slate-600 leading-relaxed max-w-2xl">
-                  {emergencyAlert.isRevoked ? (
-                    <span className="text-rose-700 font-medium">
-                      The patient or caregiver has revoked record authorization. Access to this clinical dossier is now locked.
-                    </span>
-                  ) : (
-                    <>
-                      <strong>Queue Allocation Decision:</strong> {emergencyAlert.bypassedDoctor} was at capacity ({emergencyAlert.bypassedQueue} patients in queue). Referral routed to {emergencyAlert.doctor} ({emergencyAlert.queueDepth} waiting) for immediate care.
-                    </>
-                  )}
-                </p>
+
+              <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
                 {!emergencyAlert.isRevoked && (
-                  <div className="pt-1 flex flex-wrap items-center gap-3 text-[11px] text-slate-700 font-medium">
-                    <span className="inline-flex items-center gap-1 text-rose-700 font-semibold">
-                      <AlertCircle size={13} className="text-rose-600" />
-                      Critical Alert: Aspirin temporarily held for hernia surgery (Feb 2024)
-                    </span>
-                    <span className="text-slate-300">•</span>
-                    <span>T2D on Metformin</span>
-                  </div>
+                  <Link
+                    to="/doctor/patients/101"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-forest hover:bg-forest/90 text-white text-xs font-bold transition shadow-xs"
+                  >
+                    <span>Open Patient Dossier</span>
+                    <ArrowRight size={13} />
+                  </Link>
                 )}
+                <button
+                  type="button"
+                  onClick={() => setEmergencyAlert(null)}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                  title="Dismiss"
+                >
+                  <X size={15} />
+                </button>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
-              {!emergencyAlert.isRevoked && (
-                <Link
-                  to="/doctor/patients/101"
-                  className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition shadow-xs whitespace-nowrap flex items-center gap-1.5"
-                >
-                  <span>Open Patient Triage Dossier</span>
-                  <ArrowRight size={14} />
-                </Link>
-              )}
-              <button
-                type="button"
-                onClick={() => setEmergencyAlert(null)}
-                className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition cursor-pointer"
-                title="Dismiss Alert"
-              >
-                <X size={16} />
-              </button>
-            </div>
+            {/* Bottom Row: 3 Clean Structured Badges */}
+            {emergencyAlert.isRevoked ? (
+              <div className="flex items-center gap-2 text-xs font-semibold text-rose-800">
+                <AlertCircle size={15} className="text-rose-600 shrink-0" />
+                <span>
+                  The patient revoked authorization at {emergencyAlert.revokedAt || "recently"}. Cryptographic access token has been terminated.
+                </span>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+                {/* 1. Assigned Doctor */}
+                <div className="p-2.5 rounded-xl bg-emerald-50/60 border border-emerald-200/70 flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 block">
+                      Assigned Specialist
+                    </span>
+                    <span className="font-bold text-slate-900 text-xs">
+                      {emergencyAlert.doctor}
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md">
+                    {emergencyAlert.queueDepth} in queue
+                  </span>
+                </div>
+
+                {/* 2. Bypassed Doctor (Overloaded) */}
+                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+                      Bypassed (Overloaded)
+                    </span>
+                    <span className="font-bold text-slate-700 text-xs">
+                      {emergencyAlert.bypassedDoctor}
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-bold text-slate-500 bg-white border border-slate-200 px-2 py-0.5 rounded-md">
+                    {emergencyAlert.bypassedQueue} waiting
+                  </span>
+                </div>
+
+                {/* 3. Clinical Warning */}
+                <div className="p-2.5 rounded-xl bg-rose-50/60 border border-rose-200/70 flex items-center gap-2">
+                  <AlertCircle size={15} className="text-rose-600 shrink-0" />
+                  <div className="min-w-0">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-rose-800 block">
+                      Clinical Risk Alert
+                    </span>
+                    <span className="font-semibold text-rose-900 text-[11px] truncate block">
+                      Aspirin held for hernia surgery (Feb 2024)
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
