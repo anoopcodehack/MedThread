@@ -278,8 +278,8 @@ def answer_clinical_question(
         for ev in relevant_events[:4]
     ]
 
-    # Try Gemini LLM Grounded Formatting if API key is provided
-    if settings.GEMINI_API_KEY:
+    # Try Gemini LLM Grounded Formatting if a valid API key is provided
+    if settings.GEMINI_API_KEY and not settings.GEMINI_API_KEY.startswith("your_gemini") and len(settings.GEMINI_API_KEY) > 10:
         try:
             from google import genai
             client = genai.Client(api_key=settings.GEMINI_API_KEY)
