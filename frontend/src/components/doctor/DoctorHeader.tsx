@@ -56,30 +56,30 @@ export default function DoctorHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-2xs">
+      <header className="sticky top-0 z-40 bg-gradient-to-r from-[#7B9E91] via-[#8AAFA2] to-[#7B9E91] text-white backdrop-blur-md border-b border-white/20 shadow-sm">
         <div className="max-w-7xl w-full mx-auto px-6 py-3.5 flex items-center justify-between gap-6 relative">
           {/* Left: Brand Logo */}
           <div className="flex items-center gap-3 shrink-0">
             <Link to="/" className="flex items-center gap-2 group" title="Return to MedThread Home">
-              <BrandLogo theme="dark" size="md" showSubtitle />
+              <BrandLogo theme="light" size="md" showSubtitle />
             </Link>
           </div>
 
           {/* Center: Mega-Menu Top Navigation (No > or chevron symbols) */}
-          <nav className="hidden md:flex items-center gap-8 text-xs font-semibold text-slate-700">
+          <nav className="hidden md:flex items-center gap-8 text-xs font-semibold text-white/90">
             {/* 1. Cockpit Direct Link */}
             <Link
               to="/doctor/dashboard"
               onClick={() => setOpenDropdown(null)}
               className={`transition flex flex-col items-center py-1 font-bold ${
                 isCockpitActive
-                  ? "text-forest"
-                  : "text-slate-600 hover:text-forest"
+                  ? "text-white"
+                  : "text-white/80 hover:text-white"
               }`}
             >
               <span>Cockpit</span>
               {activeDot === "cockpit" && (
-                <span className="w-1.5 h-1.5 bg-forest rounded-xs mt-1 block" />
+                <span className="w-1.5 h-1.5 bg-white rounded-xs mt-1 block shadow-xs" />
               )}
             </Link>
 
@@ -93,13 +93,13 @@ export default function DoctorHeader() {
                 to="/doctor/recent-patients"
                 className={`flex flex-col items-center py-1 font-bold transition ${
                   isPatientsActive || openDropdown === "patients"
-                    ? "text-forest"
-                    : "text-slate-600 hover:text-forest"
+                    ? "text-white"
+                    : "text-white/80 hover:text-white"
                 }`}
               >
                 <span>Patient Records</span>
                 {activeDot === "patients" && (
-                  <span className="w-1.5 h-1.5 bg-forest rounded-xs mt-1 block" />
+                  <span className="w-1.5 h-1.5 bg-white rounded-xs mt-1 block shadow-xs" />
                 )}
               </Link>
 
@@ -230,13 +230,13 @@ export default function DoctorHeader() {
                 to="/doctor/access-history"
                 className={`flex flex-col items-center py-1 font-bold transition ${
                   isAuditActive || openDropdown === "audit"
-                    ? "text-forest"
-                    : "text-slate-600 hover:text-forest"
+                    ? "text-white"
+                    : "text-white/80 hover:text-white"
                 }`}
               >
                 <span>Analytics &amp; Audit</span>
                 {activeDot === "audit" && (
-                  <span className="w-1.5 h-1.5 bg-forest rounded-xs mt-1 block" />
+                  <span className="w-1.5 h-1.5 bg-white rounded-xs mt-1 block shadow-xs" />
                 )}
               </Link>
 
@@ -295,16 +295,16 @@ export default function DoctorHeader() {
             <button
               type="button"
               onClick={() => setIsBenchmarkOpen(true)}
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-50 text-forest border border-emerald-200 hover:bg-emerald-100 transition"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-white/20 text-white border border-white/30 hover:bg-white/30 transition shadow-xs"
               title="Clinical Performance Benchmark Scorecard"
             >
-              <Award className="h-3.5 w-3.5 text-forest" />
+              <Award className="h-3.5 w-3.5 text-white" />
               <span>Benchmark (-78%)</span>
             </button>
 
             <button
               type="button"
-              className="text-slate-500 hover:text-forest transition p-2 rounded-xl hover:bg-slate-100"
+              className="text-white/90 hover:text-white transition p-2 rounded-xl hover:bg-white/15"
               aria-label="Notifications"
             >
               <Bell size={18} />
@@ -315,8 +315,8 @@ export default function DoctorHeader() {
               to="/doctor/profile"
               className={`flex h-9 w-9 items-center justify-center rounded-full border transition shadow-xs ${
                 pathname === "/doctor/profile"
-                  ? "bg-forest text-white border-forest ring-2 ring-forest/30"
-                  : "bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-700"
+                  ? "bg-white text-[#0A2A18] border-white ring-2 ring-white/40"
+                  : "bg-white/15 hover:bg-white/25 border-white/30 text-white"
               }`}
               title="Open Doctor Profile"
               aria-label="Open Doctor Profile"
@@ -327,7 +327,7 @@ export default function DoctorHeader() {
             {/* Logout Button (Dark Green Pill Style from Landing Page) */}
             <Link
               to="/"
-              className="bg-[#0A2A18] hover:bg-[#124227] text-white text-xs font-bold px-4 sm:px-5 py-2 sm:py-2.5 rounded-full shadow-md transition-all transform hover:scale-105 uppercase tracking-wider flex items-center gap-1.5"
+              className="bg-[#0A2A18] hover:bg-[#124227] text-white text-xs font-bold px-4 sm:px-5 py-2 sm:py-2.5 rounded-full shadow-md transition-all transform hover:scale-105 uppercase tracking-wider flex items-center gap-1.5 border border-white/20"
               title="Logout from Doctor Workspace"
             >
               <LogOut size={13} />
@@ -337,12 +337,12 @@ export default function DoctorHeader() {
         </div>
 
         {/* Mobile/Tablet Sub-Navigation Scroll Strip */}
-        <div className="md:hidden border-t border-slate-100 bg-[#F8FAF7] px-4 py-2 overflow-x-auto scrollbar-none">
-          <nav className="flex items-center gap-2 text-xs font-bold min-w-max">
+        <div className="md:hidden border-t border-white/15 bg-[#789B8E] px-4 py-2 overflow-x-auto scrollbar-none">
+          <nav className="flex items-center gap-2 text-xs font-bold min-w-max text-white">
             <Link
               to="/doctor/dashboard"
               className={`px-3 py-1.5 rounded-xl transition ${
-                isCockpitActive ? "bg-forest text-white" : "text-slate-600"
+                isCockpitActive ? "bg-white text-[#0A2A18]" : "text-white/80 hover:text-white"
               }`}
             >
               Cockpit
@@ -350,7 +350,7 @@ export default function DoctorHeader() {
             <Link
               to="/doctor/recent-patients"
               className={`px-3 py-1.5 rounded-xl transition ${
-                pathname === "/doctor/recent-patients" ? "bg-forest text-white" : "text-slate-600"
+                pathname === "/doctor/recent-patients" ? "bg-white text-[#0A2A18]" : "text-white/80 hover:text-white"
               }`}
             >
               Recent Patients

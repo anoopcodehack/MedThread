@@ -152,17 +152,17 @@ export default function PatientHeader({
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-2xs">
+      <header className="sticky top-0 z-40 bg-gradient-to-r from-[#7B9E91] via-[#8AAFA2] to-[#7B9E91] text-white backdrop-blur-md border-b border-white/20 shadow-sm">
         <div className="max-w-7xl w-full mx-auto px-6 py-3.5 flex items-center justify-between gap-6 relative">
-          {/* Left: Brand Logo */}
+          {/* Left: Brand Logo (Light theme on mist green) */}
           <div className="flex items-center gap-3 shrink-0">
             <Link to="/" className="flex items-center gap-2 group" title="Return to MedThread Home">
-              <BrandLogo theme="dark" size="md" showSubtitle />
+              <BrandLogo theme="light" size="md" showSubtitle />
             </Link>
           </div>
 
-          {/* Center: Mega-Menu Top Navigation (No chevron/arrow symbols in navbar) */}
-          <nav className="hidden md:flex items-center gap-8 text-xs font-semibold text-slate-700">
+          {/* Center: Mega-Menu Top Navigation */}
+          <nav className="hidden md:flex items-center gap-8 text-xs font-semibold text-white/90">
             {/* 1. Overview Direct Link */}
             <button
               type="button"
@@ -172,17 +172,17 @@ export default function PatientHeader({
               }}
               className={`transition flex flex-col items-center py-1 font-bold ${
                 activePage === "dashboard"
-                  ? "text-forest"
-                  : "text-slate-600 hover:text-forest"
+                  ? "text-white"
+                  : "text-white/80 hover:text-white"
               }`}
             >
               <span>Overview</span>
               {activeDot === "dashboard" && (
-                <span className="w-1.5 h-1.5 bg-forest rounded-xs mt-1 block" />
+                <span className="w-1.5 h-1.5 bg-white rounded-xs mt-1 block shadow-xs" />
               )}
             </button>
 
-            {/* 2. Clinical Records Mega-Menu Hover Dropdown (Clean text, no > or chevron) */}
+            {/* 2. Clinical Records Mega-Menu Hover Dropdown */}
             <div
               className="relative"
               onMouseEnter={() => handleMouseEnter("records")}
@@ -193,13 +193,13 @@ export default function PatientHeader({
                 onClick={() => onNavigate?.("history")}
                 className={`flex flex-col items-center py-1 font-bold transition ${
                   isRecordsActive || openDropdown === "records"
-                    ? "text-forest"
-                    : "text-slate-600 hover:text-forest"
+                    ? "text-white"
+                    : "text-white/80 hover:text-white"
                 }`}
               >
                 <span>Clinical Records</span>
                 {activeDot === "records" && (
-                  <span className="w-1.5 h-1.5 bg-forest rounded-xs mt-1 block" />
+                  <span className="w-1.5 h-1.5 bg-white rounded-xs mt-1 block shadow-xs" />
                 )}
               </button>
 
@@ -314,13 +314,13 @@ export default function PatientHeader({
                 onClick={() => onNavigate?.("documents")}
                 className={`flex flex-col items-center py-1 font-bold transition ${
                   isDocsActive || openDropdown === "documents"
-                    ? "text-forest"
-                    : "text-slate-600 hover:text-forest"
+                    ? "text-white"
+                    : "text-white/80 hover:text-white"
                 }`}
               >
                 <span>Documents</span>
                 {activeDot === "documents" && (
-                  <span className="w-1.5 h-1.5 bg-forest rounded-xs mt-1 block" />
+                  <span className="w-1.5 h-1.5 bg-white rounded-xs mt-1 block shadow-xs" />
                 )}
               </button>
 
@@ -385,18 +385,18 @@ export default function PatientHeader({
               }}
               className={`transition flex flex-col items-center py-1 font-bold ${
                 activePage === "access"
-                  ? "text-forest"
-                  : "text-slate-600 hover:text-forest"
+                  ? "text-white"
+                  : "text-white/80 hover:text-white"
               }`}
             >
               <span>Emergency Access</span>
               {activeDot === "access" && (
-                <span className="w-1.5 h-1.5 bg-forest rounded-xs mt-1 block" />
+                <span className="w-1.5 h-1.5 bg-white rounded-xs mt-1 block shadow-xs" />
               )}
             </button>
           </nav>
 
-          {/* Right: Notifications, Profile Icon Only (Opens Profile on Click), & Logout */}
+          {/* Right: Notifications, Profile Icon Only, & Logout */}
           <div className="flex items-center gap-3 shrink-0">
             {/* Notifications with Real-Time Clinician Update Badge & Dropdown */}
             <div className="relative" ref={notifRef}>
@@ -405,15 +405,15 @@ export default function PatientHeader({
                 onClick={() => setIsNotifOpen((prev) => !prev)}
                 className={`relative p-2 rounded-xl transition ${
                   isNotifOpen
-                    ? "bg-slate-100 text-forest"
-                    : "text-slate-500 hover:text-forest hover:bg-slate-100"
+                    ? "bg-white/25 text-white"
+                    : "text-white/90 hover:text-white hover:bg-white/15"
                 }`}
                 aria-label="Clinician updates and audit alerts"
                 title="Clinician updates and prescription audits"
               >
                 <Bell size={18} />
                 {unreadCount > 0 && (
-                  <span className="absolute 1 top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-600 text-[10px] font-bold text-white shadow-xs">
+                  <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white shadow-xs">
                     {unreadCount}
                   </span>
                 )}
@@ -529,8 +529,8 @@ export default function PatientHeader({
               }}
               className={`flex h-9 w-9 items-center justify-center rounded-full border transition shadow-xs ${
                 activePage === "profile"
-                  ? "bg-forest text-white border-forest ring-2 ring-forest/30"
-                  : "bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-700"
+                  ? "bg-white text-[#0A2A18] border-white ring-2 ring-white/40"
+                  : "bg-white/15 hover:bg-white/25 border-white/30 text-white"
               }`}
               title="Open Profile & Caregivers"
               aria-label="Open Profile & Caregivers"
@@ -541,7 +541,7 @@ export default function PatientHeader({
             {/* Logout Button (Dark Green Pill Style from Landing Page) */}
             <Link
               to="/"
-              className="bg-[#0A2A18] hover:bg-[#124227] text-white text-xs font-bold px-4 sm:px-5 py-2 sm:py-2.5 rounded-full shadow-md transition-all transform hover:scale-105 uppercase tracking-wider flex items-center gap-1.5"
+              className="bg-[#0A2A18] hover:bg-[#124227] text-white text-xs font-bold px-4 sm:px-5 py-2 sm:py-2.5 rounded-full shadow-md transition-all transform hover:scale-105 uppercase tracking-wider flex items-center gap-1.5 border border-white/20"
               title="Logout from Patient Portal"
             >
               <LogOut size={13} />
@@ -551,13 +551,13 @@ export default function PatientHeader({
         </div>
 
         {/* Mobile/Tablet Simple Strip */}
-        <div className="md:hidden border-t border-slate-100 bg-[#F8FAF7] px-4 py-2 overflow-x-auto scrollbar-none">
-          <nav className="flex items-center gap-2 text-xs font-bold min-w-max">
+        <div className="md:hidden border-t border-white/15 bg-[#789B8E] px-4 py-2 overflow-x-auto scrollbar-none">
+          <nav className="flex items-center gap-2 text-xs font-bold min-w-max text-white">
             <button
               type="button"
               onClick={() => onNavigate?.("dashboard")}
               className={`px-3 py-1.5 rounded-xl transition ${
-                activePage === "dashboard" ? "bg-forest text-white" : "text-slate-600"
+                activePage === "dashboard" ? "bg-white text-[#0A2A18]" : "text-white/80 hover:text-white"
               }`}
             >
               Overview
@@ -566,7 +566,7 @@ export default function PatientHeader({
               type="button"
               onClick={() => onNavigate?.("history")}
               className={`px-3 py-1.5 rounded-xl transition ${
-                activePage === "history" ? "bg-forest text-white" : "text-slate-600"
+                activePage === "history" ? "bg-white text-[#0A2A18]" : "text-white/80 hover:text-white"
               }`}
             >
               Timeline
@@ -575,7 +575,7 @@ export default function PatientHeader({
               type="button"
               onClick={() => onNavigate?.("conditions")}
               className={`px-3 py-1.5 rounded-xl transition ${
-                activePage === "conditions" ? "bg-forest text-white" : "text-slate-600"
+                activePage === "conditions" ? "bg-white text-[#0A2A18]" : "text-white/80 hover:text-white"
               }`}
             >
               Conditions
@@ -584,7 +584,7 @@ export default function PatientHeader({
               type="button"
               onClick={() => onNavigate?.("medications")}
               className={`px-3 py-1.5 rounded-xl transition ${
-                activePage === "medications" ? "bg-forest text-white" : "text-slate-600"
+                activePage === "medications" ? "bg-white text-[#0A2A18]" : "text-white/80 hover:text-white"
               }`}
             >
               Medications
@@ -593,7 +593,7 @@ export default function PatientHeader({
               type="button"
               onClick={() => onNavigate?.("investigations")}
               className={`px-3 py-1.5 rounded-xl transition ${
-                activePage === "investigations" ? "bg-forest text-white" : "text-slate-600"
+                activePage === "investigations" ? "bg-white text-[#0A2A18]" : "text-white/80 hover:text-white"
               }`}
             >
               Tests
@@ -602,7 +602,7 @@ export default function PatientHeader({
               type="button"
               onClick={() => onNavigate?.("documents")}
               className={`px-3 py-1.5 rounded-xl transition ${
-                activePage === "documents" ? "bg-forest text-white" : "text-slate-600"
+                activePage === "documents" ? "bg-white text-[#0A2A18]" : "text-white/80 hover:text-white"
               }`}
             >
               Documents
@@ -611,7 +611,7 @@ export default function PatientHeader({
               type="button"
               onClick={() => onNavigate?.("access")}
               className={`px-3 py-1.5 rounded-xl transition ${
-                activePage === "access" ? "bg-forest text-white" : "text-slate-600"
+                activePage === "access" ? "bg-white text-[#0A2A18]" : "text-white/80 hover:text-white"
               }`}
             >
               Emergency Access
