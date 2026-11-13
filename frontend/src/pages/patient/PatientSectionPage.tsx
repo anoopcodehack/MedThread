@@ -4,8 +4,11 @@ import {
   Activity,
   AlertCircle,
   ArrowDownWideNarrow,
+  ArrowRight,
   CalendarDays,
+  CheckCircle2,
   ClipboardList,
+  Clock,
   FileText,
   FilterX,
   HeartPulse,
@@ -17,6 +20,8 @@ import {
   Search,
   Share2,
   Stethoscope,
+  Users,
+  Zap,
 } from "lucide-react";
 import type { LucideProps } from "lucide-react";
 import { api } from "../../services/api";
@@ -943,6 +948,17 @@ function ShareAndAccessHub({ patientId = 101 }: { patientId?: number }) {
         </div>
       </section>
 
+      {/* Autonomous Emergency Specialist Triage & Distributed Queue Balancer */}
+      <EmergencyTriageQueueBalancer
+        patientId={patientId}
+        onDispatch={(newProvider) => {
+          setProviders((prev) => [
+            newProvider,
+            ...prev.filter((p) => p.id !== newProvider.id),
+          ]);
+        }}
+      />
+
       {/* Active Authorized Providers Section */}
       <section className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-xs">
         <div className="flex items-center justify-between mb-6">
@@ -1012,6 +1028,357 @@ function ShareAndAccessHub({ patientId = 101 }: { patientId?: number }) {
         </div>
       </section>
     </div>
+  );
+}
+
+interface DispatchedProvider {
+  id: string;
+  name: string;
+  facility: string;
+  specialty: string;
+  grantedAt: string;
+  expiresIn: string;
+  scope: string;
+}
+
+function EmergencyTriageQueueBalancer({
+  patientId = 101,
+  onDispatch,
+}: {
+  patientId?: number;
+  onDispatch: (provider: DispatchedProvider) => void;
+}) {
+  const [selectedCase, setSelectedCase] = useState<"cardiac" | "endocrine" | "pulmonary">("cardiac");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [dispatchedData, setDispatchedData] = useState<{
+    patientId?: number;
+    doctor: string;
+    specialty: string;
+    facility: string;
+    queueDepth: number;
+    bypassedDoctor: string;
+    bypassedQueue: number;
+    token: string;
+    time: string;
+  } | null>(() => {
+    try {
+      const stored = localStorage.getItem("medthread_emergency_dispatch");
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const cases = [
+    {
+      id: "cardiac",
+      title: "Acute Chest Pain & Post-Angioplasty Angina",
+      specialty: "Cardiology",
+      urgency: "High Priority (Triage 1)",
+      relevantHistory: "Prior Hernia Surgery (Aspirin Held), Stent Record (PAT-101)",
+    },
+    {
+      id: "endocrine",
+      title: "Severe Hypoglycemic Crisis & Confusion",
+      specialty: "Endocrinology",
+      urgency: "Medium Priority (Triage 2)",
+      relevantHistory: "Metformin Titration 500mg -> 850mg (PAT-101)",
+    },
+    {
+      id: "pulmonary",
+      title: "Acute Bronchospasm & Wheezing",
+      specialty: "Pulmonology",
+      urgency: "High Priority (Triage 1)",
+      relevantHistory: "Allergy History & Dyspnea Notes",
+    },
+  ] as const;
+
+  const currentCase = cases.find((c) => c.id === selectedCase) || cases[0];
+
+  // 3 Registered On-Call Doctors in the Distributed Specialist Pool
+  const doctors = [
+    {
+      id: "doc-1",
+      name: "Dr. Ananya Rao, MD",
+      specialty: "Cardiology",
+      facility: "Apollo Heart Institute",
+      queueDepth: 5,
+      avgWaitMins: 75,
+      isMatch: currentCase.specialty === "Cardiology",
+      status: "OVERLOADED",
+    },
+    {
+      id: "doc-2",
+      name: "Dr. Suresh Menon, MD",
+      specialty: "Cardiology",
+      facility: "Apollo Heart Institute",
+      queueDepth: 1,
+      avgWaitMins: 15,
+      isMatch: currentCase.specialty === "Cardiology",
+      status: "OPTIMAL",
+    },
+    {
+      id: "doc-3",
+      name: "Dr. Kavita Shenoy, MD",
+      specialty: "Endocrinology",
+      facility: "Max Diabetes & Endocrine Center",
+      queueDepth: 2,
+      avgWaitMins: 30,
+      isMatch: currentCase.specialty === "Endocrinology",
+      status: currentCase.specialty === "Endocrinology" ? "OPTIMAL" : "MISMATCH",
+    },
+  ];
+
+  const handleRunBalancer = () => {
+    setIsProcessing(true);
+    setTimeout(() => {
+      // Algorithmic resolution: Filter by specialty match, then pick minimum queue depth
+      const eligible = doctors.filter((d) => d.isMatch);
+      const selectedDoc = eligible.reduce((prev, curr) =>
+        curr.queueDepth < prev.queueDepth ? curr : prev
+      );
+      const bypassed = eligible.find((d) => d.id !== selectedDoc.id) || doctors[0];
+
+      const token = `MT-ER-${Math.floor(100000 + Math.random() * 900000)}`;
+      const result = {
+        patientId: patientId,
+        doctor: selectedDoc.name,
+        specialty: selectedDoc.specialty,
+        facility: selectedDoc.facility,
+        queueDepth: selectedDoc.queueDepth,
+        bypassedDoctor: bypassed.name,
+        bypassedQueue: bypassed.queueDepth,
+        token: token,
+        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      };
+
+      setDispatchedData(result);
+      setIsProcessing(false);
+
+      // Save to localStorage so Doctor Dashboard immediately shows the incoming emergency banner
+      localStorage.setItem("medthread_emergency_dispatch", JSON.stringify(result));
+      window.dispatchEvent(new CustomEvent("medthread_emergency_dispatched", { detail: result }));
+
+      // Add to active provider permissions list
+      onDispatch({
+        id: `emergency-${Date.now()}`,
+        name: selectedDoc.name,
+        facility: selectedDoc.facility,
+        specialty: selectedDoc.specialty,
+        grantedAt: "Just now (Queue Balanced)",
+        expiresIn: "24 hours",
+        scope: "Full Emergency Access (Aspirin & Allergy Alert)",
+      });
+    }, 800);
+  };
+
+  return (
+    <section className="rounded-3xl border border-amber-300 bg-gradient-to-br from-amber-50/60 via-white to-emerald-50/40 p-6 sm:p-8 shadow-sm space-y-6">
+      {/* Top Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-amber-200/80 pb-5">
+        <div className="flex items-start gap-3">
+          <div className="p-3 rounded-2xl bg-amber-500 text-white shadow-md shrink-0">
+            <Zap size={22} className="animate-pulse" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-amber-200 text-amber-900 border border-amber-300">
+                Distributed Queue Load Balancer
+              </span>
+              <span className="text-xs text-slate-500 font-semibold hidden sm:inline">
+                Dynamic Priority Triage (PS-7 Emergency Constraint)
+              </span>
+            </div>
+            <h3 className="font-heading font-extrabold text-xl text-slate-900 mt-1">
+              Autonomous Specialist Triage &amp; Load Balancing
+            </h3>
+            <p className="text-xs text-slate-600 mt-1 max-w-2xl leading-relaxed">
+              When an emergency occurs, MedThread correlates the patient’s historical records (e.g. held anticoagulants, stenting), evaluates real-time queue depths of matching specialists, and automatically routes the emergency cryptographic token to the doctor with the shortest wait time.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={handleRunBalancer}
+            disabled={isProcessing}
+            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-emerald-700 hover:from-amber-700 hover:to-emerald-800 text-white text-xs font-bold transition shadow-md flex items-center justify-center gap-2"
+          >
+            <Zap size={15} />
+            <span>{isProcessing ? "Computing Optimal Route..." : "⚡ Run Autonomous Queue Balancer"}</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Step 1: Emergency Condition Selector */}
+      <div className="space-y-2">
+        <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
+          Step 1: Patient Emergency Scenario &amp; Clinical Match:
+        </label>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {cases.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              onClick={() => setSelectedCase(c.id as any)}
+              className={`p-3.5 rounded-2xl border text-left transition flex flex-col justify-between ${
+                selectedCase === c.id
+                  ? "bg-white border-amber-500 ring-2 ring-amber-400/30 shadow-xs"
+                  : "bg-white/80 border-slate-200 hover:border-slate-300"
+              }`}
+            >
+              <div>
+                <span className="text-[10px] font-extrabold text-amber-700 uppercase tracking-wider block mb-1">
+                  Required: {c.specialty}
+                </span>
+                <h4 className="font-heading font-bold text-xs text-slate-900 leading-snug">
+                  {c.title}
+                </h4>
+              </div>
+              <p className="text-[10px] text-slate-500 mt-2 pt-2 border-t border-slate-100">
+                Grounding: {c.relevantHistory}
+              </p>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Step 2: Live Doctor Queue Hash-Map */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+            Step 2: On-Call Specialist Queue State (Capacity Hash-Map):
+          </label>
+          <span className="text-[10px] text-slate-500 font-medium">
+            Formula: Allocation = min(Queue_depth | Specialty == {currentCase.specialty})
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+          {doctors.map((doc) => {
+            const isAssigned = dispatchedData?.doctor === doc.name;
+            return (
+              <div
+                key={doc.id}
+                className={`p-4 rounded-2xl border transition relative ${
+                  isAssigned
+                    ? "bg-emerald-50/80 border-emerald-400 ring-2 ring-emerald-400/40 shadow-sm"
+                    : doc.isMatch && doc.status === "OVERLOADED"
+                    ? "bg-rose-50/60 border-rose-200"
+                    : doc.isMatch
+                    ? "bg-white border-slate-200 shadow-xs"
+                    : "bg-slate-50/80 border-slate-200 opacity-60"
+                }`}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className="p-2 rounded-xl bg-white border border-slate-200 text-slate-700 shadow-2xs">
+                      <Stethoscope size={16} />
+                    </div>
+                    <div>
+                      <h4 className="font-heading font-bold text-xs text-slate-900">
+                        {doc.name}
+                      </h4>
+                      <p className="text-[10px] text-slate-500 font-medium">
+                        {doc.facility}
+                      </p>
+                    </div>
+                  </div>
+
+                  <span
+                    className={`text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
+                      isAssigned
+                        ? "bg-emerald-600 text-white"
+                        : doc.isMatch && doc.status === "OVERLOADED"
+                        ? "bg-rose-100 text-rose-800 border border-rose-300"
+                        : doc.isMatch
+                        ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                        : "bg-slate-200 text-slate-600"
+                    }`}
+                  >
+                    {isAssigned
+                      ? "Assigned ✓"
+                      : doc.isMatch && doc.status === "OVERLOADED"
+                      ? "Overloaded (5)"
+                      : doc.isMatch
+                      ? "Available (1)"
+                      : "Wrong Spec"}
+                  </span>
+                </div>
+
+                <div className="mt-3 pt-2.5 border-t border-slate-200/80 grid grid-cols-2 gap-2 text-[11px]">
+                  <div>
+                    <span className="text-[10px] text-slate-400 block">Queue Depth</span>
+                    <span className="font-bold text-slate-800 flex items-center gap-1">
+                      <Users size={12} className="text-slate-400" />
+                      {doc.queueDepth} Patients
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-slate-400 block">Est. Latency</span>
+                    <span className="font-bold text-slate-800 flex items-center gap-1">
+                      <Clock size={12} className="text-slate-400" />
+                      ~{doc.avgWaitMins} mins
+                    </span>
+                  </div>
+                </div>
+
+                {isAssigned && (
+                  <div className="mt-2.5 pt-2 border-t border-emerald-200 flex items-center gap-1 text-[10px] font-bold text-emerald-800">
+                    <CheckCircle2 size={12} />
+                    <span>Emergency Access Token Transmitted</span>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Step 3: Algorithmic Resolution Banner */}
+      {dispatchedData && (
+        <div className="rounded-2xl border border-emerald-300 bg-white p-4 shadow-sm space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-emerald-100 pb-2.5">
+            <div className="flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-ping" />
+              <span className="font-heading font-extrabold text-xs text-emerald-900 uppercase tracking-wide">
+                Distributed Triage Resolution: Token Handshake Dispatched at {dispatchedData.time}
+              </span>
+            </div>
+            <span className="text-xs font-mono font-bold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+              Access Token: {dispatchedData.token}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
+            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+              <span className="text-[10px] text-slate-400 block uppercase font-bold">Matched Specialty</span>
+              <span className="font-bold text-slate-900">{dispatchedData.specialty}</span>
+            </div>
+            <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-100">
+              <span className="text-[10px] text-rose-500 block uppercase font-bold">Bypassed (Overloaded)</span>
+              <span className="font-bold text-rose-900">{dispatchedData.bypassedDoctor} ({dispatchedData.bypassedQueue} waiting)</span>
+            </div>
+            <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200">
+              <span className="text-[10px] text-emerald-600 block uppercase font-bold">Assigned Specialist</span>
+              <span className="font-bold text-emerald-900">{dispatchedData.doctor} ({dispatchedData.queueDepth} waiting)</span>
+            </div>
+            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex flex-col justify-between">
+              <span className="text-[10px] text-slate-400 block uppercase font-bold">Clinical Cockpit State</span>
+              <span className="font-bold text-forest flex items-center gap-1">
+                <span>Ringing in Doctor Cockpit</span>
+                <ArrowRight size={12} />
+              </span>
+            </div>
+          </div>
+
+          <p className="text-[11px] text-slate-500 italic">
+            *Dr. Suresh Menon now has verified 24-hr access to Rajesh Sharma's complete timeline, highlighting the held Aspirin hernia surgery alert.
+          </p>
+        </div>
+      )}
+    </section>
   );
 }
 

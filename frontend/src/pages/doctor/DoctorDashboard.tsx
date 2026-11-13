@@ -10,7 +10,10 @@ import {
   Dna, 
   ScanLine, 
   ArrowUpRight, 
-  Activity
+  Activity,
+  AlertTriangle,
+  ArrowRight,
+  X
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -25,6 +28,30 @@ export default function DoctorDashboard() {
   const [data, setData] = useState<DashboardData>();
   const [profile, setProfile] = useState<DoctorProfile | null>(null);
   const [activePatientIndex, setActivePatientIndex] = useState<number>(0);
+  const [emergencyAlert, setEmergencyAlert] = useState<{
+    doctor: string;
+    specialty: string;
+    token: string;
+    time: string;
+    bypassedDoctor: string;
+    bypassedQueue: number;
+    queueDepth: number;
+  } | null>(() => {
+    try {
+      const stored = localStorage.getItem("medthread_emergency_dispatch");
+      return stored ? JSON.parse(stored) : {
+        doctor: "Dr. Suresh Menon, MD",
+        specialty: "Cardiology",
+        token: "MT-ER-948271",
+        time: "Just now",
+        bypassedDoctor: "Dr. Ananya Rao, MD",
+        bypassedQueue: 5,
+        queueDepth: 1,
+      };
+    } catch {
+      return null;
+    }
+  });
 
   useEffect(() => {
     void getDashboardData().then(setData);
@@ -39,9 +66,23 @@ export default function DoctorDashboard() {
       }
     };
 
+    const handleEmergency = (event: Event) => {
+      const customEvent = event as CustomEvent<any>;
+      if (customEvent.detail) {
+        setEmergencyAlert(customEvent.detail);
+      } else {
+        try {
+          const stored = localStorage.getItem("medthread_emergency_dispatch");
+          if (stored) setEmergencyAlert(JSON.parse(stored));
+        } catch {}
+      }
+    };
+
     window.addEventListener("medthread_doctor_profile_updated", handleProfileUpdate);
+    window.addEventListener("medthread_emergency_dispatched", handleEmergency);
     return () => {
       window.removeEventListener("medthread_doctor_profile_updated", handleProfileUpdate);
+      window.removeEventListener("medthread_emergency_dispatched", handleEmergency);
     };
   }, []);
 
@@ -87,6 +128,61 @@ export default function DoctorDashboard() {
           </Link>
         </div>
       </div>
+
+      {/* 🚨 Emergency Queue-Balanced Dispatch Alert Banner */}
+      {emergencyAlert && (
+        <div className="bg-gradient-to-r from-red-600 via-rose-700 to-amber-600 text-white p-5 rounded-3xl shadow-xl border border-red-400/80 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-start gap-3.5">
+              <div className="p-3 rounded-2xl bg-white/20 border border-white/30 text-white shrink-0">
+                <AlertTriangle size={24} className="text-amber-300 animate-pulse" />
+              </div>
+              <div className="space-y-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider bg-white/20 px-2.5 py-0.5 rounded-full border border-white/30 text-white">
+                    🚨 URGENT EMERGENCY DISPATCH ASSIGNED
+                  </span>
+                  <span className="text-xs text-amber-200 font-bold">
+                    via Distributed Queue Balancer
+                  </span>
+                  <span className="text-[10px] text-white/70 font-mono bg-black/20 px-2 py-0.5 rounded">
+                    Token: {emergencyAlert.token}
+                  </span>
+                </div>
+                <h3 className="font-heading font-extrabold text-base text-white">
+                  Patient Rajesh Sharma (PAT-101) routed to {emergencyAlert.doctor}
+                </h3>
+                <p className="text-xs text-white/90 leading-relaxed max-w-2xl">
+                  <strong>Queue Balancer Decision:</strong> {emergencyAlert.bypassedDoctor} was overloaded ({emergencyAlert.bypassedQueue} patients in queue). Emergency rerouted to {emergencyAlert.doctor} ({emergencyAlert.queueDepth} waiting) for immediate care.
+                </p>
+                <div className="pt-1 flex items-center gap-3 text-[11px] text-amber-200 font-semibold">
+                  <span>⚠️ Critical Grounded Alert: Aspirin temporarily held for hernia surgery (Feb 2024)</span>
+                  <span>•</span>
+                  <span>T2D on Metformin</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
+              <Link
+                to="/doctor/patients/101"
+                className="bg-white hover:bg-slate-100 text-red-700 text-xs font-bold px-4 py-2.5 rounded-xl transition shadow-md whitespace-nowrap flex items-center gap-1.5"
+              >
+                <span>Review Patient Dossier (42s Triage)</span>
+                <ArrowRight size={14} />
+              </Link>
+              <button
+                type="button"
+                onClick={() => setEmergencyAlert(null)}
+                className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition"
+                title="Dismiss Alert"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main HUD Grid matching User Reference (media_1794540834403_31de41f0.jpg) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
