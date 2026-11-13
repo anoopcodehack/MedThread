@@ -630,7 +630,7 @@ export default function MedicalHistoryPage({ patientId }: Props) {
 
 function PageHeading() {
   return (
-    <div className="flex items-start gap-3">
+    <div className="flex items-center gap-3">
       <div className="rounded-xl bg-[#EAF1EB] p-3 text-[#164A32]">
         <History size={22} aria-hidden="true" />
       </div>
@@ -638,10 +638,6 @@ function PageHeading() {
         <h1 id="history-heading" className="text-xl font-semibold text-[#26352D]">
           Complete Medical History
         </h1>
-        <p className="mt-1 max-w-2xl text-sm leading-6 text-[#718077]">
-          Review events documented in the patient’s records, with source
-          references and backend-provided review status.
-        </p>
       </div>
     </div>
   );

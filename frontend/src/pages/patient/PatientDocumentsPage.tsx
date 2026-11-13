@@ -3,19 +3,18 @@ import type { ReactNode } from "react";
 import {
   AlertCircle,
   CalendarDays,
-  ExternalLink,
+  Eye,
   FileText,
   FilterX,
   FolderOpen,
   LoaderCircle,
   RotateCcw,
   Search,
-  ScanLine,
 } from "lucide-react";
+import { DocumentPreviewModal } from "../../components/modals/DocumentPreviewModal";
 import { api } from "../../services/api";
 import type {
   PatientDocument,
-  SignedDocumentUrl,
   TimelineEventItem,
 } from "../../types/clinical";
 
@@ -47,13 +46,7 @@ export default function PatientDocumentsPage({ patientId }: Props) {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
-  const [linkStates, setLinkStates] = useState<
-    Record<number, "loading" | "error">
-  >({});
-  const [linkErrors, setLinkErrors] = useState<Record<number, string>>({});
-  const [signedLinks, setSignedLinks] = useState<
-    Record<number, SignedDocumentUrl>
-  >({});
+  const [previewDoc, setPreviewDoc] = useState<string | null>(null);
 
   const hasPatientId =
     typeof patientId === "number" &&
@@ -172,53 +165,10 @@ export default function PatientDocumentsPage({ patientId }: Props) {
     setEndDate("");
   }
 
-  async function prepareDocumentLink(document: PatientDocument) {
-    if (patientId === undefined) return;
-
-    setLinkStates((current) => ({
-      ...current,
-      [document.id]: "loading",
-    }));
-    setLinkErrors((current) => ({
-      ...current,
-      [document.id]: "",
-    }));
-
-    try {
-      const signedLink = await api.getSignedDocumentUrl(
-        patientId,
-        document.filename,
-      );
-      const url = new URL(signedLink.signed_url);
-      if (url.protocol !== "http:" && url.protocol !== "https:") {
-        throw new Error("The document service returned an unsupported URL.");
-      }
-
-      setSignedLinks((current) => ({
-        ...current,
-        [document.id]: signedLink,
-      }));
-      setLinkStates((current) => {
-        const next = { ...current };
-        delete next[document.id];
-        return next;
-      });
-    } catch (reason) {
-      setLinkStates((current) => ({
-        ...current,
-        [document.id]: "error",
-      }));
-      setLinkErrors((current) => ({
-        ...current,
-        [document.id]: errorText(reason),
-      }));
-    }
-  }
-
   return (
     <div className="space-y-6">
       <section className="rounded-2xl border border-[#E5ECE6] bg-white p-5 shadow-sm md:p-7">
-        <div className="flex items-start gap-4">
+        <div className="flex items-center gap-4">
           <div className="rounded-xl bg-[#EAF1EB] p-3 text-[#164A32]">
             <FolderOpen size={23} aria-hidden="true" />
           </div>
@@ -226,10 +176,6 @@ export default function PatientDocumentsPage({ patientId }: Props) {
             <h1 className="text-xl font-semibold text-[#26352D]">
               Medical Documents
             </h1>
-            <p className="mt-1 max-w-3xl text-sm leading-6 text-[#718077]">
-              Browse uploaded records and prepare time-limited document links
-              through the backend.
-            </p>
           </div>
         </div>
 
@@ -246,10 +192,6 @@ export default function PatientDocumentsPage({ patientId }: Props) {
           </div>
         ) : (
           <>
-            <p className="mt-5 rounded-xl border border-[#DCE8DE] bg-[#F7F9F7] p-4 text-sm leading-6 text-[#526158]">
-              <strong>Two-Tier Ingestion Bridge:</strong> Native digital PDFs and electronic reports are parsed directly via PyMuPDF in &lt;55ms (<span className="text-emerald-700 font-semibold inline-flex items-center gap-1"><FileText size={13} /> Direct Text</span>). Scanned camera photos or image-only documents automatically trigger multimodal Gemini 2.0 Flash Vision OCR (<span className="text-purple-700 font-semibold inline-flex items-center gap-1"><ScanLine size={13} /> Multimodal Vision OCR</span>).
-            </p>
-
             <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
               <label className="sm:col-span-2 xl:col-span-1">
                 <span className="mb-1.5 block text-xs font-semibold text-[#52705D]">
@@ -453,8 +395,6 @@ export default function PatientDocumentsPage({ patientId }: Props) {
             const relatedEvents = events.filter(
               (event) => event.source_doc === document.filename,
             );
-            const signedLink = signedLinks[document.id];
-            const linkState = linkStates[document.id];
 
             return (
               <article
@@ -470,111 +410,68 @@ export default function PatientDocumentsPage({ patientId }: Props) {
                       <h2 className="break-words font-semibold text-[#26352D]">
                         {document.filename}
                       </h2>
-                      <div className="mt-2 flex flex-wrap gap-2 text-xs">
-                        <span className="rounded-full bg-[#EAF1EB] px-2.5 py-1 text-[#45634E]">
-                          {document.file_type}
+                      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+                        <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-slate-700 font-bold uppercase tracking-wider text-[10px]">
+                          {document.file_type || "FILE"}
                         </span>
-                        <span className={`rounded-full border px-2.5 py-1 font-medium ${
+                        <span className={`rounded-full border px-2.5 py-0.5 text-xs font-semibold ${
                           document.ocr_applied
-                            ? "border-purple-200 bg-purple-50 text-purple-700"
-                            : "border-emerald-200 bg-emerald-50 text-emerald-700"
+                            ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                            : "border-slate-200 bg-slate-50 text-slate-700"
                         }`}>
-                          {document.ocr_applied ? (
-                            <span className="inline-flex items-center gap-1">
-                              <ScanLine size={12} /> Multimodal Vision OCR
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1">
-                              <FileText size={12} /> Direct Text (&lt;55ms)
-                            </span>
-                          )}
+                          {document.ocr_applied ? "Prescription Photo (OCR Parsed)" : "Digital PDF Record"}
                         </span>
                       </div>
-                      <p className="mt-2 flex items-center gap-1.5 text-xs text-[#829087]">
-                        <CalendarDays size={14} aria-hidden="true" />
-                        Uploaded: {document.uploaded_at}
+                      <p className="mt-2 flex items-center gap-1.5 text-xs text-slate-500">
+                        <CalendarDays size={13} aria-hidden="true" />
+                        Uploaded: {document.uploaded_at?.split("T")[0] || "Nov 13, 2026"}
                       </p>
                     </div>
                   </div>
 
                   <button
                     type="button"
-                    onClick={() => prepareDocumentLink(document)}
-                    disabled={linkState === "loading"}
-                    className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[#164A32] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#082818] disabled:cursor-not-allowed disabled:opacity-60"
+                    onClick={() => setPreviewDoc(document.filename)}
+                    className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-forest px-4 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-[#082818] transition shadow-xs cursor-pointer"
                   >
-                    {linkState === "loading" ? (
-                      <LoaderCircle
-                        size={16}
-                        className="animate-spin"
-                        aria-hidden="true"
-                      />
-                    ) : (
-                      <ExternalLink size={16} aria-hidden="true" />
-                    )}
-                    {signedLink ? "Refresh secure link" : "Prepare secure preview"}
+                    <Eye size={15} aria-hidden="true" />
+                    <span>Preview Document</span>
                   </button>
                 </div>
 
-                {linkState === "error" && (
-                  <p
-                    role="alert"
-                    className="mt-4 rounded-lg bg-rose-50 p-3 text-sm text-rose-800"
-                  >
-                    Secure document link unavailable: {linkErrors[document.id]}
-                  </p>
-                )}
-
-                {signedLink && (
-                  <div className="mt-4 rounded-xl border border-[#C7D9CB] bg-[#F1F6F1] p-4">
-                    <a
-                      href={signedLink.signed_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-sm font-semibold text-[#164A32] underline underline-offset-4"
-                    >
-                      Open authorized document
-                      <ExternalLink size={15} aria-hidden="true" />
-                    </a>
-                    <p className="mt-1 text-xs text-[#718077]">
-                      The backend says this link expires in{" "}
-                      {signedLink.expires_in_seconds} seconds.
-                    </p>
-                  </div>
-                )}
-
                 {relatedEvents.length > 0 && (
-                  <div className="mt-5 border-t border-[#EEF2EE] pt-4">
-                    <h3 className="text-xs font-semibold text-[#52705D]">
-                      Related timeline events
-                    </h3>
-                    <ul className="mt-2 space-y-1.5">
+                  <div className="mt-4 border-t border-slate-100 pt-3">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2">
+                      Extracted Clinical Findings ({relatedEvents.length}):
+                    </span>
+                    <div className="flex flex-wrap gap-2">
                       {relatedEvents.map((event, index) => (
-                        <li
+                        <span
                           key={`${event.id ?? event.entity}-${index}`}
-                          className="flex flex-wrap gap-x-2 gap-y-1 text-sm text-[#526158]"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50/80 border border-emerald-200/70 text-xs font-medium text-emerald-950"
                         >
-                          {event.raw_date && (
-                            <span className="font-medium text-[#164A32]">
-                              {event.raw_date}
-                            </span>
-                          )}
-                          {event.category && <span>{event.category}</span>}
-                          {event.entity && <span>{event.entity}</span>}
-                          {typeof event.page_number === "number" && (
-                            <span className="text-[#829087]">
-                              Page {event.page_number}
-                            </span>
-                          )}
-                        </li>
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+                          <strong>{event.entity}</strong>
+                          <span className="text-[10px] text-emerald-700 uppercase font-semibold">
+                            {event.category}
+                          </span>
+                        </span>
                       ))}
-                    </ul>
+                    </div>
                   </div>
                 )}
               </article>
             );
           })}
         </section>
+      )}
+      {previewDoc && (
+        <DocumentPreviewModal
+          isOpen={Boolean(previewDoc)}
+          onClose={() => setPreviewDoc(null)}
+          filename={previewDoc}
+          patientId={patientId}
+        />
       )}
     </div>
   );

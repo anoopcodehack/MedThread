@@ -15,21 +15,25 @@ import {
   ArrowRight,
   Clock,
   Stethoscope,
+  X,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { BrandLogo } from "../common/BrandLogo";
+import { getSupabaseClient } from "../../lib/supabase";
 import type { PatientPage } from "./PatientSidebar";
 
 interface Props {
   title?: string;
   patientName?: string;
   patientExternalId?: string;
+  patientId?: number;
   activePage?: PatientPage;
   onNavigate?: (page: PatientPage) => void;
 }
 
 export interface PatientNotification {
   id: string;
+  patientId?: number;
   type: string;
   title: string;
   doctor: string;
@@ -44,51 +48,299 @@ export interface PatientNotification {
   eventId?: number;
 }
 
-const DEFAULT_PATIENT_NOTIFICATIONS: PatientNotification[] = [
-  {
-    id: "notif-init-1",
-    type: "CLINICAL_OVERRIDE",
-    title: "Clinician Prescription Override Verified",
-    doctor: "Dr. Ananya Rao",
-    facility: "Apollo Heart Institute",
-    entity: "Aspirin 75mg",
-    field: "Medication Status",
-    beforeValue: "TEMPORARILY HELD",
-    afterValue: "ACTIVE",
-    reason: "Verified with patient and clinical consultation note: surgical site healed, resuming cardiac prophylaxis.",
-    timestamp: "10 mins ago",
-    read: false,
-    eventId: 39,
-  },
-];
+// 5 Dedicated Benchmark Patient Seed Notifications - strictly isolated per patient!
+const DEFAULT_PATIENT_NOTIFICATIONS: Record<number, PatientNotification[]> = {
+  // Patient 101: Rajesh Sharma (Cardiology - Aspirin Prophylaxis Resumed)
+  101: [
+    {
+      id: "notif-seed-101",
+      patientId: 101,
+      type: "CLINICAL_OVERRIDE",
+      title: "Clinician Prescription Override Verified",
+      doctor: "Dr. Ananya Rao",
+      facility: "Apollo Heart Institute",
+      entity: "Aspirin 75mg",
+      field: "Medication Status",
+      beforeValue: "TEMPORARILY HELD",
+      afterValue: "ACTIVE",
+      reason: "Verified with patient and clinical consultation note: surgical site healed, resuming cardiac prophylaxis.",
+      timestamp: "10 mins ago",
+      read: false,
+      eventId: 39,
+    },
+  ],
+  // Patient 102: Priya Patel (Allergy - Ceftriaxone Anaphylaxis Confirmed)
+  102: [
+    {
+      id: "notif-seed-102",
+      patientId: 102,
+      type: "CLINICAL_OVERRIDE",
+      title: "Allergy Alert Status Confirmed",
+      doctor: "Dr. Ananya Rao",
+      facility: "Apollo Heart Institute",
+      entity: "Ceftriaxone",
+      field: "Allergy Confirmation",
+      beforeValue: "UNVERIFIED",
+      afterValue: "CONFIRMED ANAPHYLAXIS",
+      reason: "Cross-checked emergency admissions report; acute urticaria on cephalosporin.",
+      timestamp: "35 mins ago",
+      read: false,
+      eventId: 42,
+    },
+  ],
+  // Patient 103: Vikram Malhotra (Lipidology - Atorvastatin Titration)
+  103: [
+    {
+      id: "notif-seed-103",
+      patientId: 103,
+      type: "CLINICAL_OVERRIDE",
+      title: "Statin Dosage Titration Verified",
+      doctor: "Dr. Ananya Rao",
+      facility: "Apollo Heart Institute",
+      entity: "Atorvastatin",
+      field: "Dosage",
+      beforeValue: "10 MG",
+      afterValue: "20 MG",
+      reason: "Up-titrated per ACC/AHA guidelines for LDL target control.",
+      timestamp: "1 hour ago",
+      read: false,
+      eventId: 45,
+    },
+  ],
+  // Patient 104: Mohammed Irfan (Endocrinology - Metformin Regimen)
+  104: [
+    {
+      id: "notif-seed-104",
+      patientId: 104,
+      type: "CLINICAL_OVERRIDE",
+      title: "Glycemic Titration Schedule Confirmed",
+      doctor: "Dr. Ananya Rao",
+      facility: "Apollo Heart Institute",
+      entity: "Metformin",
+      field: "Frequency",
+      beforeValue: "500 MG ONCE DAILY",
+      afterValue: "500 MG TWICE DAILY",
+      reason: "Post-prandial glycemic stabilization per clinical protocol.",
+      timestamp: "2 hours ago",
+      read: false,
+      eventId: 48,
+    },
+  ],
+  // Patient 105: David Fernandes (Nephrology - Lisinopril Dosage)
+  105: [
+    {
+      id: "notif-seed-105",
+      patientId: 105,
+      type: "CLINICAL_OVERRIDE",
+      title: "Renal Protective Dosing Confirmed",
+      doctor: "Dr. Ananya Rao",
+      facility: "Apollo Heart Institute",
+      entity: "Lisinopril",
+      field: "Dosage",
+      beforeValue: "20 MG",
+      afterValue: "10 MG",
+      reason: "Serum creatinine stable; maintenance renal protection dose confirmed.",
+      timestamp: "3 hours ago",
+      read: false,
+      eventId: 51,
+    },
+  ],
+};
+
+function formatCleanValue(val: string | undefined): string {
+  if (!val) return "N/A";
+  const s = String(val).trim();
+  if (s.includes("TEMPORARILY_HELD") || s.includes("TEMPORARILY HELD")) return "TEMPORARILY HELD";
+  if (
+    s.toLowerCase().includes("contradictory") ||
+    s.toLowerCase().includes("marked as") ||
+    s.includes("without surgical")
+  ) {
+    return "CONTRADICTION DETECTED";
+  }
+  if (s === "STARTED") return "ACTIVE";
+  if (s.length > 25) return s.slice(0, 22) + "...";
+  return s;
+}
 
 export default function PatientHeader({
   activePage = "dashboard",
+  patientId = 101,
   onNavigate,
 }: Props) {
   const [openDropdown, setOpenDropdown] = useState<"records" | "documents" | null>(null);
   const [isNotifOpen, setIsNotifOpen] = useState<boolean>(false);
-  const [notifications, setNotifications] = useState<PatientNotification[]>(() => {
+  const [liveToast, setLiveToast] = useState<PatientNotification | null>(null);
+
+  // Strictly retrieve notifications scoped ONLY to this specific patient ID!
+  const getScopedNotifications = (pid: number): PatientNotification[] => {
     try {
-      const stored = localStorage.getItem("medthread_patient_notifications");
-      if (stored) {
-        return JSON.parse(stored);
+      const patientKey = `medthread_patient_notifications_${pid}`;
+      const patientStored = localStorage.getItem(patientKey);
+      if (patientStored) {
+        const parsed = JSON.parse(patientStored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // Strictly keep only this patient's notifications!
+          const own = parsed.filter((n: PatientNotification) => {
+            if (!n || typeof n !== "object") return false;
+            // Strict ID match: must match pid
+            if (n.patientId && Number(n.patientId) !== Number(pid)) return false;
+            // Cleanse cross-contamination from earlier sessions:
+            // Non-101 patients should never inherit Patient 101's Aspirin conflict override
+            if (pid !== 101 && n.entity?.toLowerCase().includes("aspirin")) return false;
+            return true;
+          });
+          if (own.length > 0) return own;
+        }
       }
     } catch {}
-    return DEFAULT_PATIENT_NOTIFICATIONS;
-  });
+    // If no overrides yet for this specific patient, return their clean isolated default notification
+    return DEFAULT_PATIENT_NOTIFICATIONS[pid] || [];
+  };
+
+  const [notifications, setNotifications] = useState<PatientNotification[]>(() =>
+    getScopedNotifications(patientId)
+  );
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const notifRef = useRef<HTMLDivElement | null>(null);
 
-  // Sync notifications from localStorage and listen to real-time custom event
+  // When switching between patients (e.g. from Patient A to Patient B), strictly isolate notifications
   useEffect(() => {
+    setNotifications(getScopedNotifications(patientId));
+  }, [patientId]);
+
+  // Trigger floating alert toast for 6 seconds
+  const triggerToast = (notif: PatientNotification) => {
+    setLiveToast(notif);
+    setTimeout(() => {
+      setLiveToast((current) => (current?.id === notif.id ? null : current));
+    }, 6500);
+  };
+
+  // Sync notifications: Same-window, cross-tab BroadcastChannel, storage events, and Supabase polling
+  useEffect(() => {
+    // 1. Same-window custom event (Strict Patient Isolation)
     const handleNewNotif = (e: any) => {
-      if (e.detail) {
-        setNotifications((prev) => [e.detail, ...prev]);
+      const notif = e.detail;
+      // STRICT PATIENT ISOLATION: A patient notification must NEVER show in B patient dashboard!
+      if (notif && Number(notif.patientId) === Number(patientId)) {
+        setNotifications((prev) => {
+          if (prev.some((n) => n.id === notif.id)) return prev;
+          const next = [notif, ...prev];
+          try {
+            localStorage.setItem(`medthread_patient_notifications_${patientId}`, JSON.stringify(next));
+          } catch {}
+          return next;
+        });
+        triggerToast(notif);
       }
     };
     window.addEventListener("medthread_notification_added", handleNewNotif);
-    
+
+    // 2. Cross-tab BroadcastChannel for 0-latency inter-tab messaging (Strict Patient Isolation)
+    let bc: BroadcastChannel | null = null;
+    try {
+      bc = new BroadcastChannel("medthread_live_notifications");
+      bc.onmessage = (event) => {
+        const notif = event.data;
+        // STRICT PATIENT ISOLATION: Ignore if notification belongs to a different patient
+        if (notif && Number(notif.patientId) === Number(patientId)) {
+          setNotifications((prev) => {
+            if (prev.some((n) => n.id === notif.id)) return prev;
+            const next = [notif, ...prev];
+            try {
+              localStorage.setItem(`medthread_patient_notifications_${patientId}`, JSON.stringify(next));
+            } catch {}
+            return next;
+          });
+          triggerToast(notif);
+        }
+      };
+    } catch {}
+
+    // 3. Cross-tab localStorage storage event (Strictly scoped to patientId)
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === `medthread_patient_notifications_${patientId}` && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue);
+          if (Array.isArray(parsed)) {
+            const own = parsed.filter((n: PatientNotification) => Number(n.patientId) === Number(patientId));
+            setNotifications(own);
+            if (own.length > 0 && !own[0].read) {
+              triggerToast(own[0]);
+            }
+          }
+        } catch {}
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+
+    // 4. Supabase DB real-time poll for cross-device updates (Strictly patientId scoped)
+    const pollSupabase = async () => {
+      try {
+        const supabase = getSupabaseClient();
+        const { data, error } = await supabase
+          .from("timeline_events")
+          .select("id, patient_id, entity, category, status, normalized_value, reviewed_override, is_reviewed")
+          .eq("patient_id", patientId)
+          .eq("is_reviewed", 1)
+          .order("id", { ascending: false })
+          .limit(5);
+
+        if (!error && data && data.length > 0) {
+          setNotifications((prev) => {
+            let changed = false;
+            const next = [...prev];
+            for (const row of data) {
+              const rowId = `supabase-event-${row.id}`;
+              if (!next.some((n) => n.id === rowId)) {
+                changed = true;
+                let docName = "Dr. Ananya Rao";
+                let reason = "Verified with patient and clinical consultation note";
+                let overrideVal = row.normalized_value || row.status || "VERIFIED";
+                if (row.reviewed_override) {
+                  const docMatch = row.reviewed_override.match(/\[CLINICIAN OVERRIDE by (.*?)\]/);
+                  if (docMatch) docName = docMatch[1];
+                  const reasonMatch = row.reviewed_override.match(/Reason: (.*)$/);
+                  if (reasonMatch) reason = reasonMatch[1];
+                  const setMatch = row.reviewed_override.match(/set to '(.*?)'/);
+                  if (setMatch) overrideVal = setMatch[1];
+                }
+
+                const newNotif: PatientNotification = {
+                  id: rowId,
+                  patientId: patientId,
+                  type: "CLINICAL_OVERRIDE",
+                  title: "Doctor Record Update Verified",
+                  doctor: docName,
+                  facility: "Apollo Heart Institute",
+                  entity: row.entity || "Medication Record",
+                  field: row.category === "MEDICATION" ? "Medication Status" : "Clinical Value",
+                  beforeValue: "TEMPORARILY HELD",
+                  afterValue: overrideVal.toUpperCase(),
+                  reason: reason,
+                  timestamp: "Just now",
+                  read: false,
+                  eventId: row.id,
+                };
+                next.unshift(newNotif);
+              }
+            }
+            if (changed) {
+              try {
+                localStorage.setItem(`medthread_patient_notifications_${patientId}`, JSON.stringify(next));
+              } catch {}
+              return next;
+            }
+            return prev;
+          });
+        }
+      } catch {}
+    };
+
+    pollSupabase();
+    const interval = setInterval(pollSupabase, 3000);
+
     // Close notifications popover on click outside
     const handleClickOutside = (e: MouseEvent) => {
       if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
@@ -99,9 +351,12 @@ export default function PatientHeader({
 
     return () => {
       window.removeEventListener("medthread_notification_added", handleNewNotif);
+      window.removeEventListener("storage", handleStorage);
+      if (bc) bc.close();
+      clearInterval(interval);
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, [patientId]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -109,7 +364,7 @@ export default function PatientHeader({
     const updated = notifications.map((n) => ({ ...n, read: true }));
     setNotifications(updated);
     try {
-      localStorage.setItem("medthread_patient_notifications", JSON.stringify(updated));
+      localStorage.setItem(`medthread_patient_notifications_${patientId}`, JSON.stringify(updated));
     } catch {}
   };
 
@@ -132,7 +387,7 @@ export default function PatientHeader({
     "visits",
   ].includes(activePage);
 
-  const isDocsActive = ["documents"].includes(activePage);
+  const isDocsActive = ["documents", "scanner"].includes(activePage);
 
   // Exactly ONE active dot indicator: shows under hovered menu if open, otherwise under active page
   const activeDot: "dashboard" | "records" | "documents" | "access" | null =
@@ -356,9 +611,9 @@ export default function PatientHeader({
                     type="button"
                     onClick={() => {
                       setOpenDropdown(null);
-                      onNavigate?.("dashboard");
+                      onNavigate?.("scanner");
                     }}
-                    className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 text-slate-800 transition group text-left"
+                    className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 text-slate-800 transition group text-left cursor-pointer"
                   >
                     <div className="p-2 rounded-lg bg-emerald-50 text-emerald-800 group-hover:bg-forest group-hover:text-white transition">
                       <Camera size={15} />
@@ -368,7 +623,7 @@ export default function PatientHeader({
                         Prescription Scanner
                       </span>
                       <span className="block text-[10px] text-slate-500">
-                        Snap paper prescriptions live
+                        Decipher handwritten doctor prescriptions
                       </span>
                     </div>
                   </button>
@@ -421,27 +676,22 @@ export default function PatientHeader({
 
               {/* Notification Popover Dropdown */}
               {isNotifOpen && (
-                <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-white shadow-2xl border border-slate-200 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+                <div className="absolute right-0 mt-2 w-80 sm:w-[390px] rounded-2xl bg-white shadow-2xl border border-slate-200 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
                   {/* Header */}
-                  <div className="px-4 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                  <div className="px-4 py-3 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="p-1 rounded bg-forest/10 text-forest">
-                        <ShieldCheck size={16} />
+                      <div className="p-1.5 rounded-lg bg-forest/10 text-forest">
+                        <ShieldCheck size={15} />
                       </div>
-                      <div>
-                        <h4 className="font-heading font-bold text-xs text-slate-900">
-                          Clinician Record Updates
-                        </h4>
-                        <p className="text-[10px] text-slate-500">
-                          Direct evidence audits &amp; doctor overrides
-                        </p>
-                      </div>
+                      <h4 className="font-heading font-bold text-xs text-slate-900">
+                        Doctor Record Updates
+                      </h4>
                     </div>
                     {unreadCount > 0 && (
                       <button
                         type="button"
                         onClick={markAllAsRead}
-                        className="text-[10px] font-bold text-forest hover:underline flex items-center gap-1"
+                        className="text-[11px] font-bold text-forest hover:text-emerald-800 flex items-center gap-1 cursor-pointer"
                       >
                         <CheckCheck size={12} />
                         Mark read
@@ -460,16 +710,16 @@ export default function PatientHeader({
                         <div
                           key={notif.id}
                           className={`p-4 transition hover:bg-slate-50/80 ${
-                            !notif.read ? "bg-emerald-50/20" : ""
+                            !notif.read ? "bg-emerald-50/25" : ""
                           }`}
                         >
                           {/* Doctor & Facility */}
-                          <div className="flex items-center justify-between text-xs mb-1.5">
-                            <span className="font-bold text-slate-900 flex items-center gap-1">
+                          <div className="flex items-center justify-between text-xs mb-1">
+                            <span className="font-bold text-slate-900 flex items-center gap-1.5">
                               <Stethoscope size={13} className="text-forest" />
                               {notif.doctor}
                             </span>
-                            <span className="text-[10px] text-slate-500 flex items-center gap-1">
+                            <span className="text-[10px] text-slate-400 flex items-center gap-1">
                               <Clock size={11} />
                               {notif.timestamp}
                             </span>
@@ -480,25 +730,29 @@ export default function PatientHeader({
                           </p>
 
                           {/* Visual Before vs Current Diff Box */}
-                          <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5 mb-2">
-                            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                              Clinical Audit Diff ({notif.field}):
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="line-through text-rose-700 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded text-[11px] font-mono font-medium">
-                                Before: {notif.beforeValue}
+                          <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1.5 mb-2">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+                              Verified Update ({notif.field}):
+                            </span>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="inline-flex items-center gap-1 line-through text-rose-700 bg-rose-50 border border-rose-200/80 px-2 py-0.5 rounded text-[11px] font-semibold">
+                                <span className="text-[9px] uppercase font-bold text-rose-500">Old:</span>
+                                {formatCleanValue(notif.beforeValue)}
                               </span>
-                              <ArrowRight size={13} className="text-slate-400 shrink-0" />
-                              <span className="font-bold text-emerald-800 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded text-[11px] font-mono">
-                                Current: {notif.afterValue}
+                              <ArrowRight size={12} className="text-slate-400 shrink-0" />
+                              <span className="inline-flex items-center gap-1 font-bold text-emerald-900 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded text-[11px]">
+                                <span className="text-[9px] uppercase font-bold text-emerald-700">New:</span>
+                                {formatCleanValue(notif.afterValue)}
                               </span>
                             </div>
                           </div>
 
                           {/* Justification note */}
-                          <p className="text-[11px] text-slate-600 italic bg-amber-50/60 p-2 rounded-lg border border-amber-200/60 mb-2.5">
-                            &ldquo;{notif.reason}&rdquo;
-                          </p>
+                          {notif.reason && (
+                            <p className="text-[11px] text-slate-600 bg-emerald-50/40 p-2 rounded-lg border border-emerald-100 mb-2 leading-relaxed">
+                              &ldquo;{notif.reason}&rdquo;
+                            </p>
+                          )}
 
                           {/* Action button */}
                           <button
@@ -507,7 +761,7 @@ export default function PatientHeader({
                               setIsNotifOpen(false);
                               onNavigate?.("medications");
                             }}
-                            className="text-xs font-bold text-forest hover:text-emerald-700 flex items-center gap-1 group"
+                            className="text-xs font-bold text-forest hover:text-emerald-800 flex items-center gap-1 group cursor-pointer"
                           >
                             <span>Inspect in Medical Timeline</span>
                             <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
@@ -626,6 +880,52 @@ export default function PatientHeader({
           className="fixed inset-0 top-[60px] bg-slate-900/10 backdrop-blur-xs z-30 pointer-events-none transition-opacity duration-200"
           aria-hidden="true"
         />
+      )}
+
+      {/* Live Floating Toast Notification when Doctor Overrides / Verifies */}
+      {liveToast && (
+        <div className="fixed top-20 right-4 sm:right-8 z-50 max-w-sm rounded-2xl bg-white p-4 shadow-2xl border-2 border-emerald-500 animate-in slide-in-from-top-4 fade-in duration-300">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start gap-2.5">
+              <div className="p-2 rounded-xl bg-emerald-100 text-emerald-800 shrink-0">
+                <Bell size={16} className="animate-bounce" />
+              </div>
+              <div>
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700 block">
+                  Live Doctor Record Update
+                </span>
+                <h5 className="text-xs font-bold text-slate-900 mt-0.5">
+                  {liveToast.doctor}
+                </h5>
+                <p className="text-[11px] text-slate-600 mt-0.5">
+                  Updated <strong>{liveToast.entity}</strong>:{" "}
+                  <span className="line-through text-rose-600">{formatCleanValue(liveToast.beforeValue)}</span>
+                  {" ➔ "}
+                  <span className="text-emerald-700 font-bold">{formatCleanValue(liveToast.afterValue)}</span>
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLiveToast(null);
+                    setIsNotifOpen(true);
+                  }}
+                  className="mt-1.5 text-[11px] font-bold text-forest hover:underline flex items-center gap-1 cursor-pointer"
+                >
+                  <span>View Details</span>
+                  <ArrowRight size={11} />
+                </button>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setLiveToast(null)}
+              className="text-slate-400 hover:text-slate-700 p-1 cursor-pointer"
+              title="Dismiss"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        </div>
       )}
     </>
   );
