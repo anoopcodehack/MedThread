@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-import PatientSidebar, {
-  type PatientPage,
-} from "../../components/patient/PatientSidebar";
+import type { PatientPage } from "../../components/patient/PatientSidebar";
 import PatientHeader from "../../components/patient/PatientHeader";
+import { PlatformFooter } from "../../components/common/PlatformFooter";
 import PatientDashboard from "./PatientDashboard";
 import MedicalHistoryPage from "./MedicalHistoryPage";
 import PatientDocumentsPage from "./PatientDocumentsPage";
@@ -36,7 +35,6 @@ const KNOWN_PATIENTS: Record<number, { name: string; external_id: string }> = {
 
 export default function PatientPortal({ patientId }: Props) {
   const [activePage, setActivePage] = useState<PatientPage>("dashboard");
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [patients, setPatients] = useState<PatientSummary[]>([]);
   const [dataRevision, setDataRevision] = useState(0);
 
@@ -74,20 +72,14 @@ export default function PatientPortal({ patientId }: Props) {
     : defaultPatient.external_id;
 
   return (
-    <div className="flex min-h-screen bg-[#F0F4F8] text-slate-900">
-      <PatientSidebar
-        activePage={activePage}
-        onNavigate={setActivePage}
-        mobileOpen={mobileOpen}
-        onClose={() => setMobileOpen(false)}
-      />
-
-      <div className="min-w-0 flex-1">
+    <div className="min-h-screen bg-[#F0F4F8] text-slate-900 flex flex-col justify-between">
+      <div>
         <PatientHeader
           title={pageTitles[activePage]}
-          onMenuClick={() => setMobileOpen(true)}
           patientName={patientName}
           patientExternalId={patientExternalId}
+          activePage={activePage}
+          onNavigate={setActivePage}
         />
 
         <main className="mx-auto max-w-7xl p-5 sm:p-8">
@@ -117,6 +109,8 @@ export default function PatientPortal({ patientId }: Props) {
           )}
         </main>
       </div>
+
+      <PlatformFooter currentRole="patient" />
     </div>
   );
 }
