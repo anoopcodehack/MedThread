@@ -10,6 +10,7 @@ import {
   Activity,
   FileCheck2,
   Lock,
+  ArrowUp,
 } from "lucide-react";
 import { BrandLogo } from "./BrandLogo";
 
@@ -20,6 +21,10 @@ interface PlatformFooterProps {
 export const PlatformFooter: React.FC<PlatformFooterProps> = ({
   currentRole = "patient",
 }) => {
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <footer className="mt-16 bg-gradient-to-b from-[#0B2818] via-[#082214] to-[#04140B] text-white pt-14 pb-12 overflow-hidden relative border-t border-emerald-950/40">
       {/* Soft Ambient Glow */}
@@ -27,7 +32,7 @@ export const PlatformFooter: React.FC<PlatformFooterProps> = ({
 
       <div className="max-w-7xl mx-auto px-6 relative z-10 space-y-10">
         {/* Top Assurance Banner */}
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm flex flex-col md:flex-row items-center justify-between gap-6 hover:bg-white/[0.07] transition duration-200">
           <div className="flex items-center gap-4">
             <div className="h-12 w-12 rounded-xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-emerald-300 shrink-0">
               <ShieldCheck size={26} />
@@ -48,18 +53,18 @@ export const PlatformFooter: React.FC<PlatformFooterProps> = ({
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
-            <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/15 text-xs text-white/90">
+            <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/15 text-xs text-white/90 hover:bg-white/15 transition">
               <Lock size={13} className="text-emerald-400" />
               <span>HIPAA &amp; DISHA Compliant</span>
             </div>
-            <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/15 text-xs text-white/90">
+            <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/15 text-xs text-white/90 hover:bg-white/15 transition">
               <Activity size={13} className="text-emerald-400" />
               <span>256-Bit Encryption</span>
             </div>
           </div>
         </div>
 
-        {/* 4 Navigation Columns */}
+        {/* 4 Navigation Columns with in-place hover highlights */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-xs pt-4 border-t border-white/10">
           {/* Column 1: Brand & Clinical Philosophy */}
           <div>
@@ -79,27 +84,47 @@ export const PlatformFooter: React.FC<PlatformFooterProps> = ({
             </div>
           </div>
 
-          {/* Column 2: Platform Capabilities */}
+          {/* Column 2: Platform Capabilities (Hover stays right in place with subtle emerald glow) */}
           <div>
             <h4 className="font-heading font-bold uppercase tracking-widest text-white text-[11px] mb-3">
               Clinical Platform
             </h4>
-            <ul className="space-y-2 text-white/60">
-              <li className="hover:text-white transition flex items-center gap-1.5">
-                <FileCheck2 size={12} className="text-emerald-400" />
-                <span>Unified Longitudinal Timeline</span>
+            <ul className="space-y-1.5 text-white/70">
+              <li className="group p-1.5 -mx-1.5 rounded-lg hover:bg-white/10 hover:text-white transition flex items-center justify-between cursor-default">
+                <div className="flex items-center gap-2">
+                  <FileCheck2 size={13} className="text-emerald-400 shrink-0" />
+                  <span>Unified Longitudinal Timeline</span>
+                </div>
+                <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-300/80 group-hover:text-emerald-300 transition">
+                  Verified
+                </span>
               </li>
-              <li className="hover:text-white transition flex items-center gap-1.5">
-                <FileCheck2 size={12} className="text-emerald-400" />
-                <span>Multi-Hospital Record Stitching</span>
+              <li className="group p-1.5 -mx-1.5 rounded-lg hover:bg-white/10 hover:text-white transition flex items-center justify-between cursor-default">
+                <div className="flex items-center gap-2">
+                  <FileCheck2 size={13} className="text-emerald-400 shrink-0" />
+                  <span>Multi-Hospital Stitching</span>
+                </div>
+                <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-300/80 group-hover:text-emerald-300 transition">
+                  4 Networks
+                </span>
               </li>
-              <li className="hover:text-white transition flex items-center gap-1.5">
-                <FileCheck2 size={12} className="text-emerald-400" />
-                <span>Active vs Held Meds Clarifier</span>
+              <li className="group p-1.5 -mx-1.5 rounded-lg hover:bg-white/10 hover:text-white transition flex items-center justify-between cursor-default">
+                <div className="flex items-center gap-2">
+                  <FileCheck2 size={13} className="text-emerald-400 shrink-0" />
+                  <span>Active vs Held Meds</span>
+                </div>
+                <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-300/80 group-hover:text-emerald-300 transition">
+                  Safety Check
+                </span>
               </li>
-              <li className="hover:text-white transition flex items-center gap-1.5">
-                <FileCheck2 size={12} className="text-emerald-400" />
-                <span>Optical Camera Prescription OCR</span>
+              <li className="group p-1.5 -mx-1.5 rounded-lg hover:bg-white/10 hover:text-white transition flex items-center justify-between cursor-default">
+                <div className="flex items-center gap-2">
+                  <FileCheck2 size={13} className="text-emerald-400 shrink-0" />
+                  <span>Optical Camera Scanner</span>
+                </div>
+                <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-300/80 group-hover:text-emerald-300 transition">
+                  OCR Engine
+                </span>
               </li>
             </ul>
           </div>
@@ -109,17 +134,20 @@ export const PlatformFooter: React.FC<PlatformFooterProps> = ({
             <h4 className="font-heading font-bold uppercase tracking-widest text-white text-[11px] mb-3">
               Workspaces &amp; Navigation
             </h4>
-            <ul className="space-y-2 text-white/60">
+            <ul className="space-y-1.5 text-white/70">
               <li>
-                <Link to="/" className="hover:text-white transition">
+                <Link
+                  to="/"
+                  className="block p-1.5 -mx-1.5 rounded-lg hover:bg-white/10 hover:text-white transition"
+                >
                   MedThread Home Overview
                 </Link>
               </li>
               <li>
                 <Link
                   to="/patient"
-                  className={`hover:text-white transition ${
-                    currentRole === "patient" ? "text-emerald-300 font-bold" : ""
+                  className={`block p-1.5 -mx-1.5 rounded-lg hover:bg-white/10 hover:text-white transition ${
+                    currentRole === "patient" ? "text-emerald-300 font-bold bg-white/5" : ""
                   }`}
                 >
                   Patient Health Workspace
@@ -128,15 +156,18 @@ export const PlatformFooter: React.FC<PlatformFooterProps> = ({
               <li>
                 <Link
                   to="/doctor"
-                  className={`hover:text-white transition ${
-                    currentRole === "doctor" ? "text-emerald-300 font-bold" : ""
+                  className={`block p-1.5 -mx-1.5 rounded-lg hover:bg-white/10 hover:text-white transition ${
+                    currentRole === "doctor" ? "text-emerald-300 font-bold bg-white/5" : ""
                   }`}
                 >
                   Doctor Clinical Cockpit
                 </Link>
               </li>
               <li>
-                <Link to="/login" className="hover:text-white transition">
+                <Link
+                  to="/login"
+                  className="block p-1.5 -mx-1.5 rounded-lg hover:bg-white/10 hover:text-white transition"
+                >
                   Provider &amp; Patient Sign In
                 </Link>
               </li>
@@ -148,39 +179,47 @@ export const PlatformFooter: React.FC<PlatformFooterProps> = ({
             <h4 className="font-heading font-bold uppercase tracking-widest text-white text-[11px] mb-3">
               Security &amp; Standards
             </h4>
-            <ul className="space-y-2 text-white/60">
-              <li>HIPAA &amp; DISHA Data Isolation</li>
-              <li>Row-Level Security (RLS) Enforced</li>
-              <li>Cloud Supabase PostgreSQL Engine</li>
-              <li>Zero-Knowledge Audit Trail</li>
+            <ul className="space-y-1.5 text-white/70">
+              <li className="p-1.5 -mx-1.5 rounded-lg hover:bg-white/10 hover:text-white transition">
+                HIPAA &amp; DISHA Data Isolation
+              </li>
+              <li className="p-1.5 -mx-1.5 rounded-lg hover:bg-white/10 hover:text-white transition">
+                Row-Level Security (RLS) Enforced
+              </li>
+              <li className="p-1.5 -mx-1.5 rounded-lg hover:bg-white/10 hover:text-white transition">
+                Cloud Supabase PostgreSQL Engine
+              </li>
+              <li className="p-1.5 -mx-1.5 rounded-lg hover:bg-white/10 hover:text-white transition">
+                Zero-Knowledge Audit Trail
+              </li>
             </ul>
 
             <div className="flex items-center gap-3 text-white/80 mt-4">
               <a
                 href="#instagram"
                 aria-label="Instagram"
-                className="h-7 w-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition"
+                className="h-7 w-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition hover:scale-110"
               >
                 <Instagram size={13} />
               </a>
               <a
                 href="#twitter"
                 aria-label="Twitter"
-                className="h-7 w-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition"
+                className="h-7 w-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition hover:scale-110"
               >
                 <Twitter size={13} />
               </a>
               <a
                 href="#linkedin"
                 aria-label="LinkedIn"
-                className="h-7 w-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition"
+                className="h-7 w-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition hover:scale-110"
               >
                 <Linkedin size={13} />
               </a>
               <a
                 href="#facebook"
                 aria-label="Facebook"
-                className="h-7 w-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition"
+                className="h-7 w-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition hover:scale-110"
               >
                 <Facebook size={13} />
               </a>
@@ -188,16 +227,24 @@ export const PlatformFooter: React.FC<PlatformFooterProps> = ({
           </div>
         </div>
 
-        {/* Bottom Copyright */}
+        {/* Bottom Bar: Copyright & Back to Top */}
         <div className="pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-[10px] text-white/40">
           <p>© 2026 MedThread Health Technologies, Inc. All rights reserved.</p>
-          <p className="flex items-center gap-3">
-            <span>Privacy Policy</span>
+          <div className="flex items-center gap-4">
+            <span className="hover:text-white/70 transition cursor-pointer">Privacy Policy</span>
             <span>•</span>
-            <span>Terms of Service</span>
+            <span className="hover:text-white/70 transition cursor-pointer">Terms of Service</span>
             <span>•</span>
-            <span>Clinical Evidence Grounding</span>
-          </p>
+            <button
+              type="button"
+              onClick={scrollToTop}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition"
+              title="Back to Top"
+            >
+              <ArrowUp size={11} />
+              <span>Back to Top</span>
+            </button>
+          </div>
         </div>
       </div>
     </footer>
