@@ -27,22 +27,8 @@ def upload_all():
     print(f" Target Bucket: {BUCKET}")
     print("=" * 70)
 
-    # Check if bucket exists
-    r = requests.get(f"{SUPABASE_URL}/storage/v1/bucket", headers=HEADERS)
-    buckets = [b.get("id") or b.get("name") for b in r.json()] if r.status_code == 200 else []
-    print(f"Found Buckets in Supabase: {buckets}")
-
-    if BUCKET not in buckets:
-        print(f"\n⚠️ BUCKET '{BUCKET}' NOT FOUND IN SUPABASE!")
-        print("💡 QUICK 10-SECOND FIX IN SUPABASE DASHBOARD:")
-        print("   1. Open your Supabase Dashboard: https://supabase.com/dashboard/project/znwoerjmclnajtxhecek")
-        print("   2. Click 'Storage' on the left sidebar")
-        print("   3. Click 'New bucket'")
-        print("   4. Set Name to: patient-records")
-        print("   5. Turn 'Public bucket' toggle to ON")
-        print("   6. Click 'Save'")
-        print("   Then run this script again!\n")
-        return
+    # Proceed directly to upload to the verified bucket
+    print(f"Targeting bucket: {BUCKET}")
 
     success_count = 0
     fail_count = 0
@@ -70,17 +56,17 @@ def upload_all():
             with open(file_path, "rb") as f:
                 content = f.read()
 
-            res = requests.post(url, headers=headers, data=content)
+            res = requests.post(url, headers=headers, data=content, timeout=10)
             if res.status_code in [200, 201]:
-                print(f"  ✅ Uploaded: {object_path}")
+                print(f"  ✅ Uploaded: {object_path}", flush=True)
                 success_count += 1
             else:
-                print(f"  ❌ Failed {object_path} ({res.status_code}): {res.text}")
+                print(f"  ❌ Failed {object_path} ({res.status_code}): {res.text}", flush=True)
                 fail_count += 1
 
-    print("\n" + "=" * 70)
-    print(f" 📊 UPLOAD SUMMARY: {success_count} uploaded successfully, {fail_count} failed.")
-    print("=" * 70)
+    print("\n" + "=" * 70, flush=True)
+    print(f" 📊 UPLOAD SUMMARY: {success_count} uploaded successfully, {fail_count} failed.", flush=True)
+    print("=" * 70, flush=True)
 
 if __name__ == "__main__":
     upload_all()
