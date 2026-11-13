@@ -51,6 +51,8 @@ export const ReviewerModal: React.FC<ReviewerModalProps> = ({
         field_modified: fieldModified,
         new_value: newValue.trim(),
         reason: reason.trim(),
+        entity: event.entity,
+        original_value: event.currentValue || event.status,
       });
       onSuccess(event.id);
       onClose();

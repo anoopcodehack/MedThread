@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   X, 
   FileText, 
@@ -10,6 +10,7 @@ import {
   User, 
   Edit3
 } from 'lucide-react';
+import { DocumentPreviewModal } from '../modals/DocumentPreviewModal';
 
 export interface ContradictionEvidence {
   id: number;
@@ -38,6 +39,8 @@ export const EvidenceViewer: React.FC<EvidenceViewerProps> = ({
   onOpenReviewOverride,
   patientId = 101
 }) => {
+  const [previewDoc, setPreviewDoc] = useState<{ filename: string; quote?: string } | null>(null);
+
   if (!isOpen || !contradiction) return null;
 
   const getTierBadge = (tier: string) => {
@@ -126,15 +129,15 @@ export const EvidenceViewer: React.FC<EvidenceViewerProps> = ({
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <a
-                  href={`http://localhost:8000/api/documents/raw/${patientId}/${contradiction.doc1_name}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[10px] font-bold text-forest bg-forest/10 hover:bg-forest/20 px-2 py-0.5 rounded transition"
-                  title="Stream original PDF"
+                <button
+                  type="button"
+                  onClick={() => setPreviewDoc({ filename: contradiction.doc1_name, quote: contradiction.quote1 })}
+                  className="text-[10px] font-bold text-forest bg-forest/10 hover:bg-forest/20 px-2.5 py-1 rounded-md transition cursor-pointer flex items-center gap-1 border border-forest/20"
+                  title="Stream and preview certified clinical document"
                 >
+                  <FileText className="h-3 w-3" />
                   View PDF ↗
-                </a>
+                </button>
                 <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-slate-200 text-slate-700">
                   Primary Record
                 </span>
@@ -179,15 +182,15 @@ export const EvidenceViewer: React.FC<EvidenceViewerProps> = ({
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <a
-                  href={`http://localhost:8000/api/documents/raw/${patientId}/${contradiction.doc2_name}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[10px] font-bold text-rose-700 bg-rose-100 hover:bg-rose-200 px-2 py-0.5 rounded transition"
-                  title="Stream original PDF"
+                <button
+                  type="button"
+                  onClick={() => setPreviewDoc({ filename: contradiction.doc2_name, quote: contradiction.quote2 })}
+                  className="text-[10px] font-bold text-rose-700 bg-rose-100 hover:bg-rose-200 px-2.5 py-1 rounded-md transition cursor-pointer flex items-center gap-1 border border-rose-300"
+                  title="Stream and preview certified clinical document"
                 >
+                  <FileText className="h-3 w-3" />
                   View PDF ↗
-                </a>
+                </button>
                 <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-rose-100 text-rose-700">
                   Conflicting Record
                 </span>
@@ -254,6 +257,16 @@ export const EvidenceViewer: React.FC<EvidenceViewerProps> = ({
         </div>
 
       </div>
+
+      {previewDoc && (
+        <DocumentPreviewModal
+          isOpen={Boolean(previewDoc)}
+          onClose={() => setPreviewDoc(null)}
+          filename={previewDoc.filename}
+          patientId={patientId}
+          highlightQuote={previewDoc.quote}
+        />
+      )}
     </div>
   );
 };

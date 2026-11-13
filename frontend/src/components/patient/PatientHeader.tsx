@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   UserRound,
   LogOut,
@@ -10,6 +10,11 @@ import {
   Hospital,
   FolderOpen,
   Camera,
+  ShieldCheck,
+  CheckCheck,
+  ArrowRight,
+  Clock,
+  Stethoscope,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { BrandLogo } from "../common/BrandLogo";
@@ -23,12 +28,90 @@ interface Props {
   onNavigate?: (page: PatientPage) => void;
 }
 
+export interface PatientNotification {
+  id: string;
+  type: string;
+  title: string;
+  doctor: string;
+  facility: string;
+  entity: string;
+  field: string;
+  beforeValue: string;
+  afterValue: string;
+  reason: string;
+  timestamp: string;
+  read: boolean;
+  eventId?: number;
+}
+
+const DEFAULT_PATIENT_NOTIFICATIONS: PatientNotification[] = [
+  {
+    id: "notif-init-1",
+    type: "CLINICAL_OVERRIDE",
+    title: "Clinician Prescription Override Verified",
+    doctor: "Dr. Ananya Rao",
+    facility: "Apollo Heart Institute",
+    entity: "Aspirin 75mg",
+    field: "Medication Status",
+    beforeValue: "TEMPORARILY HELD",
+    afterValue: "ACTIVE",
+    reason: "Verified with patient and clinical consultation note: surgical site healed, resuming cardiac prophylaxis.",
+    timestamp: "10 mins ago",
+    read: false,
+    eventId: 39,
+  },
+];
+
 export default function PatientHeader({
   activePage = "dashboard",
   onNavigate,
 }: Props) {
   const [openDropdown, setOpenDropdown] = useState<"records" | "documents" | null>(null);
+  const [isNotifOpen, setIsNotifOpen] = useState<boolean>(false);
+  const [notifications, setNotifications] = useState<PatientNotification[]>(() => {
+    try {
+      const stored = localStorage.getItem("medthread_patient_notifications");
+      if (stored) {
+        return JSON.parse(stored);
+      }
+    } catch {}
+    return DEFAULT_PATIENT_NOTIFICATIONS;
+  });
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const notifRef = useRef<HTMLDivElement | null>(null);
+
+  // Sync notifications from localStorage and listen to real-time custom event
+  useEffect(() => {
+    const handleNewNotif = (e: any) => {
+      if (e.detail) {
+        setNotifications((prev) => [e.detail, ...prev]);
+      }
+    };
+    window.addEventListener("medthread_notification_added", handleNewNotif);
+    
+    // Close notifications popover on click outside
+    const handleClickOutside = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setIsNotifOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      window.removeEventListener("medthread_notification_added", handleNewNotif);
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
+  const markAllAsRead = () => {
+    const updated = notifications.map((n) => ({ ...n, read: true }));
+    setNotifications(updated);
+    try {
+      localStorage.setItem("medthread_patient_notifications", JSON.stringify(updated));
+    } catch {}
+  };
 
   const handleMouseEnter = (menu: "records" | "documents") => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -386,13 +469,127 @@ export default function PatientHeader({
 
           {/* Right: Notifications, Profile Icon Only (Opens Profile on Click), & Logout */}
           <div className="flex items-center gap-3 shrink-0">
-            <button
-              type="button"
-              className="text-slate-500 hover:text-forest transition p-2 rounded-xl hover:bg-slate-100"
-              aria-label="Notifications"
-            >
-              <Bell size={18} />
-            </button>
+            {/* Notifications with Real-Time Clinician Update Badge & Dropdown */}
+            <div className="relative" ref={notifRef}>
+              <button
+                type="button"
+                onClick={() => setIsNotifOpen((prev) => !prev)}
+                className={`relative p-2 rounded-xl transition ${
+                  isNotifOpen
+                    ? "bg-slate-100 text-forest"
+                    : "text-slate-500 hover:text-forest hover:bg-slate-100"
+                }`}
+                aria-label="Clinician updates and audit alerts"
+                title="Clinician updates and prescription audits"
+              >
+                <Bell size={18} />
+                {unreadCount > 0 && (
+                  <span className="absolute 1 top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-600 text-[10px] font-bold text-white shadow-xs">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Notification Popover Dropdown */}
+              {isNotifOpen && (
+                <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-white shadow-2xl border border-slate-200 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+                  {/* Header */}
+                  <div className="px-4 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1 rounded bg-forest/10 text-forest">
+                        <ShieldCheck size={16} />
+                      </div>
+                      <div>
+                        <h4 className="font-heading font-bold text-xs text-slate-900">
+                          Clinician Record Updates
+                        </h4>
+                        <p className="text-[10px] text-slate-500">
+                          Direct evidence audits &amp; doctor overrides
+                        </p>
+                      </div>
+                    </div>
+                    {unreadCount > 0 && (
+                      <button
+                        type="button"
+                        onClick={markAllAsRead}
+                        className="text-[10px] font-bold text-forest hover:underline flex items-center gap-1"
+                      >
+                        <CheckCheck size={12} />
+                        Mark read
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Notification List */}
+                  <div className="max-h-80 overflow-y-auto divide-y divide-slate-100">
+                    {notifications.length === 0 ? (
+                      <div className="p-6 text-center text-xs text-slate-500">
+                        No new clinician updates. All records are currently synchronized.
+                      </div>
+                    ) : (
+                      notifications.map((notif) => (
+                        <div
+                          key={notif.id}
+                          className={`p-4 transition hover:bg-slate-50/80 ${
+                            !notif.read ? "bg-emerald-50/20" : ""
+                          }`}
+                        >
+                          {/* Doctor & Facility */}
+                          <div className="flex items-center justify-between text-xs mb-1.5">
+                            <span className="font-bold text-slate-900 flex items-center gap-1">
+                              <Stethoscope size={13} className="text-forest" />
+                              {notif.doctor}
+                            </span>
+                            <span className="text-[10px] text-slate-500 flex items-center gap-1">
+                              <Clock size={11} />
+                              {notif.timestamp}
+                            </span>
+                          </div>
+
+                          <p className="text-[11px] text-slate-600 mb-2 font-medium">
+                            {notif.facility} · Overrode <strong className="text-slate-800">{notif.entity}</strong>
+                          </p>
+
+                          {/* Visual Before vs Current Diff Box */}
+                          <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5 mb-2">
+                            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                              Clinical Audit Diff ({notif.field}):
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="line-through text-rose-700 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded text-[11px] font-mono font-medium">
+                                Before: {notif.beforeValue}
+                              </span>
+                              <ArrowRight size={13} className="text-slate-400 shrink-0" />
+                              <span className="font-bold text-emerald-800 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded text-[11px] font-mono">
+                                Current: {notif.afterValue}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Justification note */}
+                          <p className="text-[11px] text-slate-600 italic bg-amber-50/60 p-2 rounded-lg border border-amber-200/60 mb-2.5">
+                            &ldquo;{notif.reason}&rdquo;
+                          </p>
+
+                          {/* Action button */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsNotifOpen(false);
+                              onNavigate?.("medications");
+                            }}
+                            className="text-xs font-bold text-forest hover:text-emerald-700 flex items-center gap-1 group"
+                          >
+                            <span>Inspect in Medical Timeline</span>
+                            <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
+                          </button>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* User Profile Icon Only: Clicking this opens Profile & Caregivers page */}
             <button
