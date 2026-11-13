@@ -25,6 +25,8 @@ import {
 import type { LucideProps } from "lucide-react";
 import { api } from "../../services/api";
 import { getSupabaseClient } from "../../lib/supabase";
+import { getAllDoctors, updateDoctorQueueInSupabase } from "../../services/doctorService";
+import type { DoctorProfile } from "../../types/doctor";
 import type {
   ContradictionItem,
   TimelineEventItem,
@@ -1068,6 +1070,16 @@ function EmergencyTriageQueueBalancer({
     }
   });
 
+  const [supabaseDoctors, setSupabaseDoctors] = useState<DoctorProfile[]>([]);
+
+  useEffect(() => {
+    void getAllDoctors().then((docs) => {
+      if (docs && docs.length > 0) {
+        setSupabaseDoctors(docs);
+      }
+    });
+  }, []);
+
   const cases = [
     {
       id: "cardiac",
@@ -1094,39 +1106,47 @@ function EmergencyTriageQueueBalancer({
 
   const currentCase = cases.find((c) => c.id === selectedCase) || cases[0];
 
-  // 3 Registered On-Call Doctors in the Distributed Specialist Pool
-  const doctors = [
+  // Live Supabase On-Call Specialist Pool
+  const basePool = supabaseDoctors.length >= 3 ? supabaseDoctors.slice(0, 3) : [
     {
-      id: "doc-1",
+      id: 1,
       name: "Dr. Ananya Rao, MD",
-      specialty: "Cardiology",
-      facility: "Apollo Heart Institute",
+      specialisation: "Cardiology",
+      organisation: "Apollo Heart Institute",
       queueDepth: 5,
-      avgWaitMins: 75,
-      isMatch: currentCase.specialty === "Cardiology",
-      status: "OVERLOADED",
     },
     {
-      id: "doc-2",
+      id: 2,
       name: "Dr. Suresh Menon, MD",
-      specialty: "Cardiology",
-      facility: "Apollo Heart Institute",
+      specialisation: "Cardiology",
+      organisation: "Manipal Hospital",
       queueDepth: 1,
-      avgWaitMins: 15,
-      isMatch: currentCase.specialty === "Cardiology",
-      status: "OPTIMAL",
     },
     {
-      id: "doc-3",
+      id: 3,
       name: "Dr. Kavita Shenoy, MD",
-      specialty: "Endocrinology",
-      facility: "Max Diabetes & Endocrine Center",
+      specialisation: "Pulmonology",
+      organisation: "Fortis Hospital",
       queueDepth: 2,
-      avgWaitMins: 30,
-      isMatch: currentCase.specialty === "Endocrinology",
-      status: currentCase.specialty === "Endocrinology" ? "OPTIMAL" : "MISMATCH",
     },
   ];
+
+  const doctors = basePool.map((doc, idx) => {
+    const spec = doc.specialisation || (idx === 2 ? "Pulmonology" : "Cardiology");
+    const isMatch = spec.toLowerCase().includes(currentCase.specialty.toLowerCase());
+    const queueDepth = doc.queueDepth ?? (idx === 0 ? 5 : idx === 1 ? 1 : 2);
+    return {
+      id: doc.id || `doc-${idx + 1}`,
+      rawId: typeof doc.id === "number" ? doc.id : idx + 1,
+      name: doc.name.includes("MD") ? doc.name : `${doc.name}, MD`,
+      specialty: spec,
+      facility: doc.organisation || "Hospital Center",
+      queueDepth,
+      avgWaitMins: queueDepth * 15,
+      isMatch,
+      status: !isMatch ? "MISMATCH" : queueDepth > 4 ? "OVERLOADED" : "AVAILABLE",
+    };
+  });
 
   const handleRunBalancer = () => {
     setIsProcessing(true);
@@ -1153,6 +1173,11 @@ function EmergencyTriageQueueBalancer({
 
       setDispatchedData(result);
       setIsProcessing(false);
+
+      // Persist live queue state update to Supabase
+      if (selectedDoc.rawId) {
+        void updateDoctorQueueInSupabase(selectedDoc.rawId, selectedDoc.queueDepth + 1);
+      }
 
       // Save to localStorage so Doctor Dashboard immediately shows the incoming emergency banner
       localStorage.setItem("medthread_emergency_dispatch", JSON.stringify(result));

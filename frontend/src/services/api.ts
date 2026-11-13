@@ -485,4 +485,22 @@ export const api = {
       };
     }
   },
+
+  getDoctors: async (): Promise<any[]> => {
+    try {
+      const res = await client.get('/doctors');
+      return res.data;
+    } catch {
+      return [];
+    }
+  },
+
+  updateDoctor: async (doctorId: number, data: any): Promise<any> => {
+    try {
+      const res = await client.put(`/doctors/${doctorId}`, data);
+      return res.data;
+    } catch {
+      return null;
+    }
+  },
 };

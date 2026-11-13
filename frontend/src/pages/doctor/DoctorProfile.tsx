@@ -332,7 +332,7 @@ export default function DoctorProfile() {
                         id={field.key}
                         name={field.key}
                         type={field.type || "text"}
-                        value={formData[field.key]}
+                        value={String(formData[field.key] ?? "")}
                         onChange={(e) => handleChange(field.key, e.target.value)}
                         placeholder={field.placeholder}
                         disabled={isSaving}
@@ -343,7 +343,7 @@ export default function DoctorProfile() {
                   ) : (
                     <div>
                       <div className="w-full rounded-xl border border-sage/80 bg-cream/70 px-4 py-3 text-sm font-medium text-forest">
-                        {value || <span className="italic text-muted">Not specified</span>}
+                        {String(value ?? "") || <span className="italic text-muted">Not specified</span>}
                       </div>
                       <p className="mt-1 text-[11px] text-muted">{field.description}</p>
                     </div>

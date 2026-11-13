@@ -170,10 +170,134 @@ export async function getPatientRecords(patientId: string): Promise<PatientRecor
   return mock.getPatientRecords(patientId);
 }
 
+export async function getAllDoctors(): Promise<DoctorProfile[]> {
+  try {
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase.from('doctors').select('*').order('id', { ascending: true });
+    if (!error && data && data.length > 0) {
+      return data.map((d: any) => ({
+        id: d.id,
+        name: d.name,
+        email: d.email,
+        registrationNumber: d.registration_number,
+        specialisation: d.specialisation,
+        organisation: d.organisation,
+        department: d.department,
+        queueDepth: d.queue_depth,
+        status: d.status,
+        phone: d.phone,
+        verified: Boolean(d.verified),
+      }));
+    }
+  } catch (err) {
+    console.warn("Supabase doctors table query fallback:", err);
+  }
+
+  // Fallback to backend API
+  try {
+    const backendDocs = await api.getDoctors();
+    if (backendDocs && backendDocs.length > 0) {
+      return backendDocs;
+    }
+  } catch {}
+
+  // Standard verified specialists fallback
+  return [
+    {
+      id: 1,
+      name: "Dr. Ananya Rao",
+      email: "doctor@medthread.io",
+      registrationNumber: "MCI-KA-2018-44912",
+      specialisation: "Cardiology",
+      organisation: "Apollo Heart Institute",
+      department: "Interventional Cardiology",
+      queueDepth: 5,
+      status: "OVERLOADED",
+      verified: true,
+    },
+    {
+      id: 2,
+      name: "Dr. Suresh Menon",
+      email: "suresh.menon@manipal.edu",
+      registrationNumber: "MCI-KA-2016-19284",
+      specialisation: "Cardiology",
+      organisation: "Manipal Hospital",
+      department: "Cardiology & Triage",
+      queueDepth: 1,
+      status: "AVAILABLE",
+      verified: true,
+    },
+    {
+      id: 3,
+      name: "Dr. Kavita Shenoy",
+      email: "kavita.shenoy@fortis.in",
+      registrationNumber: "MCI-KA-2020-77192",
+      specialisation: "Pulmonology",
+      organisation: "Fortis Hospital",
+      department: "Pulmonology & Critical Care",
+      queueDepth: 2,
+      status: "AVAILABLE",
+      verified: true,
+    },
+    {
+      id: 4,
+      name: "Dr. Vikrant Mehta",
+      email: "v.mehta@maxhealth.in",
+      registrationNumber: "MCI-DL-2015-88120",
+      specialisation: "Endocrinology",
+      organisation: "Max Healthcare",
+      department: "Endocrinology & Diabetology",
+      queueDepth: 3,
+      status: "AVAILABLE",
+      verified: true,
+    },
+    {
+      id: 5,
+      name: "Dr. Rajesh Iyer",
+      email: "r.iyer@aiims.edu",
+      registrationNumber: "MCI-DL-2011-30911",
+      specialisation: "Internal Medicine",
+      organisation: "AIIMS New Delhi",
+      department: "General & Internal Medicine",
+      queueDepth: 0,
+      status: "AVAILABLE",
+      verified: true,
+    },
+  ];
+}
+
 export async function getDoctorProfile(): Promise<DoctorProfile> {
   const localProfile = await mock.getDoctorProfile();
   try {
     const supabase = getSupabaseClient();
+
+    // 1. Try querying Supabase 'doctors' table
+    const { data: dbDoctor, error } = await supabase
+      .from('doctors')
+      .select('*')
+      .or(`email.eq.${localProfile.email},email.eq.doctor@medthread.io`)
+      .limit(1)
+      .maybeSingle();
+
+    if (!error && dbDoctor) {
+      const merged: DoctorProfile = {
+        ...localProfile,
+        id: dbDoctor.id,
+        name: dbDoctor.name,
+        email: dbDoctor.email,
+        registrationNumber: dbDoctor.registration_number,
+        specialisation: dbDoctor.specialisation,
+        organisation: dbDoctor.organisation,
+        department: dbDoctor.department,
+        queueDepth: dbDoctor.queue_depth,
+        status: dbDoctor.status,
+        phone: dbDoctor.phone,
+        verified: Boolean(dbDoctor.verified),
+      };
+      return merged;
+    }
+
+    // 2. Try user auth metadata
     const { data: userData } = await supabase.auth.getUser();
     if (userData?.user?.user_metadata?.doctor_profile) {
       return {
@@ -181,8 +305,8 @@ export async function getDoctorProfile(): Promise<DoctorProfile> {
         ...userData.user.user_metadata.doctor_profile,
       };
     }
-  } catch {
-    // Supabase auth optional or not configured in demo mode
+  } catch (err) {
+    console.warn("Supabase doctor profile fetch fallback:", err);
   }
   return localProfile;
 }
@@ -191,6 +315,29 @@ export async function updateDoctorProfile(data: Partial<DoctorProfile>): Promise
   const updated = await mock.updateDoctorProfile(data);
   try {
     const supabase = getSupabaseClient();
+
+    // 1. Persist directly to Supabase 'doctors' table
+    const doctorPayload = {
+      name: updated.name,
+      email: updated.email,
+      registration_number: updated.registrationNumber,
+      specialisation: updated.specialisation,
+      organisation: updated.organisation,
+      department: updated.department || "Cardiology",
+      updated_at: new Date().toISOString(),
+    };
+
+    const { error: upsertErr } = await supabase
+      .from('doctors')
+      .upsert(doctorPayload, { onConflict: 'email' });
+
+    if (upsertErr) {
+      console.warn("Supabase doctors upsert warning:", upsertErr);
+    } else {
+      console.log("Doctor profile saved to Supabase 'doctors' table successfully!");
+    }
+
+    // 2. Also sync to Auth user metadata
     const { data: userData } = await supabase.auth.getUser();
     if (userData?.user) {
       await supabase.auth.updateUser({
@@ -200,8 +347,33 @@ export async function updateDoctorProfile(data: Partial<DoctorProfile>): Promise
         },
       });
     }
-  } catch {
-    // Non-blocking fallback for local / demo environment
+  } catch (err) {
+    console.warn("Supabase doctor save non-blocking fallback:", err);
   }
+
+  // 3. Sync to backend API if active
+  if (updated.id && typeof updated.id === "number") {
+    try {
+      await api.updateDoctor(updated.id, updated);
+    } catch {}
+  }
+
   return updated;
+}
+
+export async function updateDoctorQueueInSupabase(
+  doctorId: number,
+  queueDepth: number,
+  status?: string
+): Promise<void> {
+  try {
+    const supabase = getSupabaseClient();
+    await supabase.from('doctors').update({
+      queue_depth: queueDepth,
+      status: status || (queueDepth > 4 ? 'OVERLOADED' : 'AVAILABLE'),
+      updated_at: new Date().toISOString(),
+    }).eq('id', doctorId);
+  } catch (err) {
+    console.warn("Could not sync doctor queue to Supabase:", err);
+  }
 }

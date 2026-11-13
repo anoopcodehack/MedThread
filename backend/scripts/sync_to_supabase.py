@@ -12,7 +12,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from backend.core.config import settings
 from backend.core.database import SessionLocal
-from backend.models.clinical_models import Patient, Document, TimelineEvent, Contradiction, ReviewAuditLog
+from backend.models.clinical_models import Patient, Document, TimelineEvent, Contradiction, ReviewAuditLog, Doctor
 
 SUPABASE_URL = settings.SUPABASE_URL.rstrip("/")
 SUPABASE_KEY = settings.SUPABASE_KEY
@@ -114,6 +114,35 @@ def sync():
             print(f"   Error: {r.text}", flush=True)
     else:
         print("5. Review Audit Logs: 0 records to sync", flush=True)
+
+    # 6. Batch Sync Doctors
+    doctors = db.query(Doctor).all()
+    if not doctors:
+        from backend.main import DOCTOR_REGISTRY
+        for d in DOCTOR_REGISTRY:
+            doc = Doctor(
+                id=d["id"], name=d["name"], email=d["email"],
+                registration_number=d["registration_number"], specialisation=d["specialisation"],
+                organisation=d["organisation"], department=d["department"],
+                queue_depth=d["queue_depth"], status=d["status"], verified=1
+            )
+            db.merge(doc)
+        db.commit()
+        doctors = db.query(Doctor).all()
+
+    doctor_payload = [
+        {
+            "id": d.id, "name": d.name, "email": d.email,
+            "registration_number": d.registration_number, "specialisation": d.specialisation,
+            "organisation": d.organisation, "department": d.department,
+            "queue_depth": d.queue_depth, "status": d.status, "verified": True
+        }
+        for d in doctors
+    ]
+    r = requests.post(f"{SUPABASE_URL}/rest/v1/doctors", headers=HEADERS, json=doctor_payload, timeout=10)
+    print(f"6. Doctors ({len(doctor_payload)} records): Status {r.status_code}", flush=True)
+    if r.status_code not in [200, 201]:
+        print(f"   Note: {r.text}", flush=True)
 
     db.close()
     print("=" * 70, flush=True)

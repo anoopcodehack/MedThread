@@ -25,7 +25,7 @@ from sqlalchemy.orm import Session
 
 from backend.core.config import settings
 from backend.core.database import Base, engine, get_db
-from backend.models.clinical_models import Patient, Document, TimelineEvent, Contradiction, ReviewAuditLog
+from backend.models.clinical_models import Patient, Document, TimelineEvent, Contradiction, ReviewAuditLog, Doctor
 from backend.schemas.evidence_schema import (
     TimelineEventItem,
     ContradictionItem,
@@ -97,6 +97,149 @@ def list_patients(db: Session = Depends(get_db)):
             get_or_create_patient(db, pid)
         patients = db.query(Patient).all()
     return [{"id": p.id, "external_id": p.external_patient_id, "name": p.full_name} for p in patients]
+
+DOCTOR_REGISTRY = [
+    {
+        "id": 1,
+        "name": "Dr. Ananya Rao",
+        "email": "doctor@medthread.io",
+        "registration_number": "MCI-KA-2018-44912",
+        "specialisation": "Cardiology",
+        "organisation": "Apollo Heart Institute",
+        "department": "Interventional Cardiology",
+        "queue_depth": 5,
+        "status": "OVERLOADED"
+    },
+    {
+        "id": 2,
+        "name": "Dr. Suresh Menon",
+        "email": "suresh.menon@manipal.edu",
+        "registration_number": "MCI-KA-2016-19284",
+        "specialisation": "Cardiology",
+        "organisation": "Manipal Hospital",
+        "department": "Cardiology & Triage",
+        "queue_depth": 1,
+        "status": "AVAILABLE"
+    },
+    {
+        "id": 3,
+        "name": "Dr. Kavita Shenoy",
+        "email": "kavita.shenoy@fortis.in",
+        "registration_number": "MCI-KA-2020-77192",
+        "specialisation": "Pulmonology",
+        "organisation": "Fortis Hospital",
+        "department": "Pulmonology & Critical Care",
+        "queue_depth": 2,
+        "status": "AVAILABLE"
+    },
+    {
+        "id": 4,
+        "name": "Dr. Vikrant Mehta",
+        "email": "v.mehta@maxhealth.in",
+        "registration_number": "MCI-DL-2015-88120",
+        "specialisation": "Endocrinology",
+        "organisation": "Max Healthcare",
+        "department": "Endocrinology & Diabetology",
+        "queue_depth": 3,
+        "status": "AVAILABLE"
+    },
+    {
+        "id": 5,
+        "name": "Dr. Rajesh Iyer",
+        "email": "r.iyer@aiims.edu",
+        "registration_number": "MCI-DL-2011-30911",
+        "specialisation": "Internal Medicine",
+        "organisation": "AIIMS New Delhi",
+        "department": "General & Internal Medicine",
+        "queue_depth": 0,
+        "status": "AVAILABLE"
+    }
+]
+
+@app.get("/api/doctors")
+def list_doctors(db: Session = Depends(get_db)):
+    """
+    Returns list of all doctors from database/Supabase cache.
+    """
+    doctors = db.query(Doctor).all()
+    if not doctors:
+        for d in DOCTOR_REGISTRY:
+            doc = Doctor(
+                id=d["id"],
+                name=d["name"],
+                email=d["email"],
+                registration_number=d["registration_number"],
+                specialisation=d["specialisation"],
+                organisation=d["organisation"],
+                department=d["department"],
+                queue_depth=d["queue_depth"],
+                status=d["status"],
+                verified=1
+            )
+            db.merge(doc)
+        db.commit()
+        doctors = db.query(Doctor).all()
+    return [
+        {
+            "id": d.id,
+            "name": d.name,
+            "email": d.email,
+            "registrationNumber": d.registration_number,
+            "specialisation": d.specialisation,
+            "organisation": d.organisation,
+            "department": d.department,
+            "queueDepth": d.queue_depth,
+            "status": d.status,
+            "verified": bool(d.verified)
+        }
+        for d in doctors
+    ]
+
+@app.get("/api/doctors/{doctor_id}")
+def get_doctor(doctor_id: int, db: Session = Depends(get_db)):
+    doc = db.query(Doctor).filter(Doctor.id == doctor_id).first()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Doctor not found")
+    return {
+        "id": doc.id,
+        "name": doc.name,
+        "email": doc.email,
+        "registrationNumber": doc.registration_number,
+        "specialisation": doc.specialisation,
+        "organisation": doc.organisation,
+        "department": doc.department,
+        "queueDepth": doc.queue_depth,
+        "status": doc.status,
+        "verified": bool(doc.verified)
+    }
+
+@app.put("/api/doctors/{doctor_id}")
+def update_doctor(doctor_id: int, payload: dict, db: Session = Depends(get_db)):
+    doc = db.query(Doctor).filter(Doctor.id == doctor_id).first()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Doctor not found")
+    if "name" in payload: doc.name = payload["name"]
+    if "email" in payload: doc.email = payload["email"]
+    if "registrationNumber" in payload: doc.registration_number = payload["registrationNumber"]
+    if "specialisation" in payload: doc.specialisation = payload["specialisation"]
+    if "organisation" in payload: doc.organisation = payload["organisation"]
+    if "department" in payload: doc.department = payload["department"]
+    if "queueDepth" in payload: doc.queue_depth = payload["queueDepth"]
+    if "status" in payload: doc.status = payload["status"]
+    db.commit()
+    db.refresh(doc)
+    return {
+        "id": doc.id,
+        "name": doc.name,
+        "email": doc.email,
+        "registrationNumber": doc.registration_number,
+        "specialisation": doc.specialisation,
+        "organisation": doc.organisation,
+        "department": doc.department,
+        "queueDepth": doc.queue_depth,
+        "status": doc.status,
+        "verified": bool(doc.verified)
+    }
 
 @app.post("/api/upload", response_model=ExtractionReport)
 async def upload_document(

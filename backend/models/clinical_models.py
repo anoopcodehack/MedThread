@@ -93,3 +93,20 @@ class ReviewAuditLog(Base):
     new_value = Column(Text, nullable=False)
     reason = Column(Text, nullable=True)
     reviewed_at = Column(DateTime, default=datetime.utcnow)
+
+class Doctor(Base):
+    __tablename__ = "doctors"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(128), nullable=False)
+    email = Column(String(128), unique=True, index=True, nullable=False)
+    registration_number = Column(String(64), nullable=False)
+    specialisation = Column(String(128), nullable=False)
+    organisation = Column(String(128), nullable=False)
+    department = Column(String(128), default="Cardiology")
+    queue_depth = Column(Integer, default=0)
+    status = Column(String(32), default="AVAILABLE")
+    phone = Column(String(32), default="+91 98765 43210")
+    verified = Column(Integer, default=1)
+    created_at = Column(DateTime, default=datetime.utcnow)
+

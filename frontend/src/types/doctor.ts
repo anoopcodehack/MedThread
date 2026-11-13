@@ -1,11 +1,17 @@
 export type AccessStatus = "Active" | "Expired" | "Revoked";
 
 export interface DoctorProfile {
+  id?: number | string;
   name: string;
   email: string;
   registrationNumber: string;
   specialisation: string;
   organisation: string;
+  department?: string;
+  queueDepth?: number;
+  status?: string;
+  phone?: string;
+  verified?: boolean;
 }
 
 export interface RecentPatient {
