@@ -299,6 +299,95 @@ export default function LandingPage() {
             </div>
           </div>
 
+          {/* Who We Serve: The 4 Real-World Healthcare Personas */}
+          <div className="mt-24 pt-16 border-t border-slate-100">
+            <div className="max-w-2xl mb-12">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[#0A2A18] bg-emerald-100/80 px-3.5 py-1 rounded-full border border-emerald-200">
+                Who Is Affected
+              </span>
+              <h3 className="font-heading font-black text-2xl sm:text-3xl text-slate-900 mt-3 tracking-tight">
+                BUILT FOR THE REAL-WORLD BURDEN OF HEALTHCARE
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
+                Patients who move, travel, see several specialists, or care for an elderly parent carry the heavy burden of stitching records together. MedThread turns that scattered pile of papers into a single, verifiable digital history.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* Persona 1: The Family Caregiver */}
+              <div className="bg-[#F8FAF9] p-6 rounded-3xl border border-slate-200/80 hover:border-emerald-300 transition flex flex-col justify-between">
+                <div>
+                  <div className="h-10 w-10 rounded-xl bg-emerald-100 text-[#0A2A18] flex items-center justify-center mb-4 font-bold text-sm">
+                    01
+                  </div>
+                  <h4 className="font-heading font-bold text-slate-900 text-sm mb-1.5">
+                    Caring for an Elderly Parent
+                  </h4>
+                  <p className="text-xs text-slate-600 leading-relaxed font-normal">
+                    Adult children managing 10–15 years of complicated illness across 4 different hospital files. No more carrying thick plastic bags of crumpled papers to remember which dose was stopped or changed.
+                  </p>
+                </div>
+                <div className="mt-4 pt-3 border-t border-slate-200/60 text-[11px] font-semibold text-emerald-800">
+                  ✓ Multi-Hospital Stitching
+                </div>
+              </div>
+
+              {/* Persona 2: Multiple Specialists */}
+              <div className="bg-[#F8FAF9] p-6 rounded-3xl border border-slate-200/80 hover:border-emerald-300 transition flex flex-col justify-between">
+                <div>
+                  <div className="h-10 w-10 rounded-xl bg-emerald-100 text-[#0A2A18] flex items-center justify-center mb-4 font-bold text-sm">
+                    02
+                  </div>
+                  <h4 className="font-heading font-bold text-slate-900 text-sm mb-1.5">
+                    Patients Seeing Several Specialists
+                  </h4>
+                  <p className="text-xs text-slate-600 leading-relaxed font-normal">
+                    Seeing a Diabetologist at Clinic A, a Cardiologist at Hospital B, and an Orthopedic Surgeon at Hospital C? Doctors rarely talk to each other; MedThread flags conflicting prescriptions and duplicate tests.
+                  </p>
+                </div>
+                <div className="mt-4 pt-3 border-t border-slate-200/60 text-[11px] font-semibold text-emerald-800">
+                  ✓ Cross-Specialty Conflict Radar
+                </div>
+              </div>
+
+              {/* Persona 3: Emergency Clinicians */}
+              <div className="bg-[#F8FAF9] p-6 rounded-3xl border border-slate-200/80 hover:border-emerald-300 transition flex flex-col justify-between">
+                <div>
+                  <div className="h-10 w-10 rounded-xl bg-emerald-100 text-[#0A2A18] flex items-center justify-center mb-4 font-bold text-sm">
+                    03
+                  </div>
+                  <h4 className="font-heading font-bold text-slate-900 text-sm mb-1.5">
+                    Clinicians &amp; Emergency Doctors
+                  </h4>
+                  <p className="text-xs text-slate-600 leading-relaxed font-normal">
+                    An ER doctor at 2 AM with an unfamiliar or unconscious patient has less than 60 seconds. Instant triage HUD surfaces allergies, active blood-thinners, and surgical history immediately.
+                  </p>
+                </div>
+                <div className="mt-4 pt-3 border-t border-slate-200/60 text-[11px] font-semibold text-emerald-800">
+                  ✓ 60-Second ER Triage HUD
+                </div>
+              </div>
+
+              {/* Persona 4: Expats & Cross-Border */}
+              <div className="bg-[#F8FAF9] p-6 rounded-3xl border border-slate-200/80 hover:border-emerald-300 transition flex flex-col justify-between">
+                <div>
+                  <div className="h-10 w-10 rounded-xl bg-emerald-100 text-[#0A2A18] flex items-center justify-center mb-4 font-bold text-sm">
+                    04
+                  </div>
+                  <h4 className="font-heading font-bold text-slate-900 text-sm mb-1.5">
+                    People Moving Between Countries
+                  </h4>
+                  <p className="text-xs text-slate-600 leading-relaxed font-normal">
+                    Expats and travelers moving between health systems with different units (mmol/L vs mg/dL) and date formats (DD/MM/YYYY vs MM/DD/YYYY). Automated mathematical harmonization with zero rounding error.
+                  </p>
+                </div>
+                <div className="mt-4 pt-3 border-t border-slate-200/60 text-[11px] font-semibold text-emerald-800">
+                  ✓ International Unit Standardizer
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </section>
 

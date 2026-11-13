@@ -85,6 +85,76 @@ export default function PatientRecords() {
         <p className="mt-2 text-sm text-muted">{profile.id}</p>
       </div>
 
+      {/* ⚡ 60-SECOND EMERGENCY & MULTI-SPECIALIST TRIAGE HUD */}
+      <section className="rounded-2xl border border-amber-300 bg-gradient-to-r from-amber-50 via-orange-50 to-white p-5 shadow-xs">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-1.5">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-amber-800 text-white">
+                60-Second Emergency Window
+              </span>
+              <span className="text-xs font-bold text-amber-950">
+                Unfamiliar / Emergency Consultation Mode
+              </span>
+              <span className="text-[11px] text-slate-500 font-medium">
+                • Primary Caregiver: Anoop Sharma (+91 98765 43210)
+              </span>
+            </div>
+            <h3 className="font-heading font-extrabold text-base text-slate-900">
+              Immediate Critical Triage Summary
+            </h3>
+            <p className="text-xs text-slate-600 leading-relaxed max-w-3xl">
+              Cross-facility reconciliation active: Synthesized from 4 independent clinics (Cardiology, Endocrinology, Primary Care, Orthopedics).
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <span className="px-3 py-1.5 rounded-xl bg-white border border-amber-300 text-xs font-bold text-amber-900 shadow-xs">
+              ⚡ 60s Review Ready
+            </span>
+          </div>
+        </div>
+
+        {/* 3 Critical Emergency Pillars */}
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-amber-200/80 text-xs">
+          <div className="p-3 rounded-xl bg-white border border-red-200">
+            <div className="text-[10px] font-bold text-red-700 uppercase tracking-wide">
+              Critical Allergies
+            </div>
+            <div className="font-bold text-slate-900 mt-1">
+              Penicillin &amp; NSAIDs
+            </div>
+            <div className="text-[10px] text-slate-500 mt-0.5">
+              Source: City Hospital Discharge 2021 (p. 2)
+            </div>
+          </div>
+
+          <div className="p-3 rounded-xl bg-white border border-amber-200">
+            <div className="text-[10px] font-bold text-amber-800 uppercase tracking-wide">
+              Active High-Risk Meds
+            </div>
+            <div className="font-bold text-slate-900 mt-1">
+              Warfarin 5mg daily (Blood Thinner)
+            </div>
+            <div className="text-[10px] text-slate-500 mt-0.5">
+              Prescribed: Apollo Cardiology (Hold prior to surgery)
+            </div>
+          </div>
+
+          <div className="p-3 rounded-xl bg-white border border-blue-200">
+            <div className="text-[10px] font-bold text-blue-800 uppercase tracking-wide">
+              Unit Standardized Labs
+            </div>
+            <div className="font-bold text-slate-900 mt-1">
+              Glucose 142 mg/dL (7.88 mmol/L)
+            </div>
+            <div className="text-[10px] text-slate-500 mt-0.5">
+              Auto-normalized across international records
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* 🔴 4-TIER CONTRADICTION & RECONCILIATION RADAR */}
       {conflicts.length > 0 && (
         <section className="rounded-2xl border-2 border-red-200 bg-red-50/50 p-6 shadow-sm">

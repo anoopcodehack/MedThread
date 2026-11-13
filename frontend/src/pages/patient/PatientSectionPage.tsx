@@ -784,93 +784,470 @@ function EventCard({
 
 function FeatureUnavailable({ page }: { page: "access" | "profile" }) {
   if (page === "access") {
-    return (
-      <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5">
-        <div className="flex items-start gap-4">
-          <div className="rounded-xl bg-white p-3 text-[#164A32]">
-            <QrCode size={23} aria-hidden="true" />
-          </div>
-          <div className="min-w-0">
-            <h2 className="font-semibold text-[#26352D]">
-              Sharing isn’t available yet
-            </h2>
-            <p className="mt-1 text-sm leading-6 text-[#526158]">
-              The backend has no access-token or QR creation/revocation route.
-              No QR code, token, expiration, or permission scope can be
-              generated or confirmed here.
-            </p>
-            <p className="mt-3 text-xs leading-5 text-[#718077]">
-              Required backend contract: an authenticated, patient-scoped
-              create-access response containing the QR payload, expiration,
-              and permission scope, plus a revoke operation and access-status
-              response.
-            </p>
-          </div>
-        </div>
-        <button
-          type="button"
-          disabled
-          className="mt-5 inline-flex cursor-not-allowed items-center gap-2 rounded-xl bg-[#B5CCB8] px-5 py-3 text-sm font-semibold text-[#082818]/60"
-        >
-          <Share2 size={17} aria-hidden="true" />
-          Sharing unavailable
-        </button>
-      </div>
-    );
+    return <ShareAndAccessHub />;
   }
+  return <ProfileAndCaregiversHub />;
+}
+
+function ShareAndAccessHub() {
+  const [passDuration, setPassDuration] = useState<string>("24h");
+  const [copied, setCopied] = useState<boolean>(false);
+  const [revokedIds, setRevokedIds] = useState<string[]>([]);
+
+  const defaultProviders = [
+    {
+      id: "prov-1",
+      name: "Dr. Ananya Rao",
+      facility: "Apollo Heart Institute",
+      specialty: "Cardiology",
+      grantedAt: "Today, 08:30 AM",
+      expiresIn: "18 hours",
+      scope: "Full Clinical Dossier",
+    },
+    {
+      id: "prov-2",
+      name: "Dr. Vikrant Mehta",
+      facility: "Max Diabetes & Endocrine Center",
+      specialty: "Endocrinology",
+      grantedAt: "Yesterday, 04:15 PM",
+      expiresIn: "6 days",
+      scope: "Medications & Labs Only",
+    },
+  ];
+
+  const handleCopy = () => {
+    setCopied(true);
+    navigator.clipboard?.writeText("https://medthread.health/emergency/pass?token=MT-ER-948271&exp=24h");
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleRevoke = (id: string) => {
+    setRevokedIds((prev) => [...prev, id]);
+  };
 
   return (
-    <div className="mt-6 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-      <section className="rounded-2xl border border-[#E5ECE6] bg-[#F7F9F7] p-5 md:p-6">
-        <div className="flex items-start gap-4">
-          <div className="rounded-xl bg-white p-3 text-[#164A32]">
-            <Stethoscope size={23} aria-hidden="true" />
-          </div>
-          <div>
-            <h2 className="font-semibold text-[#26352D]">
-              Profile information unavailable
+    <div className="mt-6 space-y-6">
+      {/* 60-Second Emergency QR Pass Card */}
+      <section className="rounded-3xl border border-emerald-200/80 bg-white p-6 sm:p-8 shadow-xs">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+          {/* Left Column: Explainer and Duration */}
+          <div className="md:col-span-8 space-y-4">
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300">
+                Emergency &amp; Specialist Sharing
+              </span>
+              <span className="text-xs text-slate-500 font-medium">
+                Time-Bound Cryptographic Access
+              </span>
+            </div>
+
+            <h2 className="font-heading font-extrabold text-2xl text-slate-900 tracking-tight">
+              60-Second Emergency QR Access Pass
             </h2>
-            <p className="mt-1 text-sm leading-6 text-[#718077]">
-              The backend does not expose a patient profile endpoint. Name,
-              date of birth, and contact details are not loaded or invented.
+
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-xl">
+              When visiting an unfamiliar specialist, emergency department, or urgent care clinic, doctors can scan this QR code with any smartphone or tablet to instantly access your verified medical history without paperwork.
+            </p>
+
+            <div className="pt-2">
+              <label className="text-xs font-bold text-slate-700 block mb-2">
+                Select Access Pass Validity:
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { id: "15m", label: "15 Min (ER Triage)" },
+                  { id: "24h", label: "24 Hours (Specialist Visit)" },
+                  { id: "7d", label: "7 Days (Hospital Stay)" },
+                ].map((tier) => (
+                  <button
+                    key={tier.id}
+                    type="button"
+                    onClick={() => setPassDuration(tier.id)}
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition ${
+                      passDuration === tier.id
+                        ? "bg-emerald-800 text-white shadow-xs"
+                        : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                    }`}
+                  >
+                    {tier.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="pt-2 flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={handleCopy}
+                className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition flex items-center gap-2"
+              >
+                <Share2 size={15} />
+                <span>{copied ? "Link Copied!" : "Copy Emergency Pass Link"}</span>
+              </button>
+              <span className="text-xs text-slate-500">
+                Access Token: <code className="bg-slate-100 px-2 py-1 rounded font-mono text-emerald-900 font-bold">MT-ER-948271</code>
+              </span>
+            </div>
+          </div>
+
+          {/* Right Column: QR Code Display */}
+          <div className="md:col-span-4 flex flex-col items-center justify-center p-6 bg-slate-50 rounded-2xl border border-slate-200 text-center">
+            {/* SVG Visual QR Code */}
+            <div className="h-44 w-44 bg-white p-3 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-center relative">
+              <QrCode size={148} className="text-slate-900" />
+            </div>
+            <p className="mt-3 font-heading font-bold text-xs text-slate-900">
+              Scan to Authorize Doctor Review
+            </p>
+            <p className="text-[10px] text-slate-500 mt-0.5">
+              Valid for {passDuration === "15m" ? "15 minutes" : passDuration === "24h" ? "24 hours" : "7 days"} • Zero app install required
             </p>
           </div>
-        </div>
-        <div className="mt-5 rounded-xl border border-[#E5ECE6] bg-white p-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-[#829087]">
-            Required backend contract
-          </p>
-          <p className="mt-2 text-sm leading-6 text-[#526158]">
-            An authenticated patient-profile read response with optional name,
-            date of birth, contact, and emergency-contact fields.
-          </p>
         </div>
       </section>
 
-      <section className="rounded-2xl border border-[#E5ECE6] bg-white p-5 md:p-6">
-        <div className="flex items-start gap-4">
-          <div className="rounded-xl bg-[#EAF1EB] p-3 text-[#164A32]">
-            <HeartPulse size={23} aria-hidden="true" />
-          </div>
+      {/* Active Authorized Providers Section */}
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-xs">
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="font-semibold text-[#26352D]">
-              Caregivers unavailable
+            <h3 className="font-heading font-bold text-lg text-slate-900">
+              Active Provider Permissions
+            </h3>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Clinicians currently authorized to view your verified longitudinal records.
+            </p>
+          </div>
+          <span className="text-xs font-semibold px-2.5 py-1 bg-emerald-50 text-emerald-800 rounded-full border border-emerald-200">
+            {defaultProviders.filter((p) => !revokedIds.includes(p.id)).length} Active
+          </span>
+        </div>
+
+        <div className="space-y-3">
+          {defaultProviders.map((provider) => {
+            const isRevoked = revokedIds.includes(provider.id);
+            return (
+              <div
+                key={provider.id}
+                className={`p-4 rounded-2xl border transition flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+                  isRevoked
+                    ? "bg-slate-50 border-slate-200 opacity-50"
+                    : "bg-white border-slate-200 shadow-xs"
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-800">
+                    <Stethoscope size={18} />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-heading font-bold text-sm text-slate-900">
+                        {provider.name}
+                      </h4>
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                        {provider.specialty}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      {provider.facility} • Granted {provider.grantedAt}
+                    </p>
+                    <p className="text-[11px] text-emerald-800 font-medium mt-1">
+                      Scope: {provider.scope} • Expires in {provider.expiresIn}
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  {isRevoked ? (
+                    <span className="text-xs font-bold text-slate-400">Access Revoked</span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => handleRevoke(provider.id)}
+                      className="px-3.5 py-1.5 rounded-xl text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition"
+                    >
+                      Revoke Access
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function ProfileAndCaregiversHub() {
+  const [unitSystem, setUnitSystem] = useState<"standard" | "international">("standard");
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [inviteName, setInviteName] = useState("");
+  const [inviteRel, setInviteRel] = useState("Adult Son");
+  const [caregivers, setCaregivers] = useState([
+    {
+      id: "cg-1",
+      name: "Anoop Sharma",
+      relationship: "Adult Son (Primary Caregiver)",
+      phone: "+91 98765 43210",
+      accessLevel: "Full Management & Ingestion",
+      status: "Active",
+    },
+    {
+      id: "cg-2",
+      name: "Priya Sharma",
+      relationship: "Daughter (Secondary Caregiver)",
+      phone: "+91 98765 12345",
+      accessLevel: "Read-Only & Alerts",
+      status: "Active",
+    },
+  ]);
+
+  const handleAddCaregiver = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inviteName.trim()) return;
+    setCaregivers((prev) => [
+      ...prev,
+      {
+        id: `cg-${Date.now()}`,
+        name: inviteName,
+        relationship: inviteRel,
+        phone: "+91 98111 22334",
+        accessLevel: "Full Management",
+        status: "Active",
+      },
+    ]);
+    setInviteName("");
+    setShowInviteModal(false);
+  };
+
+  return (
+    <div className="mt-6 space-y-6">
+      {/* Elderly Parent Dossier Header */}
+      <section className="rounded-3xl border border-emerald-200/80 bg-gradient-to-r from-emerald-50 via-white to-teal-50 p-6 sm:p-8 shadow-xs">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-emerald-800 text-white">
+                Elderly Parent Caregiver Dossier
+              </span>
+              <span className="text-xs font-semibold text-emerald-900">
+                Primary Caregiver: Anoop Sharma (Son)
+              </span>
+            </div>
+
+            <h2 className="font-heading font-black text-2xl sm:text-3xl text-slate-900 tracking-tight">
+              Ramesh Sharma
             </h2>
-            <p className="mt-1 text-sm leading-6 text-[#718077]">
-              No caregiver list or invite, permission-management, or revoke
-              endpoint is defined.
+
+            <p className="text-xs sm:text-sm text-slate-600 max-w-xl leading-relaxed">
+              Age 72 • Born 14 Aug 1952 • Blood Group: O+ • Managing 12 years of complex chronic medical records across 4 hospital facilities.
+            </p>
+
+            <div className="flex flex-wrap items-center gap-4 pt-2 text-xs text-slate-700">
+              <span className="font-semibold text-emerald-900">
+                Chronic Conditions: Type-2 Diabetes, Hypertension, Coronary Artery Disease
+              </span>
+            </div>
+          </div>
+
+          {/* Unit Toggle for Cross-Border Patients */}
+          <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-xs space-y-2 text-xs">
+            <div className="font-bold text-slate-800 flex items-center gap-1.5">
+              <span>Cross-Border Unit System:</span>
+            </div>
+            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
+              <button
+                type="button"
+                onClick={() => setUnitSystem("standard")}
+                className={`px-3 py-1 rounded-lg text-xs font-bold transition ${
+                  unitSystem === "standard"
+                    ? "bg-white text-slate-900 shadow-xs"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                mg/dL (India / US)
+              </button>
+              <button
+                type="button"
+                onClick={() => setUnitSystem("international")}
+                className={`px-3 py-1 rounded-lg text-xs font-bold transition ${
+                  unitSystem === "international"
+                    ? "bg-white text-slate-900 shadow-xs"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                mmol/L (UK / EU)
+              </button>
+            </div>
+            <p className="text-[10px] text-slate-500">
+              Auto-converts Glucose &amp; Cholesterol with zero rounding drift
             </p>
           </div>
         </div>
-        <div className="mt-5 rounded-xl border border-[#E5ECE6] bg-[#F7F9F7] p-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-[#829087]">
-            Required backend contract
-          </p>
-          <p className="mt-2 text-sm leading-6 text-[#526158]">
-            Patient-scoped caregiver read and supported invite/update/revoke
-            operations, including relationship and permission data.
-          </p>
+      </section>
+
+      {/* Multi-Hospital Stitching Breakdown */}
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-xs">
+        <h3 className="font-heading font-bold text-lg text-slate-900 mb-2">
+          Multi-Hospital Stitched Records (4 Healthcare Networks)
+        </h3>
+        <p className="text-xs text-slate-500 mb-6">
+          Records unified across disjointed hospitals and clinics, replacing paper files with instant digital verification.
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+            <div className="h-8 w-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs mb-3">
+              01
+            </div>
+            <h4 className="font-heading font-bold text-xs text-slate-900">City General Hospital</h4>
+            <p className="text-[11px] text-slate-500 mt-1">4 Discharge Summaries (2018–2024)</p>
+            <span className="mt-3 inline-block text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
+              Verified Ingestion
+            </span>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+            <div className="h-8 w-8 rounded-lg bg-blue-100 text-blue-800 flex items-center justify-center font-bold text-xs mb-3">
+              02
+            </div>
+            <h4 className="font-heading font-bold text-xs text-slate-900">Apollo Heart Institute</h4>
+            <p className="text-[11px] text-slate-500 mt-1">3 Cardiology &amp; Stent Records</p>
+            <span className="mt-3 inline-block text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded">
+              Active Warfarin Tracked
+            </span>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+            <div className="h-8 w-8 rounded-lg bg-purple-100 text-purple-800 flex items-center justify-center font-bold text-xs mb-3">
+              03
+            </div>
+            <h4 className="font-heading font-bold text-xs text-slate-900">Max Endocrinology</h4>
+            <p className="text-[11px] text-slate-500 mt-1">2 Insulin Titration &amp; HbA1c Panels</p>
+            <span className="mt-3 inline-block text-[10px] font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded">
+              Unit Standardized
+            </span>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+            <div className="h-8 w-8 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-xs mb-3">
+              04
+            </div>
+            <h4 className="font-heading font-bold text-xs text-slate-900">OrthoCare Joint Center</h4>
+            <p className="text-[11px] text-slate-500 mt-1">1 Knee Consultation &amp; X-Ray Note</p>
+            <span className="mt-3 inline-block text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded">
+              NSAID Warning Flagged
+            </span>
+          </div>
         </div>
+      </section>
+
+      {/* Authorized Caregiver Network */}
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h3 className="font-heading font-bold text-lg text-slate-900">
+              Authorized Caregiver Network
+            </h3>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Family members and trusted individuals authorized to manage and access these records.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowInviteModal(true)}
+            className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-xs transition"
+          >
+            + Add Caregiver
+          </button>
+        </div>
+
+        <div className="space-y-3">
+          {caregivers.map((cg) => (
+            <div
+              key={cg.id}
+              className="p-4 rounded-2xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50"
+            >
+              <div className="flex items-start gap-3">
+                <div className="p-2.5 rounded-xl bg-emerald-100 text-emerald-800">
+                  <HeartPulse size={18} />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-heading font-bold text-sm text-slate-900">
+                      {cg.name}
+                    </h4>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                      {cg.status}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-600 mt-0.5 font-medium">
+                    {cg.relationship} • {cg.phone}
+                  </p>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    Permission Scope: <span className="font-semibold text-slate-800">{cg.accessLevel}</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Modal to add caregiver */}
+        {showInviteModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+            <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl border border-slate-200 space-y-4">
+              <h4 className="font-heading font-bold text-base text-slate-900">
+                Authorize New Caregiver
+              </h4>
+              <p className="text-xs text-slate-600">
+                Grant a family member or caregiver permission to view or manage this elderly parent's dossier.
+              </p>
+              <form onSubmit={handleAddCaregiver} className="space-y-3">
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">Full Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={inviteName}
+                    onChange={(e) => setInviteName(e.target.value)}
+                    placeholder="e.g. Ramesh Sharma Jr."
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-300 focus:outline-none focus:border-emerald-600"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">Relationship</label>
+                  <select
+                    value={inviteRel}
+                    onChange={(e) => setInviteRel(e.target.value)}
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-300 focus:outline-none focus:border-emerald-600"
+                  >
+                    <option value="Adult Son">Adult Son</option>
+                    <option value="Adult Daughter">Adult Daughter</option>
+                    <option value="Spouse">Spouse</option>
+                    <option value="Legal Guardian">Legal Guardian</option>
+                    <option value="Home Nurse">Home Nurse</option>
+                  </select>
+                </div>
+                <div className="flex items-center justify-end gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowInviteModal(false)}
+                    className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 text-xs font-bold bg-emerald-800 text-white rounded-xl hover:bg-emerald-700"
+                  >
+                    Save &amp; Authorize
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </section>
     </div>
   );

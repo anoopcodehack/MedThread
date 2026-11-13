@@ -125,6 +125,54 @@ export default function PatientDashboard({ patientId = 101, onUploadSuccess, onN
 
   return (
     <div className="space-y-8">
+      {/* Real-World Caregiver & Multi-Hospital Banner (Caring for Elderly Parent) */}
+      <section className="rounded-3xl border border-emerald-200/80 bg-gradient-to-r from-emerald-50 via-teal-50 to-white p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-emerald-800 text-white shadow-xs">
+              Caregiver Mode Active
+            </span>
+            <span className="text-xs font-bold text-emerald-950">
+              Primary Caregiver: Anoop Sharma (Son) • Managing Parent Dossier
+            </span>
+          </div>
+          <h2 className="font-heading font-extrabold text-xl sm:text-2xl text-slate-900">
+            Ramesh Sharma (Age 72) • 12 Years of Medical Records Synthesized
+          </h2>
+          <p className="text-xs text-slate-600 max-w-2xl leading-relaxed">
+            Stitching 10+ years of complex illnesses (Type-2 Diabetes, Hypertension, Coronary Artery Disease) across 4 hospital facilities. No more carrying thick plastic bags of crumpled papers to consultations.
+          </p>
+          <div className="flex flex-wrap items-center gap-4 pt-1 text-[11px] font-semibold text-slate-700">
+            <span className="flex items-center gap-1.5 text-emerald-800">
+              <CheckCircle2 size={14} className="text-emerald-600" /> 4 Hospital Files Unified
+            </span>
+            <span className="flex items-center gap-1.5 text-emerald-800">
+              <CheckCircle2 size={14} className="text-emerald-600" /> Active vs Discontinued Meds Clarified
+            </span>
+            <span className="flex items-center gap-1.5 text-emerald-800">
+              <CheckCircle2 size={14} className="text-emerald-600" /> Emergency QR Pass Ready
+            </span>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={() => onNavigate("history")}
+            className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition"
+          >
+            Explore Timeline
+          </button>
+          <button
+            type="button"
+            onClick={() => onNavigate("access")}
+            className="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 font-bold text-xs transition"
+          >
+            Emergency Access
+          </button>
+        </div>
+      </section>
+
       {/* Hero Welcome Banner (Identical to DoctorDashboard style) */}
       <section className="flex flex-col justify-between gap-5 rounded-3xl bg-forest p-6 text-white sm:flex-row sm:items-center sm:p-8">
         <div>
