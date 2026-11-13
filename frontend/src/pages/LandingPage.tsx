@@ -12,7 +12,6 @@ import {
   Linkedin,
   Facebook,
   Award,
-  RefreshCw,
   FileText,
   Activity,
   CheckCircle2
@@ -54,42 +53,76 @@ export default function LandingPage() {
             </Link>
           </div>
 
-          {/* Navigation Links - MedThread Product Focus */}
+          {/* Navigation Links - Smooth Scrolling to Page Sections */}
           <nav className="hidden md:flex items-center gap-8 text-xs font-semibold tracking-wider text-white/90 uppercase">
-            <Link to="/" className="text-white border-b-2 border-white pb-0.5">
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+              className="text-white border-b-2 border-white pb-0.5 hover:text-white transition"
+            >
               Home
-            </Link>
-            <a href="#features" className="hover:text-white transition">
+            </a>
+            <a
+              href="#features"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById("features")?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+              className="hover:text-white transition"
+            >
               Features
             </a>
-            <a href="#how-it-works" className="hover:text-white transition">
+            <a
+              href="#how-it-works"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+              className="hover:text-white transition"
+            >
               How It Works
             </a>
-            <a href="#essentials" className="hover:text-white transition">
+            <a
+              href="#essentials"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById("essentials")?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+              className="hover:text-white transition"
+            >
               Health Essentials
             </a>
-            <a href="#security" className="hover:text-white transition">
+            <a
+              href="#security"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById("security")?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+              className="hover:text-white transition"
+            >
               Security
             </a>
-            <a href="#faq" className="hover:text-white transition">
+            <a
+              href="#faq"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById("faq")?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+              className="hover:text-white transition"
+            >
               FAQ
             </a>
           </nav>
 
-          {/* Right Icons & Sign Up / Login */}
+          {/* Right Icons & Sign Up / Login (Demo Circle Logo Removed) */}
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => setShowSplash(true)}
-              className="text-white/80 hover:text-white transition p-1.5"
-              title="Replay Logo Intro"
-            >
-              <RefreshCw size={16} />
-            </button>
-
             <Link
               to="/login"
-              className="text-white/90 hover:text-white transition p-1.5 flex items-center gap-1 text-xs font-semibold"
-              title="Login"
+              className="text-white/90 hover:text-white transition p-1.5 flex items-center gap-1.5 text-xs font-semibold"
+              title="Login to MedThread"
             >
               <User size={18} />
               <span className="hidden sm:inline">Login</span>
