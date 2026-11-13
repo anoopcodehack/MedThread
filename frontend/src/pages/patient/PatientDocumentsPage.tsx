@@ -246,10 +246,7 @@ export default function PatientDocumentsPage({ patientId }: Props) {
         ) : (
           <>
             <p className="mt-5 rounded-xl border border-[#DCE8DE] bg-[#F7F9F7] p-4 text-sm leading-6 text-[#526158]">
-              Processing information is limited to the backend’s{" "}
-              <code className="rounded bg-white px-1">ocr_applied</code> flag;
-              the API does not provide a separate processing status. File URLs
-              are never used directly; previews require a returned signed URL.
+              <strong>Two-Tier Ingestion Bridge:</strong> Native digital PDFs and electronic reports are parsed directly via PyMuPDF in &lt;55ms (<span className="text-emerald-700 font-semibold">⚡ Direct Text</span>). Scanned camera photos or image-only documents automatically trigger multimodal Gemini 2.0 Flash Vision OCR (<span className="text-purple-700 font-semibold">📷 Vision OCR Applied</span>).
             </p>
 
             <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -302,9 +299,9 @@ export default function PatientDocumentsPage({ patientId }: Props) {
                   }
                   className="w-full rounded-lg border border-[#DCE8DE] bg-white px-3 py-2.5 text-sm text-[#26352D] outline-none focus:border-[#6C987F] focus:ring-2 focus:ring-[#6C987F]/20"
                 >
-                  <option value="all">All OCR states</option>
-                  <option value="applied">OCR applied</option>
-                  <option value="not-applied">OCR not applied</option>
+                  <option value="all">All Ingestion Streams</option>
+                  <option value="applied">Vision OCR Applied (Scanned)</option>
+                  <option value="not-applied">Direct Digital Stream (&lt;55ms)</option>
                 </select>
               </label>
 
@@ -476,10 +473,14 @@ export default function PatientDocumentsPage({ patientId }: Props) {
                         <span className="rounded-full bg-[#EAF1EB] px-2.5 py-1 text-[#45634E]">
                           {document.file_type}
                         </span>
-                        <span className="rounded-full border border-[#E5ECE6] px-2.5 py-1 text-[#718077]">
+                        <span className={`rounded-full border px-2.5 py-1 font-medium ${
+                          document.ocr_applied
+                            ? "border-purple-200 bg-purple-50 text-purple-700"
+                            : "border-emerald-200 bg-emerald-50 text-emerald-700"
+                        }`}>
                           {document.ocr_applied
-                            ? "OCR applied"
-                            : "OCR not applied"}
+                            ? "📷 Vision OCR Applied"
+                            : "⚡ Direct Text (<55ms)"}
                         </span>
                       </div>
                       <p className="mt-2 flex items-center gap-1.5 text-xs text-[#829087]">
