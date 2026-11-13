@@ -29,6 +29,7 @@ export interface ContradictionItem {
   quote1: string;
   doc2_name: string;
   quote2: string;
+  resolved?: number;
 }
 
 export interface CitationItem {

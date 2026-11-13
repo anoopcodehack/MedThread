@@ -36,6 +36,7 @@ class ContradictionItem(BaseModel):
     quote1: str
     doc2_name: str
     quote2: str
+    resolved: int = 0
 
 class ReviewOverrideRequest(BaseModel):
     reviewer_name: str

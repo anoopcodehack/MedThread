@@ -231,9 +231,33 @@ def get_conflicts(patient_id: int, db: Session = Depends(get_db)):
         ContradictionItem(
             id=c.id, patient_id=c.patient_id, tier=c.tier, category=c.category,
             entity=c.entity, description=c.description, doc1_name=c.doc1_name,
-            quote1=c.quote1, doc2_name=c.doc2_name, quote2=c.quote2
+            quote1=c.quote1, doc2_name=c.doc2_name, quote2=c.quote2,
+            resolved=c.resolved or 0
         ) for c in conflicts
     ]
+
+@app.patch("/api/conflicts/{conflict_id}/resolve")
+def resolve_conflict(
+    conflict_id: int,
+    payload: dict,
+    db: Session = Depends(get_db)
+):
+    """
+    Clinician resolves a contradiction (e.g. confirming newer 2024 Ceftriaxone allergy supersedes 2022 NKDA).
+    """
+    c = db.query(Contradiction).filter(Contradiction.id == conflict_id).first()
+    if not c:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Conflict {conflict_id} not found."
+        )
+    c.resolved = 1
+    db.commit()
+    return {
+        "id": c.id,
+        "resolved": 1,
+        "note": payload.get("note", "Clinician verified and resolved discrepancy")
+    }
 
 @app.get("/api/documents/{patient_id}")
 def get_patient_documents(patient_id: int, db: Session = Depends(get_db)):

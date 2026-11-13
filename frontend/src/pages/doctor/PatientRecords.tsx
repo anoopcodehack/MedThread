@@ -116,13 +116,20 @@ export default function PatientRecords() {
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className={`text-[11px] font-bold uppercase px-2 py-0.5 rounded ${
-                      isDirect ? "bg-red-100 text-red-800" :
-                      isReview ? "bg-amber-100 text-amber-800" :
-                      isDup ? "bg-orange-100 text-orange-800" : "bg-blue-100 text-blue-800"
-                    }`}>
-                      {conf.tier.replace(/_/g, " ")}
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <span className={`text-[11px] font-bold uppercase px-2 py-0.5 rounded ${
+                        isDirect ? "bg-red-100 text-red-800" :
+                        isReview ? "bg-amber-100 text-amber-800" :
+                        isDup ? "bg-orange-100 text-orange-800" : "bg-blue-100 text-blue-800"
+                      }`}>
+                        {conf.tier.replace(/_/g, " ")}
+                      </span>
+                      {Boolean(conf.resolved) && (
+                        <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
+                          <CheckCircle2 size={11} className="text-emerald-600" /> Resolved
+                        </span>
+                      )}
+                    </div>
                     <span className="text-xs font-bold text-slate-800">{conf.entity}</span>
                   </div>
 
@@ -462,12 +469,24 @@ export default function PatientRecords() {
         patientId={numericId}
         onClose={() => setSelectedContradictionForComparison(null)}
         onOpenReviewOverride={() => {
+          if (!selectedContradictionForComparison) return;
+          const searchTarget = selectedContradictionForComparison.entity.toLowerCase();
+          const matchingEv = records?.timeline.find(t => 
+            t.event.toLowerCase().includes(searchTarget)
+          ) || records?.medications.find(m => 
+            m.name.toLowerCase().includes(searchTarget)
+          ) || records?.allergies.find(a => 
+            a.name.toLowerCase().includes(searchTarget)
+          );
+
+          const eventId = matchingEv ? parseInt(matchingEv.id) || 31 : 31;
           setSelectedEventForReview({
-            id: 1,
-            entity: selectedContradictionForComparison?.entity || "Clinical Finding",
-            category: selectedContradictionForComparison?.category || "MEDICATION",
-            status: "REQUIRES_REVIEW",
-            source_passage: selectedContradictionForComparison?.quote1
+            id: eventId,
+            entity: selectedContradictionForComparison.entity,
+            category: selectedContradictionForComparison.category || "CLINICAL",
+            status: selectedContradictionForComparison.tier === "NEEDS_REVIEW" ? "CONFIRMED_ALLERGY" : "CLINICIAN_RESOLVED",
+            currentValue: selectedContradictionForComparison.description,
+            source_passage: selectedContradictionForComparison.quote2 || selectedContradictionForComparison.quote1
           });
           setIsReviewModalOpen(true);
         }}

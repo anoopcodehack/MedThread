@@ -71,6 +71,11 @@ export const api = {
     return res.data;
   },
 
+  resolveConflict: async (conflictId: number, note?: string) => {
+    const res = await client.patch(`/conflicts/${conflictId}/resolve`, { note });
+    return res.data;
+  },
+
   uploadDocument: async (patientId: number, file: File) => {
     const formData = new FormData();
     formData.append('patient_id', patientId.toString());
