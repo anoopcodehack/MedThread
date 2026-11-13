@@ -93,6 +93,7 @@ export default function PatientPortal({ patientId }: Props) {
         <main className="mx-auto max-w-7xl p-5 sm:p-8">
           {activePage === "dashboard" ? (
             <PatientDashboard
+              key={`${effectivePatientId}-${dataRevision}`}
               patientId={effectivePatientId}
               onUploadSuccess={() => setDataRevision((r) => r + 1)}
               onNavigate={(page) => setActivePage(page as PatientPage)}
