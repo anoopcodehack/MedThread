@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import type { LucideProps } from "lucide-react";
 import { api } from "../../services/api";
+import { getSupabaseClient } from "../../lib/supabase";
 import type {
   ContradictionItem,
   TimelineEventItem,
@@ -793,8 +794,7 @@ function ShareAndAccessHub() {
   const [passDuration, setPassDuration] = useState<string>("24h");
   const [copied, setCopied] = useState<boolean>(false);
   const [revokedIds, setRevokedIds] = useState<string[]>([]);
-
-  const defaultProviders = [
+  const [providers, setProviders] = useState([
     {
       id: "prov-1",
       name: "Dr. Ananya Rao",
@@ -813,7 +813,35 @@ function ShareAndAccessHub() {
       expiresIn: "6 days",
       scope: "Medications & Labs Only",
     },
-  ];
+  ]);
+
+  useEffect(() => {
+    async function loadAccessGrants() {
+      try {
+        const supabase = getSupabaseClient();
+        const { data } = await supabase
+          .from("access_grants")
+          .select("*")
+          .eq("patient_id", 101);
+        if (data && data.length > 0) {
+          setProviders(
+            data.map((g: any) => ({
+              id: g.id || g.access_token,
+              name: g.provider_name,
+              facility: g.facility_name,
+              specialty: g.specialty || "Specialist",
+              grantedAt: g.created_at ? new Date(g.created_at).toLocaleDateString() : "Active",
+              expiresIn: g.duration_type || "24 hours",
+              scope: g.scope || "Full Dossier",
+            }))
+          );
+        }
+      } catch (err) {
+        console.warn("Supabase access grants fallback:", err);
+      }
+    }
+    loadAccessGrants();
+  }, []);
 
   const handleCopy = () => {
     setCopied(true);
@@ -821,8 +849,17 @@ function ShareAndAccessHub() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleRevoke = (id: string) => {
+  const handleRevoke = async (id: string) => {
     setRevokedIds((prev) => [...prev, id]);
+    try {
+      const supabase = getSupabaseClient();
+      await supabase
+        .from("access_grants")
+        .update({ is_revoked: true, revoked_at: new Date().toISOString() })
+        .eq("id", id);
+    } catch (err) {
+      console.warn("Supabase revoke fallback:", err);
+    }
   };
 
   return (
@@ -918,12 +955,12 @@ function ShareAndAccessHub() {
             </p>
           </div>
           <span className="text-xs font-semibold px-2.5 py-1 bg-emerald-50 text-emerald-800 rounded-full border border-emerald-200">
-            {defaultProviders.filter((p) => !revokedIds.includes(p.id)).length} Active
+            {providers.filter((p) => !revokedIds.includes(p.id)).length} Active
           </span>
         </div>
 
         <div className="space-y-3">
-          {defaultProviders.map((provider) => {
+          {providers.map((provider) => {
             const isRevoked = revokedIds.includes(provider.id);
             return (
               <div
@@ -1002,22 +1039,63 @@ function ProfileAndCaregiversHub() {
     },
   ]);
 
-  const handleAddCaregiver = (e: React.FormEvent) => {
+  useEffect(() => {
+    async function loadFromSupabase() {
+      try {
+        const supabase = getSupabaseClient();
+        const { data } = await supabase
+          .from("caregivers")
+          .select("*")
+          .eq("patient_id", 101);
+        if (data && data.length > 0) {
+          setCaregivers(
+            data.map((c: any) => ({
+              id: c.id,
+              name: c.caregiver_name,
+              relationship: c.relationship,
+              phone: c.phone_number || "+91 98765 43210",
+              accessLevel: c.access_level || "Full Management",
+              status: c.is_active ? "Active" : "Revoked",
+            }))
+          );
+        }
+      } catch (err) {
+        console.warn("Supabase fetch fallback:", err);
+      }
+    }
+    loadFromSupabase();
+  }, []);
+
+  const handleAddCaregiver = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inviteName.trim()) return;
-    setCaregivers((prev) => [
-      ...prev,
-      {
-        id: `cg-${Date.now()}`,
-        name: inviteName,
-        relationship: inviteRel,
-        phone: "+91 98111 22334",
-        accessLevel: "Full Management",
-        status: "Active",
-      },
-    ]);
+    const newCaregiver = {
+      id: `cg-${Date.now()}`,
+      name: inviteName,
+      relationship: inviteRel,
+      phone: "+91 98111 22334",
+      accessLevel: "Full Management",
+      status: "Active",
+    };
+    setCaregivers((prev) => [...prev, newCaregiver]);
     setInviteName("");
     setShowInviteModal(false);
+
+    try {
+      const supabase = getSupabaseClient();
+      await supabase.from("caregivers").insert([
+        {
+          patient_id: 101,
+          caregiver_name: newCaregiver.name,
+          relationship: newCaregiver.relationship,
+          phone_number: newCaregiver.phone,
+          access_level: newCaregiver.accessLevel,
+          is_active: true,
+        },
+      ]);
+    } catch (err) {
+      console.warn("Supabase insert fallback:", err);
+    }
   };
 
   return (
