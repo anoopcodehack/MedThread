@@ -203,173 +203,102 @@ export default function PatientHeader({
                 )}
               </button>
 
-              {/* Mega-Menu Flyout (Clean 3-column layout without information overload) */}
+              {/* Mega-Menu Flyout: Clean 5 category links only (other fluff removed) */}
               {openDropdown === "records" && (
                 <div
-                  className="absolute left-1/2 -translate-x-1/2 top-full mt-3 w-[720px] rounded-2xl bg-white border border-slate-200 shadow-2xl p-6 grid grid-cols-12 gap-6 animate-in fade-in slide-in-from-top-2 duration-150 z-50 text-left"
+                  className="absolute left-1/2 -translate-x-1/2 top-full mt-3 w-64 rounded-2xl bg-white border border-slate-200 shadow-2xl p-2 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150 z-50 text-left"
                   onMouseEnter={() => handleMouseEnter("records")}
                   onMouseLeave={handleMouseLeave}
                 >
-                  {/* Col 1: Spotlight (Left Column) */}
-                  <div className="col-span-4 pr-3 border-r border-slate-100 flex flex-col justify-between">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOpenDropdown(null);
+                      onNavigate?.("history");
+                    }}
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-50 text-slate-800 transition group text-left"
+                  >
+                    <div className="p-2 rounded-lg bg-emerald-50 text-emerald-800 group-hover:bg-forest group-hover:text-white transition shrink-0">
+                      <History size={15} />
+                    </div>
                     <div>
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded">
-                        Longitudinal History
+                      <span className="block text-xs font-bold text-slate-900 group-hover:text-forest">
+                        Medical History
                       </span>
-                      <h4 className="font-heading font-extrabold text-sm text-slate-900 mt-2">
-                        Evidence-First Records
-                      </h4>
-                      <p className="text-xs text-slate-500 leading-relaxed mt-1.5">
-                        Chronological patient journey unified across hospitals with verified citations.
-                      </p>
                     </div>
+                  </button>
 
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setOpenDropdown(null);
-                        onNavigate?.("history");
-                      }}
-                      className="text-xs font-bold text-forest hover:underline mt-4 pt-2 border-t border-slate-100 text-left block"
-                    >
-                      Explore Full Timeline
-                    </button>
-                  </div>
-
-                  {/* Col 2: Category Links (Middle Column) */}
-                  <div className="col-span-4 space-y-1">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-2">
-                      Explore Categories
-                    </span>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setOpenDropdown(null);
-                        onNavigate?.("history");
-                      }}
-                      className="w-full flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-slate-50 text-slate-800 transition group text-left"
-                    >
-                      <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-800 group-hover:bg-forest group-hover:text-white transition">
-                        <History size={14} />
-                      </div>
-                      <div>
-                        <span className="block text-xs font-bold text-slate-900 group-hover:text-forest">
-                          Medical History
-                        </span>
-                        <span className="block text-[10px] text-slate-500">
-                          Chronological timeline
-                        </span>
-                      </div>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setOpenDropdown(null);
-                        onNavigate?.("conditions");
-                      }}
-                      className="w-full flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-slate-50 text-slate-800 transition group text-left"
-                    >
-                      <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-800 group-hover:bg-forest group-hover:text-white transition">
-                        <ClipboardList size={14} />
-                      </div>
-                      <div>
-                        <span className="block text-xs font-bold text-slate-900 group-hover:text-forest">
-                          Conditions &amp; Diagnoses
-                        </span>
-                        <span className="block text-[10px] text-slate-500">
-                          Verified diagnoses
-                        </span>
-                      </div>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setOpenDropdown(null);
-                        onNavigate?.("medications");
-                      }}
-                      className="w-full flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-slate-50 text-slate-800 transition group text-left"
-                    >
-                      <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-800 group-hover:bg-forest group-hover:text-white transition">
-                        <Pill size={14} />
-                      </div>
-                      <div>
-                        <span className="block text-xs font-bold text-slate-900 group-hover:text-forest">
-                          Medications &amp; Doses
-                        </span>
-                        <span className="block text-[10px] text-slate-500">
-                          Active prescriptions
-                        </span>
-                      </div>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setOpenDropdown(null);
-                        onNavigate?.("investigations");
-                      }}
-                      className="w-full flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-slate-50 text-slate-800 transition group text-left"
-                    >
-                      <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-800 group-hover:bg-forest group-hover:text-white transition">
-                        <Activity size={14} />
-                      </div>
-                      <div>
-                        <span className="block text-xs font-bold text-slate-900 group-hover:text-forest">
-                          Tests &amp; Lab Panels
-                        </span>
-                        <span className="block text-[10px] text-slate-500">
-                          Standardized labs
-                        </span>
-                      </div>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setOpenDropdown(null);
-                        onNavigate?.("visits");
-                      }}
-                      className="w-full flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-slate-50 text-slate-800 transition group text-left"
-                    >
-                      <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-800 group-hover:bg-forest group-hover:text-white transition">
-                        <Hospital size={14} />
-                      </div>
-                      <div>
-                        <span className="block text-xs font-bold text-slate-900 group-hover:text-forest">
-                          Visits &amp; Procedures
-                        </span>
-                        <span className="block text-[10px] text-slate-500">
-                          Hospital encounters
-                        </span>
-                      </div>
-                    </button>
-                  </div>
-
-                  {/* Col 3: Visual Feature Card (Right Column - NO AI icons, clean & uncluttered) */}
-                  <div className="col-span-4 pl-3 border-l border-slate-100 flex flex-col justify-between">
-                    <div className="rounded-xl bg-gradient-to-br from-[#0B2818] via-[#0E351F] to-[#082214] p-4 text-white flex flex-col justify-between h-full shadow-sm">
-                      <div>
-                        <div className="flex items-center gap-1.5 text-emerald-300 text-[10px] font-bold uppercase tracking-wider">
-                          <Hospital size={13} />
-                          <span>Multi-Hospital Ingestion</span>
-                        </div>
-                        <h5 className="font-heading font-extrabold text-xs text-white mt-2 leading-snug">
-                          Multi-Hospital Stitched Records
-                        </h5>
-                        <p className="text-[11px] text-white/75 mt-1.5 leading-relaxed">
-                          Replaces crumpled paper files with verified digital records in seconds.
-                        </p>
-                      </div>
-
-                      <div className="mt-4 pt-2.5 border-t border-white/15 flex items-center justify-between text-[10px] font-semibold text-emerald-300">
-                        <span>Standardized Units</span>
-                        <span>NABH Grounded</span>
-                      </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOpenDropdown(null);
+                      onNavigate?.("conditions");
+                    }}
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-50 text-slate-800 transition group text-left"
+                  >
+                    <div className="p-2 rounded-lg bg-emerald-50 text-emerald-800 group-hover:bg-forest group-hover:text-white transition shrink-0">
+                      <ClipboardList size={15} />
                     </div>
-                  </div>
+                    <div>
+                      <span className="block text-xs font-bold text-slate-900 group-hover:text-forest">
+                        Conditions &amp; Diagnoses
+                      </span>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOpenDropdown(null);
+                      onNavigate?.("medications");
+                    }}
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-50 text-slate-800 transition group text-left"
+                  >
+                    <div className="p-2 rounded-lg bg-emerald-50 text-emerald-800 group-hover:bg-forest group-hover:text-white transition shrink-0">
+                      <Pill size={15} />
+                    </div>
+                    <div>
+                      <span className="block text-xs font-bold text-slate-900 group-hover:text-forest">
+                        Medications &amp; Doses
+                      </span>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOpenDropdown(null);
+                      onNavigate?.("investigations");
+                    }}
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-50 text-slate-800 transition group text-left"
+                  >
+                    <div className="p-2 rounded-lg bg-emerald-50 text-emerald-800 group-hover:bg-forest group-hover:text-white transition shrink-0">
+                      <Activity size={15} />
+                    </div>
+                    <div>
+                      <span className="block text-xs font-bold text-slate-900 group-hover:text-forest">
+                        Tests &amp; Lab Panels
+                      </span>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOpenDropdown(null);
+                      onNavigate?.("visits");
+                    }}
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-50 text-slate-800 transition group text-left"
+                  >
+                    <div className="p-2 rounded-lg bg-emerald-50 text-emerald-800 group-hover:bg-forest group-hover:text-white transition shrink-0">
+                      <Hospital size={15} />
+                    </div>
+                    <div>
+                      <span className="block text-xs font-bold text-slate-900 group-hover:text-forest">
+                        Visits &amp; Procedures
+                      </span>
+                    </div>
+                  </button>
                 </div>
               )}
             </div>
