@@ -6,7 +6,7 @@ import {
   CheckCircle2, 
   Loader2, 
   Scan, 
-  Sparkles, 
+  FileCheck, 
   RefreshCw,
   AlertCircle
 } from 'lucide-react';
@@ -326,7 +326,7 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
                   </>
                 ) : (
                   <>
-                    <Sparkles className="h-4 w-4" />
+                    <FileCheck className="h-4 w-4" />
                     <span>Extract &amp; Append to Patient History</span>
                   </>
                 )}

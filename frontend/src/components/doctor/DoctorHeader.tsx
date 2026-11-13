@@ -43,7 +43,7 @@ export default function DoctorHeader() {
           type="button"
           onClick={() => setIsBenchmarkOpen(true)}
           className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100 shadow-xs transition"
-          title="SOSC SYNERGY 26 (PS-7) Quantitative Benchmark Scorecard"
+          title="Clinical Performance Benchmark Scorecard"
         >
           <Award className="h-4 w-4 text-emerald-600" />
           <span>Benchmark Scorecard (-78% Time)</span>

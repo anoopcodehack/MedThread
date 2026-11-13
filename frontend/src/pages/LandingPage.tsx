@@ -15,15 +15,16 @@ import {
   RefreshCw
 } from "lucide-react";
 import { SplashLoader } from "../components/common/SplashLoader";
+import { BrandLogo } from "../components/common/BrandLogo";
 
 export default function LandingPage() {
   const [showSplash, setShowSplash] = useState<boolean>(true);
 
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-[#A3C4AE] selection:text-[#0A2A18]">
-      {/* Pure Logo Drop Splash Loader */}
+      {/* Pure Logo Drop Splash Loader (Fast & Snappy 600ms) */}
       {showSplash && (
-        <SplashLoader onComplete={() => setShowSplash(false)} durationMs={1500} />
+        <SplashLoader onComplete={() => setShowSplash(false)} durationMs={600} />
       )}
 
       {/* ========================================================================= */}
@@ -46,9 +47,7 @@ export default function LandingPage() {
           {/* Brand Logo */}
           <div className="flex items-center gap-3">
             <Link to="/" className="flex items-center gap-2 group">
-              <span className="font-heading font-black tracking-widest text-2xl text-white uppercase drop-shadow-sm group-hover:opacity-90 transition">
-                MEDTHREAD
-              </span>
+              <BrandLogo theme="light" size="md" />
             </Link>
           </div>
 
@@ -453,9 +452,9 @@ export default function LandingPage() {
           <div className="pt-12 grid grid-cols-2 md:grid-cols-4 gap-8 text-xs">
             {/* Col 1 */}
             <div>
-              <span className="font-heading font-black tracking-widest text-lg text-white block mb-3">
-                MEDTHREAD
-              </span>
+              <div className="mb-3">
+                <BrandLogo theme="light" size="sm" />
+              </div>
               <p className="text-[11px] text-white/60 leading-relaxed">
                 Clean, science-backed health intelligence designed for everyday wellness.
               </p>

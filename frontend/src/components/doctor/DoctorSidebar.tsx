@@ -1,5 +1,6 @@
 import { Activity, Clock3, LayoutDashboard, LogOut, ScanLine, UserRound, UsersRound } from "lucide-react";
 import { NavLink } from "react-router-dom";
+import { BrandLogo } from "../common/BrandLogo";
 
 const links = [
   { to: "/doctor/dashboard", label: "Overview", icon: LayoutDashboard },
@@ -12,7 +13,9 @@ const links = [
 export default function DoctorSidebar() {
   return (
     <aside className="hidden min-h-screen w-64 shrink-0 border-r border-sage bg-white p-5 lg:block">
-      <img src="/logo.png" onError={(event) => { event.currentTarget.src = "/logo.jpg"; }} alt="MedThread" className="mb-10 h-12 w-40 object-contain object-left" />
+      <div className="mb-8">
+        <BrandLogo theme="dark" size="md" showSubtitle />
+      </div>
       <nav className="space-y-1">
         {links.map(({ to, label, icon: Icon }) => (
           <NavLink key={to} to={to} className={({ isActive }) => `flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition ${isActive ? "bg-forest text-white" : "text-muted hover:bg-cream hover:text-forest"}`}>

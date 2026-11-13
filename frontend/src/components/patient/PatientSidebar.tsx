@@ -13,6 +13,7 @@ import {
   X,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { BrandLogo } from "../common/BrandLogo";
 
 export type PatientPage =
   | "dashboard"
@@ -54,14 +55,7 @@ export default function PatientSidebar({
     <div className="flex h-full flex-col justify-between">
       <div>
         <div className="flex items-center justify-between pb-6">
-          <img
-            src="/logo.png"
-            onError={(event) => {
-              event.currentTarget.src = "/logo.jpg";
-            }}
-            alt="MedThread"
-            className="h-12 w-40 object-contain object-left"
-          />
+          <BrandLogo theme="dark" size="md" showSubtitle />
           <button
             onClick={onClose}
             className="rounded-lg p-1.5 text-muted hover:bg-cream lg:hidden"

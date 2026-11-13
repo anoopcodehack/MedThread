@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { Stethoscope, UserRound, Check, Sparkles, ShieldAlert } from "lucide-react";
+import { Stethoscope, UserRound, Check, ShieldCheck, ShieldAlert } from "lucide-react";
 import { signInWithEmail, getRoleLandingPath } from "../../services/authService";
 import GoogleAuthButton from "./GoogleAuthButton";
 import type { UserRole } from "../../types/auth";
@@ -151,7 +151,7 @@ export default function LoginForm() {
       {/* Demo Credentials Pill */}
       <div className="rounded-xl border border-sage/60 bg-cream/70 p-3 text-xs text-[#26352D] flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-forest shrink-0" />
+          <ShieldCheck className="h-4 w-4 text-forest shrink-0" />
           <span className="truncate">
             Demo {selectedRole === "doctor" ? "Doctor" : "Patient"}: <strong className="font-mono">{email}</strong>
           </span>

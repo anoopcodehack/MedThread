@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import AuthForm from "./AuthForm";
+import { BrandLogo } from "../common/BrandLogo";
 import { getSupabaseClient } from "../../lib/supabase";
 import {
   getRoleLandingPath,
@@ -73,11 +74,7 @@ export default function AuthLayout() {
 
         <div className="relative z-10 flex min-h-screen w-full flex-col justify-between p-10 xl:p-16">
 
-          <img
-            src="/logo.jpg"
-            alt="MedThread"
-            className="h-14 w-48 object-contain object-left "
-          />
+          <BrandLogo theme="light" size="lg" showSubtitle />
 
           <div className="max-w-xl">
             <span className="text-xs font-bold tracking-[3px] text-[#D9EAD5]">
@@ -152,11 +149,7 @@ export default function AuthLayout() {
       <section className="flex min-h-screen items-center justify-center px-4 py-8 sm:px-8 lg:px-10">
         <div className="w-full max-w-lg">
           <div className="mb-6 flex justify-center lg:hidden">
-            <img
-              src="/logo.jpg"
-              alt="MedThread"
-              className="h-16 w-48 object-contain"
-            />
+            <BrandLogo theme="dark" size="lg" showSubtitle />
           </div>
 
           {authError && (
