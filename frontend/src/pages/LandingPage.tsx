@@ -130,9 +130,12 @@ export default function LandingPage() {
 
             <Link
               to="/auth"
-              className="bg-[#0A2A18] hover:bg-[#124227] text-white text-xs font-bold px-5 py-2.5 rounded-full shadow-lg transition-all transform hover:scale-105 uppercase tracking-wider"
+              className="bg-[#0A2A18] hover:bg-[#124227] text-white text-xs font-bold pl-4 pr-1.5 py-1.5 rounded-full shadow-lg transition-all transform hover:scale-105 uppercase tracking-wider flex items-center gap-2 group"
             >
-              Get Started
+              <span>Get Started</span>
+              <span className="h-6 w-6 rounded-full bg-white text-[#0A2A18] flex items-center justify-center shrink-0 group-hover:rotate-45 transition-transform">
+                <ArrowUpRight size={13} className="stroke-[2.5]" />
+              </span>
             </Link>
           </div>
         </header>
@@ -172,14 +175,14 @@ export default function LandingPage() {
                 Clean, science-backed medical intelligence designed to unify your prescriptions, lab reports, and doctor visits into one verified timeline.
               </p>
 
-              {/* Floating Circular Button (Exact VYORA Shop Now circle with arrow) */}
+              {/* Signature Action Button: Pill with White Arrow Circle */}
               <Link
                 to="/auth"
-                className="mt-6 group flex flex-col items-center justify-center h-20 w-20 rounded-full bg-[#0A2A18] hover:bg-[#14482B] text-white shadow-2xl transition-all transform hover:scale-110"
+                className="mt-6 group inline-flex items-center gap-3 bg-[#0A2A18] hover:bg-[#14482B] text-white text-xs font-bold pl-5 pr-2 py-2 rounded-full shadow-2xl transition-all transform hover:scale-105 tracking-wider uppercase"
               >
-                <ArrowUpRight size={22} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                <span className="text-[10px] font-bold uppercase tracking-wider mt-0.5">
-                  Start Now
+                <span>Start Now</span>
+                <span className="h-7 w-7 rounded-full bg-white text-[#0A2A18] flex items-center justify-center shrink-0 group-hover:rotate-45 transition-transform">
+                  <ArrowUpRight size={14} className="stroke-[2.5]" />
                 </span>
               </Link>
             </div>
@@ -285,9 +288,12 @@ export default function LandingPage() {
 
             <Link
               to="/auth"
-              className="bg-[#0A2A18] hover:bg-[#124227] text-white text-xs font-bold px-6 py-2.5 rounded-full transition-all self-start md:self-auto uppercase tracking-wider"
+              className="bg-[#0A2A18] hover:bg-[#124227] text-white text-xs font-bold pl-5 pr-2 py-2 rounded-full transition-all transform hover:scale-105 self-start md:self-auto uppercase tracking-wider flex items-center gap-2.5 shadow-md group"
             >
-              Explore Platform
+              <span>Explore Platform</span>
+              <span className="h-6 w-6 rounded-full bg-white text-[#0A2A18] flex items-center justify-center shrink-0 group-hover:rotate-45 transition-transform">
+                <ArrowUpRight size={13} className="stroke-[2.5]" />
+              </span>
             </Link>
           </div>
 
@@ -664,16 +670,22 @@ export default function LandingPage() {
             <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
               <Link
                 to="/auth"
-                className="bg-white hover:bg-slate-100 text-[#0A2A18] text-xs font-bold px-7 py-3 rounded-full shadow-xl transition uppercase tracking-wider"
+                className="bg-white hover:bg-slate-100 text-[#0A2A18] text-xs font-bold pl-5 pr-2 py-2 rounded-full shadow-xl transition-all transform hover:scale-105 uppercase tracking-wider flex items-center gap-2.5 group"
               >
-                Get Started Free
+                <span>Get Started Free</span>
+                <span className="h-6 w-6 rounded-full bg-[#0A2A18] text-white flex items-center justify-center shrink-0 group-hover:rotate-45 transition-transform">
+                  <ArrowUpRight size={13} className="stroke-[2.5]" />
+                </span>
               </Link>
 
               <Link
                 to="/login"
-                className="border border-white/40 hover:bg-white/10 text-white text-xs font-bold px-7 py-3 rounded-full transition uppercase tracking-wider"
+                className="bg-[#0A2A18] hover:bg-[#124227] text-white border border-white/30 text-xs font-bold pl-5 pr-2 py-2 rounded-full transition-all transform hover:scale-105 uppercase tracking-wider flex items-center gap-2.5 group shadow-lg"
               >
-                Provider Login
+                <span>Provider Login</span>
+                <span className="h-6 w-6 rounded-full bg-white text-[#0A2A18] flex items-center justify-center shrink-0 group-hover:rotate-45 transition-transform">
+                  <ArrowUpRight size={13} className="stroke-[2.5]" />
+                </span>
               </Link>
             </div>
           </div>
@@ -697,9 +709,12 @@ export default function LandingPage() {
               />
               <button
                 type="button"
-                className="bg-white text-[#0A2A18] text-xs font-bold px-5 py-2.5 rounded-full hover:bg-slate-100 transition whitespace-nowrap uppercase tracking-wider"
+                className="bg-white text-[#0A2A18] text-xs font-bold pl-4 pr-1.5 py-1.5 rounded-full hover:bg-slate-100 transition whitespace-nowrap uppercase tracking-wider flex items-center gap-2 group cursor-pointer shadow-sm"
               >
-                Subscribe
+                <span>Subscribe</span>
+                <span className="h-5 w-5 rounded-full bg-[#0A2A18] text-white flex items-center justify-center shrink-0 group-hover:rotate-45 transition-transform">
+                  <ArrowUpRight size={11} className="stroke-[2.5]" />
+                </span>
               </button>
             </div>
           </div>
