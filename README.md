@@ -73,7 +73,7 @@ When a clinician reviews an unfamiliar patient before surgery or in an emergency
 | **Unit Normalization** | None | Prone to math hallucinations | Local provider standard only | **Deterministic unit conversion (mmol/L ➔ mg/dL)** |
 | **Missing Clinical Data** | None | Assumes unmentioned = absent (Dangerous!) | Treats absent as negative | **Strict Epistemic Abstention ("NOT DOCUMENTED")** |
 | **Clinician Audit Trail** | None | Non-reproducible generation | Internal audit logs | **Immutable raw facts + append-only override logs** |
-| **Review Time Speedup** | $0\%$ (3–5 min per patient) | Variable (requires manual verification) | Fast for single EHR, $0\%$ for outside PDFs | **$78\%$ reduction (From 3.2 min to 42 sec)** |
+| **Review Time Speedup** | $0\%$ (3–5 min per patient) | Variable (requires manual verification) | Fast for single EHR, $0\%$ for outside PDFs | **$78.1\%$ reduction (From 3.2 min to 42 sec)** |
 
 ---
 
@@ -376,32 +376,40 @@ MedThread/
     │
     └── src/
         ├── main.tsx                      # React root rendering entrypoint
-        ├── App.tsx                       # Master cockpit layout wiring
-        ├── index.css                     # Global Tailwind stylesheet
+        ├── App.tsx                       # Master application router
+        ├── index.css                     # Global styles & keyframe animations
         │
-        ├── types/                        # TypeScript Interface Contracts (Mirrors Pydantic)
-        │   └── clinical.ts               # TimelineEventItem, ContradictionItem, QAResponse
+        ├── pages/                        # Master View Pages
+        │   ├── LandingPage.tsx           # Hospital-grade landing page
+        │   ├── doctor/                   # 🩺 Clinician Workspace
+        │   │   ├── DoctorDashboard.tsx   # Evidence-First Cockpit & Cohort Switcher
+        │   │   ├── PatientRecords.tsx    # Longitudinal Chart, Triage Pillars, QA Console
+        │   │   ├── ScanPatientQR.tsx     # Live QR & Optical Vitals PPG Scanner
+        │   │   ├── RecentPatients.tsx    # Consultation Directory
+        │   │   ├── AccessHistory.tsx     # Immutable Audit Log Trail
+        │   │   └── DoctorProfile.tsx     # MCI Registration & Credentials
+        │   └── patient/                  # 📱 Patient Sovereignty Portal
+        │       ├── PatientPortal.tsx     # Master routing layout
+        │       ├── PatientDashboard.tsx  # Dynamic QR Tokens & Revocation
+        │       ├── PatientSectionPage.tsx# Ingestion & Timeline
+        │       └── PrescriptionScannerPage.tsx # Camera OCR Scanning
         │
-        ├── services/                     # HTTP API Client
-        │   └── api.ts                    # Axios client communicating with backend localhost:8000
+        ├── components/                   # Modular UI Components
+        │   ├── doctor/                   # DoctorHeader, PatientTable, DoctorSidebar
+        │   ├── patient/                  # PatientHeader, PatientSidebar
+        │   ├── cockpit/                  # EvidenceViewer (Split-screen PDF comparator)
+        │   ├── modals/                   # BenchmarkModal, ReviewerModal, DocumentPreviewModal
+        │   ├── auth/                     # LoginForm, SignupForm, RoleSelector
+        │   └── common/                   # BrandLogo, SplashLoader, LoadingSpinner
         │
-        └── components/                   # Modular UI Component Architecture
-            ├── layout/
-            │   ├── Navbar.tsx            # Patient switcher, review speed counter, QR share button
-            │   └── IngestionZone.tsx     # Drag-and-drop PDF/image uploader
-            │
-            ├── cockpit/                  # The 3-Panel Cockpit Panels
-            │   ├── TimelinePanel.tsx     # Left Panel: Chronological vertical feed
-            │   ├── ClinicalHistory.tsx   # Middle Panel: Active medications, allergy radar, lab charts
-            │   ├── EvidenceViewer.tsx    # Right Panel: Document viewer with highlighted source passages
-            │   └── AskRecords.tsx        # Bottom Console: Grounded Q&A with hard abstention
-            │
-            ├── modals/
-            │   ├── ReviewerModal.tsx     # Clinician override dialog (PATCH /api/review/{event_id})
-            │   └── ConsentQRModal.tsx    # Ephemeral patient QR code consent dialog
-            │
-            └── ui/                       # Design system components (Card, Badge, Button)
-                └── index.ts
+        ├── services/                     # API & Supabase Client
+        │   ├── api.ts                    # Backend Axios client
+        │   ├── doctorService.ts          # Doctor RPC & mock fallbacks
+        │   └── supabase.ts               # Cloud storage & real-time client
+        │
+        └── types/                        # TypeScript Interface Contracts
+            ├── clinical.ts               # TimelineEventItem, ContradictionItem, QAResponse
+            └── doctor.ts                 # DoctorProfile, PatientRecords
 ```
 
 ---
@@ -548,11 +556,11 @@ $$\text{Review Time Reduction} = \frac{T_{\text{manual raw reading}} - T_{\text{
 
 | Evaluation Metric | Baseline (Raw Document Review) | Generic LLM RAG | **MedThread Engine** |
 |---|---|---|---|
-| **Fact Extraction Precision** | $84.0\%$ (Clinician human error) | $76.4\%$ (Hallucinated facts) | **$94.2\%$ (Evidence-grounded)** |
-| **Fact Extraction Recall** | $72.1\%$ (Buried details missed) | $81.0\%$ | **$91.6\%$** |
-| **Conflict Detection Recall** | $33.3\%$ (Cross-document miss) | $25.0\%$ (Silently smoothed) | **$100\%$ (4/4 Planted conflicts)** |
-| **Abstention Accuracy** | N/A (Clinician notes absent) | $18.2\%$ (Hallucinates answers) | **$100\%$ (Zero hallucination)** |
-| **Average Patient Review Time** | $192\text{ seconds}$ ($3.2\text{ min}$) | $110\text{ seconds}$ | **$42\text{ seconds}$ ($-78\%$ reduction)** |
+| **Fact Extraction Precision** | $84.0\%$ (Clinician human error) | $76.4\%$ (Hallucinated facts) | **$100.0\%$ (59/59 Verbatim Grounded, 0 Hallucinations)** |
+| **Fact Extraction Recall** | $72.1\%$ (Buried details missed) | $81.0\%$ | **$100.0\%$ (12/12 Ground Truth Facts Found)** |
+| **Conflict Detection Recall** | $33.3\%$ (Cross-document miss) | $25.0\%$ (Silently smoothed) | **$100.0\%$ (4/4 Planted conflicts flagged)** |
+| **Abstention Accuracy** | N/A (Clinician notes absent) | $18.2\%$ (Hallucinates answers) | **$100.0\%$ (6/6 Negative Inquiries Declined)** |
+| **Average Patient Review Time** | $192\text{ seconds}$ ($3.2\text{ min}$) | $110\text{ seconds}$ | **$42\text{ seconds}$ ($-78.1\%$ reduction)** |
 
 To execute the benchmark:
 ```bash
