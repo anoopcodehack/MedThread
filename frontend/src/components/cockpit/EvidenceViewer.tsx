@@ -28,13 +28,15 @@ interface EvidenceViewerProps {
   onClose: () => void;
   contradiction: ContradictionEvidence | null;
   onOpenReviewOverride?: () => void;
+  patientId?: number;
 }
 
 export const EvidenceViewer: React.FC<EvidenceViewerProps> = ({
   isOpen,
   onClose,
   contradiction,
-  onOpenReviewOverride
+  onOpenReviewOverride,
+  patientId = 101
 }) => {
   if (!isOpen || !contradiction) return null;
 
@@ -119,13 +121,24 @@ export const EvidenceViewer: React.FC<EvidenceViewerProps> = ({
             <div className="px-4 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <FileText className="h-4 w-4 text-slate-600" />
-                <span className="font-bold text-slate-800 text-xs truncate max-w-[220px]" title={contradiction.doc1_name}>
+                <span className="font-bold text-slate-800 text-xs truncate max-w-[200px]" title={contradiction.doc1_name}>
                   {contradiction.doc1_name}
                 </span>
               </div>
-              <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-slate-200 text-slate-700">
-                Primary Record
-              </span>
+              <div className="flex items-center gap-2">
+                <a
+                  href={`http://localhost:8000/api/documents/raw/${patientId}/${contradiction.doc1_name}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[10px] font-bold text-forest bg-forest/10 hover:bg-forest/20 px-2 py-0.5 rounded transition"
+                  title="Stream original PDF"
+                >
+                  View PDF ↗
+                </a>
+                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-slate-200 text-slate-700">
+                  Primary Record
+                </span>
+              </div>
             </div>
 
             <div className="p-4 flex-1 flex flex-col justify-between space-y-4">
@@ -161,13 +174,24 @@ export const EvidenceViewer: React.FC<EvidenceViewerProps> = ({
             <div className="px-4 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <FileText className="h-4 w-4 text-slate-600" />
-                <span className="font-bold text-slate-800 text-xs truncate max-w-[220px]" title={contradiction.doc2_name}>
+                <span className="font-bold text-slate-800 text-xs truncate max-w-[200px]" title={contradiction.doc2_name}>
                   {contradiction.doc2_name}
                 </span>
               </div>
-              <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-rose-100 text-rose-700">
-                Conflicting Record
-              </span>
+              <div className="flex items-center gap-2">
+                <a
+                  href={`http://localhost:8000/api/documents/raw/${patientId}/${contradiction.doc2_name}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[10px] font-bold text-rose-700 bg-rose-100 hover:bg-rose-200 px-2 py-0.5 rounded transition"
+                  title="Stream original PDF"
+                >
+                  View PDF ↗
+                </a>
+                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-rose-100 text-rose-700">
+                  Conflicting Record
+                </span>
+              </div>
             </div>
 
             <div className="p-4 flex-1 flex flex-col justify-between space-y-4">

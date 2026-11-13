@@ -426,7 +426,7 @@ export default function PatientRecords() {
                 </div>
                 {item.url ? (
                   <a 
-                    href={item.url} 
+                    href={item.url.startsWith("http") ? item.url : `http://localhost:8000${item.url}`} 
                     target="_blank" 
                     rel="noopener noreferrer" 
                     className="inline-flex items-center gap-1 text-sm font-bold text-forest hover:underline"
@@ -459,6 +459,7 @@ export default function PatientRecords() {
       <EvidenceViewer
         isOpen={Boolean(selectedContradictionForComparison)}
         contradiction={selectedContradictionForComparison}
+        patientId={numericId}
         onClose={() => setSelectedContradictionForComparison(null)}
         onOpenReviewOverride={() => {
           setSelectedEventForReview({
