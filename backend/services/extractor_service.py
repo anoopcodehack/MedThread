@@ -48,20 +48,24 @@ def fallback_gemini_vision_ocr(file_path: str) -> str:
     """
     Invokes Gemini Vision to perform OCR on scanned image reports or phone photos.
     """
-    if not settings.GEMINI_API_KEY:
+    if not settings.GEMINI_API_KEY or settings.GEMINI_API_KEY.startswith("your_gemini") or len(settings.GEMINI_API_KEY) < 10:
         return "[OCR Fallback Notice]: Scanned document detected. Gemini API key not configured; using layout heuristics."
         
     try:
+        import mimetypes
         from google import genai
         client = genai.Client(api_key=settings.GEMINI_API_KEY)
         with open(file_path, "rb") as f:
             file_bytes = f.read()
             
+        mime_type, _ = mimetypes.guess_type(file_path)
+        mime_type = mime_type or "application/pdf"
+            
         response = client.models.generate_content(
             model=settings.GEMINI_MODEL,
             contents=[
                 "Transcribe all handwritten and printed clinical text from this medical record verbatim. Preserve exact dates, medication names, dosages, and lab units.",
-                {"mime_type": "application/pdf", "data": file_bytes}
+                {"mime_type": mime_type, "data": file_bytes}
             ]
         )
         return response.text or ""
