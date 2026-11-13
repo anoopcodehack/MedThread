@@ -41,8 +41,9 @@ export default function PatientPortal({ patientId }: Props) {
   const [activePage, setActivePage] = useState<PatientPage>("dashboard");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [patients, setPatients] = useState<PatientSummary[]>([]);
+  const storedId = typeof window !== "undefined" ? Number(sessionStorage.getItem("medthread.authenticatedPatientId")) : undefined;
   const [selectedPatientId, setSelectedPatientId] = useState<number | undefined>(
-    patientId,
+    patientId || (storedId && !isNaN(storedId) ? storedId : 101)
   );
   const [patientListState, setPatientListState] =
     useState<PatientListState>("loading");
@@ -63,11 +64,12 @@ export default function PatientPortal({ patientId }: Props) {
         if (!active) return;
         setPatients(items);
         setSelectedPatientId((current) => {
-          const preferredId = patientId ?? current;
+          const storedPatientId = Number(sessionStorage.getItem("medthread.authenticatedPatientId"));
+          const preferredId = patientId ?? (storedPatientId || current || 101);
           return preferredId !== undefined &&
             items.some((patient) => patient.id === preferredId)
             ? preferredId
-            : undefined;
+            : (items[0]?.id || 101);
         });
         setPatientListState("ready");
       })

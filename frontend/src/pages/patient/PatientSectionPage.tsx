@@ -372,7 +372,7 @@ export default function PatientSectionPage({ page, patientId }: Props) {
         </div>
 
         {isFeatureUnavailable ? (
-          <FeatureUnavailable page={page} />
+          <FeatureUnavailable page={page} patientId={patientId} />
         ) : loadState === "unavailable" ? (
           <UnavailablePatient />
         ) : (
@@ -783,14 +783,14 @@ function EventCard({
   );
 }
 
-function FeatureUnavailable({ page }: { page: "access" | "profile" }) {
+function FeatureUnavailable({ page, patientId = 101 }: { page: "access" | "profile"; patientId?: number }) {
   if (page === "access") {
-    return <ShareAndAccessHub />;
+    return <ShareAndAccessHub patientId={patientId} />;
   }
-  return <ProfileAndCaregiversHub />;
+  return <ProfileAndCaregiversHub patientId={patientId} />;
 }
 
-function ShareAndAccessHub() {
+function ShareAndAccessHub({ patientId = 101 }: { patientId?: number }) {
   const [passDuration, setPassDuration] = useState<string>("24h");
   const [copied, setCopied] = useState<boolean>(false);
   const [revokedIds, setRevokedIds] = useState<string[]>([]);
@@ -822,7 +822,7 @@ function ShareAndAccessHub() {
         const { data } = await supabase
           .from("access_grants")
           .select("*")
-          .eq("patient_id", 101);
+          .eq("patient_id", patientId);
         if (data && data.length > 0) {
           setProviders(
             data.map((g: any) => ({
@@ -841,7 +841,7 @@ function ShareAndAccessHub() {
       }
     }
     loadAccessGrants();
-  }, []);
+  }, [patientId]);
 
   const handleCopy = () => {
     setCopied(true);
@@ -1015,29 +1015,42 @@ function ShareAndAccessHub() {
   );
 }
 
-function ProfileAndCaregiversHub() {
+function ProfileAndCaregiversHub({ patientId = 101 }: { patientId?: number }) {
   const [unitSystem, setUnitSystem] = useState<"standard" | "international">("standard");
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteName, setInviteName] = useState("");
   const [inviteRel, setInviteRel] = useState("Adult Son");
-  const [caregivers, setCaregivers] = useState([
-    {
-      id: "cg-1",
-      name: "Anoop Sharma",
-      relationship: "Adult Son (Primary Caregiver)",
-      phone: "+91 98765 43210",
-      accessLevel: "Full Management & Ingestion",
-      status: "Active",
-    },
-    {
-      id: "cg-2",
-      name: "Priya Sharma",
-      relationship: "Daughter (Secondary Caregiver)",
-      phone: "+91 98765 12345",
-      accessLevel: "Read-Only & Alerts",
-      status: "Active",
-    },
-  ]);
+
+  const PROFILES_BY_ID: Record<number, { name: string; age: number; dob: string; blood: string; tag: string; caregiverDesc: string; chronic: string }> = {
+    101: { name: "Rajesh Sharma", age: 72, dob: "14 Aug 1952", blood: "O+", tag: "Elderly Parent Caregiver Dossier", caregiverDesc: "Primary Caregiver: Anoop Sharma (Son)", chronic: "Type-2 Diabetes, Hypertension, Coronary Artery Disease" },
+    102: { name: "Priya Patel", age: 32, dob: "22 Mar 1992", blood: "B+", tag: "Patient Self-Sovereign Dossier", caregiverDesc: "Emergency Contact: Rajesh Patel (Father)", chronic: "Asthma, Allergic Rhinitis, Documented Ceftriaxone Anaphylaxis" },
+    103: { name: "Vikram Malhotra", age: 55, dob: "11 Nov 1969", blood: "A+", tag: "Cardio-Metabolic Patient Dossier", caregiverDesc: "Emergency Contact: Sunita Malhotra (Spouse)", chronic: "Dyslipidemia, Essential Hypertension" },
+    104: { name: "Mohammed Irfan", age: 64, dob: "05 Jun 1960", blood: "O-", tag: "Renal & Glycemic Patient Dossier", caregiverDesc: "Emergency Contact: Tariq Irfan (Son)", chronic: "Type-2 Diabetes, Chronic Kidney Disease Stage 2" },
+    105: { name: "David Fernandes", age: 29, dob: "18 Sep 1995", blood: "AB+", tag: "Preventive Care Patient Dossier", caregiverDesc: "Emergency Contact: Maria Fernandes (Spouse)", chronic: "Nil Known Chronic Conditions (Baseline)" },
+  };
+
+  const currentProfile = PROFILES_BY_ID[patientId] || PROFILES_BY_ID[101];
+
+  const defaultCaregiversByPatient: Record<number, any[]> = {
+    101: [
+      { id: "cg-1", name: "Anoop Sharma", relationship: "Adult Son (Primary Caregiver)", phone: "+91 98765 43210", accessLevel: "Full Management & Ingestion", status: "Active" },
+      { id: "cg-2", name: "Priya Sharma", relationship: "Daughter (Secondary Caregiver)", phone: "+91 98765 12345", accessLevel: "Read-Only & Alerts", status: "Active" },
+    ],
+    102: [
+      { id: "cg-102-1", name: "Rajesh Patel", relationship: "Father (Emergency Contact)", phone: "+91 98220 54321", accessLevel: "Emergency Alerts", status: "Active" },
+    ],
+    103: [
+      { id: "cg-103-1", name: "Sunita Malhotra", relationship: "Spouse (Primary Contact)", phone: "+91 98110 99887", accessLevel: "Full Management", status: "Active" },
+    ],
+    104: [
+      { id: "cg-104-1", name: "Tariq Irfan", relationship: "Son (Primary Caregiver)", phone: "+91 98450 11223", accessLevel: "Full Management", status: "Active" },
+    ],
+    105: [
+      { id: "cg-105-1", name: "Maria Fernandes", relationship: "Spouse (Primary Contact)", phone: "+91 98900 33445", accessLevel: "Full Management", status: "Active" },
+    ],
+  };
+
+  const [caregivers, setCaregivers] = useState(defaultCaregiversByPatient[patientId] || defaultCaregiversByPatient[101]);
 
   useEffect(() => {
     async function loadFromSupabase() {
@@ -1046,7 +1059,7 @@ function ProfileAndCaregiversHub() {
         const { data } = await supabase
           .from("caregivers")
           .select("*")
-          .eq("patient_id", 101);
+          .eq("patient_id", patientId);
         if (data && data.length > 0) {
           setCaregivers(
             data.map((c: any) => ({
@@ -1064,7 +1077,7 @@ function ProfileAndCaregiversHub() {
       }
     }
     loadFromSupabase();
-  }, []);
+  }, [patientId]);
 
   const handleAddCaregiver = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1085,7 +1098,7 @@ function ProfileAndCaregiversHub() {
       const supabase = getSupabaseClient();
       await supabase.from("caregivers").insert([
         {
-          patient_id: 101,
+          patient_id: patientId,
           caregiver_name: newCaregiver.name,
           relationship: newCaregiver.relationship,
           phone_number: newCaregiver.phone,
@@ -1106,24 +1119,24 @@ function ProfileAndCaregiversHub() {
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-emerald-800 text-white">
-                Elderly Parent Caregiver Dossier
+                {currentProfile.tag}
               </span>
               <span className="text-xs font-semibold text-emerald-900">
-                Primary Caregiver: Anoop Sharma (Son)
+                {currentProfile.caregiverDesc}
               </span>
             </div>
 
             <h2 className="font-heading font-black text-2xl sm:text-3xl text-slate-900 tracking-tight">
-              Ramesh Sharma
+              {currentProfile.name}
             </h2>
 
             <p className="text-xs sm:text-sm text-slate-600 max-w-xl leading-relaxed">
-              Age 72 • Born 14 Aug 1952 • Blood Group: O+ • Managing 12 years of complex chronic medical records across 4 hospital facilities.
+              Age {currentProfile.age} • Born {currentProfile.dob} • Blood Group: {currentProfile.blood} • Managing verified medical records across hospital facilities.
             </p>
 
             <div className="flex flex-wrap items-center gap-4 pt-2 text-xs text-slate-700">
               <span className="font-semibold text-emerald-900">
-                Chronic Conditions: Type-2 Diabetes, Hypertension, Coronary Artery Disease
+                Documented Conditions: {currentProfile.chronic}
               </span>
             </div>
           </div>

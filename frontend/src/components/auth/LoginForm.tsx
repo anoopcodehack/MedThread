@@ -1,14 +1,20 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { Stethoscope, UserRound, Check, ShieldCheck, ShieldAlert } from "lucide-react";
+import { Stethoscope, UserRound, Check, ShieldCheck, ShieldAlert, ArrowRight } from "lucide-react";
 import { signInWithEmail, getRoleLandingPath } from "../../services/authService";
 import GoogleAuthButton from "./GoogleAuthButton";
 import type { UserRole } from "../../types/auth";
 
 const DEMO_DOCTOR_EMAIL = import.meta.env.VITE_DEMO_DOCTOR_EMAIL || "doctor@medthread.io";
 const DEMO_DOCTOR_PWD = import.meta.env.VITE_DEMO_DOCTOR_PASSWORD || "DoctorDemo2026!";
-const DEMO_PATIENT_EMAIL = import.meta.env.VITE_DEMO_PATIENT_EMAIL || "patient@medthread.io";
-const DEMO_PATIENT_PWD = import.meta.env.VITE_DEMO_PATIENT_PASSWORD || "PatientDemo2026!";
+
+export const PATIENT_ACCOUNTS = [
+  { id: 101, name: "Rajesh Sharma", code: "PAT-101", email: "sharma@medthread.io", desc: "Elderly Parent (12 yrs)" },
+  { id: 102, name: "Priya Patel", code: "PAT-102", email: "patel@medthread.io", desc: "Asthma & Allergy Profile" },
+  { id: 103, name: "Vikram Malhotra", code: "PAT-103", email: "malhotra@medthread.io", desc: "Cardiology & Statin" },
+  { id: 104, name: "Mohammed Irfan", code: "PAT-104", email: "irfan@medthread.io", desc: "Renal & Glycemic" },
+  { id: 105, name: "David Fernandes", code: "PAT-105", email: "david@medthread.io", desc: "Clean Baseline Checkup" },
+];
 
 export default function LoginForm() {
   const navigate = useNavigate();
@@ -24,17 +30,18 @@ export default function LoginForm() {
       setEmail(DEMO_DOCTOR_EMAIL);
       setPassword(DEMO_DOCTOR_PWD);
     } else {
-      setEmail(DEMO_PATIENT_EMAIL);
-      setPassword(DEMO_PATIENT_PWD);
+      setEmail("sharma@medthread.io");
+      setPassword("PatientDemo2026!");
     }
     setError("");
   };
 
-  const handleDirectDemoLogin = (role: "doctor" | "patient") => {
+  const handleDirectDemoLogin = (role: "doctor" | "patient", patientId?: number) => {
     sessionStorage.setItem("medthread.currentRole", role);
     if (role === "doctor") {
       navigate("/doctor", { replace: true });
     } else {
+      sessionStorage.setItem("medthread.authenticatedPatientId", String(patientId || 101));
       navigate("/patient", { replace: true });
     }
   };
@@ -46,7 +53,7 @@ export default function LoginForm() {
 
     const cleanEmail = email.trim().toLowerCase();
 
-    // 1. Instant match for demo accounts
+    // 1. Instant match for demo doctor
     if (
       (cleanEmail === DEMO_DOCTOR_EMAIL.toLowerCase() || cleanEmail.includes("doctor")) &&
       selectedRole === "doctor"
@@ -56,22 +63,33 @@ export default function LoginForm() {
       return;
     }
 
-    if (
-      (cleanEmail === DEMO_PATIENT_EMAIL.toLowerCase() || cleanEmail.includes("patient")) &&
-      selectedRole === "patient"
-    ) {
+    // 2. Individual Patient Matching
+    if (selectedRole === "patient") {
+      let matchedPatientId = 101;
+      if (cleanEmail.includes("102") || cleanEmail.includes("patel") || cleanEmail.includes("priya")) {
+        matchedPatientId = 102;
+      } else if (cleanEmail.includes("103") || cleanEmail.includes("malhotra") || cleanEmail.includes("vikram")) {
+        matchedPatientId = 103;
+      } else if (cleanEmail.includes("104") || cleanEmail.includes("irfan") || cleanEmail.includes("mohammed")) {
+        matchedPatientId = 104;
+      } else if (cleanEmail.includes("105") || cleanEmail.includes("fernandes") || cleanEmail.includes("david")) {
+        matchedPatientId = 105;
+      } else {
+        matchedPatientId = 101;
+      }
+
       sessionStorage.setItem("medthread.currentRole", "patient");
+      sessionStorage.setItem("medthread.authenticatedPatientId", String(matchedPatientId));
       navigate("/patient", { replace: true });
       return;
     }
 
-    // 2. Cloud Supabase authentication with graceful local demo fallback
+    // 3. Cloud Supabase authentication with graceful local demo fallback
     try {
       const user = await signInWithEmail(cleanEmail, password);
       const targetRole = (user.user_metadata?.role as UserRole) || selectedRole;
       navigate(getRoleLandingPath(targetRole), { replace: true });
     } catch (reason) {
-      // If cloud auth is unreachable or offline, allow demo authentication using the selected role
       if (password.length >= 4) {
         console.warn("Supabase auth offline, proceeding with local role session:", reason);
         sessionStorage.setItem("medthread.currentRole", selectedRole);
@@ -192,6 +210,38 @@ export default function LoginForm() {
             <ShieldAlert size={16} className="shrink-0" />
             <span>{error}</span>
           </p>
+        )}
+
+        {/* If Patient selected, show 5 individual patient accounts */}
+        {selectedRole === "patient" && (
+          <div className="space-y-1.5 pt-1">
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-[#344C3A]">
+              Quick Access: 5 Individual Patient Accounts
+            </label>
+            <div className="space-y-1.5">
+              {PATIENT_ACCOUNTS.map((pat) => (
+                <button
+                  key={pat.id}
+                  type="button"
+                  onClick={() => handleDirectDemoLogin("patient", pat.id)}
+                  className="w-full p-2.5 rounded-xl border border-[#DCE5DA] bg-[#F7FAF6] hover:bg-[#E8F2E6] hover:border-forest/40 text-left transition flex items-center justify-between group"
+                >
+                  <div className="truncate pr-2">
+                    <div className="font-bold text-xs text-slate-900 group-hover:text-forest flex items-center gap-1.5">
+                      <span>{pat.name}</span>
+                      <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-white text-slate-500 border border-slate-200">
+                        {pat.code}
+                      </span>
+                    </div>
+                    <div className="text-[10px] text-slate-500 truncate mt-0.5">
+                      {pat.desc} • <span className="font-mono text-[10px] text-emerald-800">{pat.email}</span>
+                    </div>
+                  </div>
+                  <ArrowRight size={13} className="text-slate-400 group-hover:text-forest shrink-0" />
+                </button>
+              ))}
+            </div>
+          </div>
         )}
 
         <button

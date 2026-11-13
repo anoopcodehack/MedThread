@@ -68,6 +68,51 @@ export default function PatientDashboard({ patientId = 101, onUploadSuccess, onN
   const [medCount, setMedCount] = useState<number>(3);
   const [isCameraScannerOpen, setIsCameraScannerOpen] = useState(false);
 
+  const PATIENT_BANNER_DATA: Record<number, { name: string; age: number; badge: string; sub: string; desc: string; hospitalCount: number }> = {
+    101: {
+      name: "Rajesh Sharma",
+      age: 72,
+      badge: "Caregiver Mode Active",
+      sub: "Primary Caregiver: Anoop Sharma (Son) • Managing Parent Dossier",
+      desc: "Stitching 10+ years of complex illnesses (Type-2 Diabetes, Hypertension, Coronary Artery Disease) across 4 hospital facilities. No more carrying thick plastic bags of crumpled papers to consultations.",
+      hospitalCount: 4,
+    },
+    102: {
+      name: "Priya Patel",
+      age: 32,
+      badge: "Patient Portal Active",
+      sub: "Emergency Contact: Rajesh Patel (Father)",
+      desc: "Longitudinal Asthma & Allergy Profile. Reconciles 2022 health checkup with 2024 emergency Ceftriaxone allergy records across healthcare providers.",
+      hospitalCount: 2,
+    },
+    103: {
+      name: "Vikram Malhotra",
+      age: 55,
+      badge: "Patient Portal Active",
+      sub: "Emergency Contact: Sunita Malhotra (Spouse)",
+      desc: "Cardio-Metabolic Management & Statin Titration across City Heart Center and Apollo Specialty Clinic.",
+      hospitalCount: 3,
+    },
+    104: {
+      name: "Mohammed Irfan",
+      age: 64,
+      badge: "Patient Portal Active",
+      sub: "Emergency Contact: Tariq Irfan (Son)",
+      desc: "Renal Panel Tracking & Blood Glucose Monitoring across 4 independent healthcare networks.",
+      hospitalCount: 4,
+    },
+    105: {
+      name: "David Fernandes",
+      age: 29,
+      badge: "Patient Portal Active",
+      sub: "Emergency Contact: Maria Fernandes (Spouse)",
+      desc: "Baseline Wellness & Routine Health Examinations with verified document citations.",
+      hospitalCount: 1,
+    },
+  };
+
+  const banner = PATIENT_BANNER_DATA[patientId] || PATIENT_BANNER_DATA[101];
+
   useEffect(() => {
     let active = true;
     Promise.all([
@@ -130,21 +175,21 @@ export default function PatientDashboard({ patientId = 101, onUploadSuccess, onN
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-2">
             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-emerald-800 text-white shadow-xs">
-              Caregiver Mode Active
+              {banner.badge}
             </span>
             <span className="text-xs font-bold text-emerald-950">
-              Primary Caregiver: Anoop Sharma (Son) • Managing Parent Dossier
+              {banner.sub}
             </span>
           </div>
           <h2 className="font-heading font-extrabold text-xl sm:text-2xl text-slate-900">
-            Ramesh Sharma (Age 72) • 12 Years of Medical Records Synthesized
+            {banner.name} (Age {banner.age}) • {banner.hospitalCount} Hospital Files Unified
           </h2>
           <p className="text-xs text-slate-600 max-w-2xl leading-relaxed">
-            Stitching 10+ years of complex illnesses (Type-2 Diabetes, Hypertension, Coronary Artery Disease) across 4 hospital facilities. No more carrying thick plastic bags of crumpled papers to consultations.
+            {banner.desc}
           </p>
           <div className="flex flex-wrap items-center gap-4 pt-1 text-[11px] font-semibold text-slate-700">
             <span className="flex items-center gap-1.5 text-emerald-800">
-              <CheckCircle2 size={14} className="text-emerald-600" /> 4 Hospital Files Unified
+              <CheckCircle2 size={14} className="text-emerald-600" /> {banner.hospitalCount} Hospital Files Unified
             </span>
             <span className="flex items-center gap-1.5 text-emerald-800">
               <CheckCircle2 size={14} className="text-emerald-600" /> Active vs Discontinued Meds Clarified
