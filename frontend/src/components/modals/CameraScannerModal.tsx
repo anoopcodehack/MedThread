@@ -9,7 +9,6 @@ import {
   FileCheck,
   RefreshCw,
   AlertCircle,
-  FileText,
 } from "lucide-react";
 import { api } from "../../services/api";
 
@@ -66,7 +65,7 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       setErrorMessage(
-        "Camera API is not supported in this browser context (requires HTTPS or localhost). Please select an image or click 'Use Sample Rx'."
+        "Camera API is not supported in this browser context (requires HTTPS or localhost). Please select an image file."
       );
       return;
     }
@@ -105,15 +104,15 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
 
       if (isDenied) {
         setErrorMessage(
-          "Camera permission was denied in your browser. Please allow camera permissions or upload an image / use sample prescription."
+          "Camera permission was denied in your browser. Please allow camera permissions or select an image file."
         );
       } else if (isNotFound) {
         setErrorMessage(
-          "No camera hardware detected on this machine. Click 'Select Image' or 'Use Sample Rx' to test."
+          "No camera hardware detected. Please click 'Select Image' to upload a document."
         );
       } else {
         setErrorMessage(
-          "Could not open camera stream. Please use file upload or click 'Use Sample Rx' below."
+          "Could not open camera stream. Please select an image file instead."
         );
       }
       setStreamActive(false);
@@ -172,175 +171,6 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
     }
   };
 
-  const loadSamplePrescription = () => {
-    const canvas = document.createElement("canvas");
-    canvas.width = 900;
-    canvas.height = 1200;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    // Background paper texture
-    ctx.fillStyle = "#FAF9F5";
-    ctx.fillRect(0, 0, 900, 1200);
-
-    // Header border
-    ctx.fillStyle = "#164A32";
-    ctx.fillRect(40, 40, 820, 110);
-
-    // Clinic text
-    ctx.fillStyle = "#FFFFFF";
-    ctx.font = "bold 26px sans-serif";
-    ctx.fillText("APOLLO SPECIALTY HOSPITALS", 60, 85);
-    ctx.font = "14px sans-serif";
-    ctx.fillStyle = "#D4E8DC";
-    ctx.fillText("DEPARTMENT OF CARDIOLOGY & METABOLIC HEALTH", 60, 115);
-    ctx.fillText("Reg. No: AP-BLR-2024-9482 • NABH Accredited", 60, 135);
-
-    // Doctor details
-    ctx.fillStyle = "#1E293B";
-    ctx.font = "bold 16px sans-serif";
-    ctx.fillText("Dr. Ananya Rao, MD, DM (Cardiology)", 60, 190);
-    ctx.font = "13px sans-serif";
-    ctx.fillStyle = "#64748B";
-    ctx.fillText("Senior Interventional Cardiologist • MCI-KA-2018-44912", 60, 210);
-
-    // Divider
-    ctx.strokeStyle = "#CBD5E1";
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(40, 230);
-    ctx.lineTo(860, 230);
-    ctx.stroke();
-
-    // Patient Info
-    const patientNames: Record<
-      number,
-      { name: string; age: number; gender: string }
-    > = {
-      101: { name: "Rajesh Sharma", age: 72, gender: "Male" },
-      102: { name: "Priya Patel", age: 32, gender: "Female" },
-      103: { name: "Vikram Malhotra", age: 55, gender: "Male" },
-      104: { name: "Mohammed Irfan", age: 64, gender: "Male" },
-      105: { name: "David Fernandes", age: 29, gender: "Male" },
-    };
-    const pat = patientNames[patientId] || patientNames[101];
-
-    ctx.fillStyle = "#0F172A";
-    ctx.font = "bold 15px sans-serif";
-    ctx.fillText(`Patient: ${pat.name} (${pat.age}y / ${pat.gender})`, 60, 260);
-    ctx.font = "13px sans-serif";
-    ctx.fillStyle = "#475569";
-    ctx.fillText(`Date: 12-Nov-2024 | ID: PAT-${patientId}`, 600, 260);
-    ctx.fillText("BP: 138/84 mmHg  |  Pulse: 74 bpm  |  HbA1c: 7.2%", 60, 285);
-
-    ctx.beginPath();
-    ctx.moveTo(40, 310);
-    ctx.lineTo(860, 310);
-    ctx.stroke();
-
-    // Rx Symbol
-    ctx.font = "bold 44px serif";
-    ctx.fillStyle = "#164A32";
-    ctx.fillText("Rx", 60, 370);
-
-    // Medications
-    ctx.font = "bold 16px sans-serif";
-    ctx.fillStyle = "#0F172A";
-    ctx.fillText("1. Tab. Metformin Hydrochloride 500 mg", 120, 360);
-    ctx.font = "13px sans-serif";
-    ctx.fillStyle = "#475569";
-    ctx.fillText(
-      "    Sig: 1 tablet twice daily orally after meals (Morning & Evening) [Ref: Glycemic Control]",
-      120,
-      385
-    );
-
-    ctx.font = "bold 16px sans-serif";
-    ctx.fillStyle = "#0F172A";
-    ctx.fillText("2. Tab. Telmisartan 40 mg", 120, 430);
-    ctx.font = "13px sans-serif";
-    ctx.fillStyle = "#475569";
-    ctx.fillText(
-      "    Sig: 1 tablet once daily morning with water [Ref: Essential Hypertension]",
-      120,
-      455
-    );
-
-    ctx.font = "bold 16px sans-serif";
-    ctx.fillStyle = "#0F172A";
-    ctx.fillText("3. Tab. Atorvastatin 20 mg", 120, 500);
-    ctx.font = "13px sans-serif";
-    ctx.fillStyle = "#475569";
-    ctx.fillText(
-      "    Sig: 1 tablet once daily at bedtime [Ref: Lipid Titration & Plaque Stabilization]",
-      120,
-      525
-    );
-
-    // Clinical Instructions
-    ctx.font = "bold 15px sans-serif";
-    ctx.fillStyle = "#0F172A";
-    ctx.fillText("Advice & Follow-up:", 60, 600);
-    ctx.font = "13px sans-serif";
-    ctx.fillStyle = "#334155";
-    ctx.fillText(
-      "• Continue diabetic renal diet; low salt (< 4g/day); avoid NSAIDs.",
-      60,
-      630
-    );
-    ctx.fillText(
-      "• Repeat Serum Creatinine and Fasting Lipid Profile in 8 weeks.",
-      60,
-      655
-    );
-    ctx.fillText(
-      "• Follow-up consultation with Dr. Ananya Rao in 2 months or SOS.",
-      60,
-      680
-    );
-
-    // Verification Watermark / Stamp
-    ctx.save();
-    ctx.translate(620, 820);
-    ctx.rotate(-0.15);
-    ctx.strokeStyle = "#164A32";
-    ctx.lineWidth = 3;
-    ctx.strokeRect(-120, -40, 240, 80);
-    ctx.fillStyle = "#164A32";
-    ctx.font = "bold 14px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("APOLLO HOSPITALS", 0, -10);
-    ctx.font = "11px sans-serif";
-    ctx.fillText("VERIFIED CLINICAL RECORD", 0, 10);
-    ctx.fillText("12-NOV-2024", 0, 25);
-    ctx.restore();
-
-    // Doctor Signature
-    ctx.font = "italic 22px cursive";
-    ctx.fillStyle = "#0F172A";
-    ctx.fillText("Dr. Ananya Rao, MD", 600, 950);
-    ctx.font = "12px sans-serif";
-    ctx.fillStyle = "#64748B";
-    ctx.fillText("Authorized Signatory", 600, 970);
-
-    const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
-    setCapturedImage(dataUrl);
-
-    fetch(dataUrl)
-      .then((res) => res.blob())
-      .then((blob) => {
-        const file = new File(
-          [blob],
-          `Prescription_Apollo_PAT${patientId}_${Date.now()}.jpg`,
-          { type: "image/jpeg" }
-        );
-        setCapturedFile(file);
-      });
-
-    stopCamera();
-    setErrorMessage(null);
-  };
-
   const handleProcessScan = async () => {
     if (!capturedFile) return;
 
@@ -382,25 +212,20 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="w-full max-w-xl rounded-2xl bg-white shadow-2xl border border-slate-200 flex flex-col overflow-hidden">
-        {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 p-4 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto">
+      <div className="w-full max-w-lg max-h-[90vh] my-auto rounded-2xl bg-white shadow-2xl border border-slate-200 flex flex-col overflow-hidden">
+        {/* Header - Always Fixed at Top */}
+        <div className="shrink-0 px-5 sm:px-6 py-4 border-b border-slate-100 bg-white flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-forest/10 text-forest">
               <Camera className="h-5 w-5" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h3 className="font-heading font-extrabold text-forest text-lg">
-                  Optical Prescription &amp; Document Scanner
-                </h3>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-forest/10 text-forest">
-                  Live OCR Ingestion
-                </span>
-              </div>
+              <h3 className="font-heading font-extrabold text-forest text-base sm:text-lg">
+                Document Scanner
+              </h3>
               <p className="text-xs text-muted font-medium mt-0.5">
-                Capture paper prescriptions or lab reports for deterministic timeline stitching
+                Capture paper prescriptions or reports directly
               </p>
             </div>
           </div>
@@ -410,15 +235,15 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
               stopCamera();
               onClose();
             }}
-            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded-lg transition"
+            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition cursor-pointer"
             title="Close scanner"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        {/* Viewfinder Body */}
-        <div className="p-6 space-y-4">
+        {/* Viewfinder Body - Scrollable if constrained, never expands parent */}
+        <div className="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1 min-h-0">
           {errorMessage && (
             <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 flex items-start gap-2">
               <AlertCircle className="h-4 w-4 shrink-0 text-amber-700 mt-0.5" />
@@ -426,7 +251,7 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
             </div>
           )}
 
-          <div className="relative aspect-4/3 w-full rounded-2xl bg-slate-900 border-2 border-dashed border-slate-700 flex flex-col items-center justify-center overflow-hidden">
+          <div className="relative h-[280px] sm:h-[340px] w-full rounded-2xl bg-slate-950 border-2 border-slate-800 flex flex-col items-center justify-center overflow-hidden">
             {/* Live Camera Feed */}
             {streamActive && (
               <video
@@ -438,34 +263,34 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
               />
             )}
 
-            {/* Captured Preview */}
+            {/* Captured Preview - Constrained neatly within viewfinder frame */}
             {capturedImage && !streamActive && (
               <img
                 src={capturedImage}
                 alt="Captured Prescription"
-                className="w-full h-full object-contain bg-slate-950"
+                className="w-full h-full object-contain bg-slate-950 p-1"
               />
             )}
 
             {/* Empty Idle State */}
             {!streamActive && !capturedImage && (
-              <div className="text-center p-6 space-y-3">
-                <div className="mx-auto w-14 h-14 rounded-full bg-slate-800 flex items-center justify-center text-slate-400">
+              <div className="text-center p-6 space-y-4">
+                <div className="mx-auto w-14 h-14 rounded-full bg-slate-850 bg-slate-800 flex items-center justify-center text-slate-300 shadow-inner">
                   <Scan className="h-7 w-7" />
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-1 max-w-sm mx-auto">
                   <p className="text-sm font-bold text-white">
-                    Point camera at prescription or paper record
+                    Position document in view
                   </p>
                   <p className="text-xs text-slate-400">
-                    Auto-align corners and ensure text is clearly legible
+                    Ensure good lighting and text is clearly readable
                   </p>
                 </div>
-                <div className="flex flex-wrap items-center justify-center gap-2.5 pt-2">
+                <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
                   <button
                     type="button"
                     onClick={startCamera}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-forest text-white hover:bg-forest/90 transition shadow-xs"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-forest text-white hover:bg-forest/90 transition shadow-sm cursor-pointer"
                   >
                     <Camera className="h-4 w-4" />
                     Open Camera
@@ -473,18 +298,10 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-200 hover:bg-slate-700 transition"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-slate-800 text-slate-200 hover:bg-slate-700 hover:text-white transition shadow-sm cursor-pointer border border-slate-700"
                   >
                     <Upload className="h-4 w-4" />
                     Select Image
-                  </button>
-                  <button
-                    type="button"
-                    onClick={loadSamplePrescription}
-                    className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-700/80 text-emerald-100 hover:bg-emerald-600 transition border border-emerald-500/40"
-                  >
-                    <FileText className="h-4 w-4" />
-                    Use Sample Rx
                   </button>
                 </div>
               </div>
@@ -492,7 +309,7 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
 
             {/* Viewfinder Target Reticle Overlay */}
             {(streamActive || capturedImage) && (
-              <div className="pointer-events-none absolute inset-6 border border-emerald-500/50 rounded-xl flex flex-col justify-between p-2">
+              <div className="pointer-events-none absolute inset-4 border border-emerald-500/40 rounded-xl flex flex-col justify-between p-2">
                 <div className="flex justify-between">
                   <div className="w-4 h-4 border-t-2 border-l-2 border-emerald-400"></div>
                   <div className="w-4 h-4 border-t-2 border-r-2 border-emerald-400"></div>
@@ -516,19 +333,19 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
 
           {/* Capture Controls when Camera is Active */}
           {streamActive && (
-            <div className="flex items-center justify-center gap-4">
+            <div className="flex items-center justify-center gap-3 pt-1">
               <button
                 type="button"
                 onClick={captureFrame}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-extrabold bg-emerald-600 text-white hover:bg-emerald-500 shadow-md transition"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold bg-emerald-600 text-white hover:bg-emerald-500 shadow-md transition cursor-pointer"
               >
                 <Camera className="h-4 w-4" />
-                Capture Document
+                Capture Photo
               </button>
               <button
                 type="button"
                 onClick={stopCamera}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition"
+                className="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition cursor-pointer"
               >
                 Cancel
               </button>
@@ -537,13 +354,11 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
 
           {/* Review & Process State */}
           {capturedImage && (
-            <div className="space-y-3">
-              <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between">
-                <div className="flex items-center gap-2 text-emerald-900 text-xs font-semibold">
+            <div className="space-y-3 pt-1">
+              <div className="p-3 bg-emerald-50 border border-emerald-200/80 rounded-xl flex items-center justify-between">
+                <div className="flex items-center gap-2 text-emerald-950 text-xs font-medium">
                   <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
-                  <span>
-                    Document captured. Ready for deterministic OCR timeline extraction.
-                  </span>
+                  <span>Document captured. Ready for processing.</span>
                 </div>
                 <button
                   type="button"
@@ -552,7 +367,7 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
                     setCapturedFile(null);
                     startCamera();
                   }}
-                  className="flex items-center gap-1 text-[11px] font-bold text-emerald-800 hover:underline"
+                  className="flex items-center gap-1 text-xs font-bold text-emerald-800 hover:text-emerald-950 hover:underline cursor-pointer"
                 >
                   <RefreshCw className="h-3 w-3" />
                   Retake
@@ -563,23 +378,23 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
                 type="button"
                 onClick={handleProcessScan}
                 disabled={isProcessing}
-                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-bold bg-forest text-white hover:bg-forest/90 transition shadow-xs disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-bold bg-forest text-white hover:bg-forest/90 transition shadow-xs disabled:opacity-50 cursor-pointer"
               >
                 {isProcessing ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
                     <span>
                       {scanStep === "scanning"
-                        ? "Optical Deskewing & Contrast Boost..."
+                        ? "Enhancing image..."
                         : scanStep === "extracting"
-                        ? "Extracting Verbatim Facts to Timeline..."
-                        : "Completing Ingestion..."}
+                        ? "Extracting clinical findings..."
+                        : "Adding to records..."}
                     </span>
                   </>
                 ) : (
                   <>
                     <FileCheck className="h-4 w-4" />
-                    <span>Extract &amp; Append to Patient History</span>
+                    <span>Extract &amp; Add to Medical History</span>
                   </>
                 )}
               </button>
