@@ -50,14 +50,40 @@ export default function PatientRecords() {
   useEffect(() => { 
     reloadRecords();
 
+    // If viewing Rajesh Sharma (PAT-101), clear emergency notification dot because the clinician opened the dossier
+    if (numericId === 101) {
+      try {
+        localStorage.setItem("medthread_emergency_notif_read", "true");
+        const stored = localStorage.getItem("medthread_emergency_dispatch");
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          parsed.isRead = true;
+          parsed.isApproved = true;
+          localStorage.setItem("medthread_emergency_dispatch", JSON.stringify(parsed));
+        }
+        window.dispatchEvent(new CustomEvent("medthread_emergency_read"));
+        const bc = new BroadcastChannel("medthread_live_notifications");
+        bc.postMessage({ type: "EMERGENCY_READ" });
+        bc.close();
+      } catch {}
+    }
+
     const handleEventReviewed = () => {
       reloadRecords();
+      // Clearing red dot if any conflict/event was reviewed/approved
+      try {
+        localStorage.setItem("medthread_emergency_notif_read", "true");
+        window.dispatchEvent(new CustomEvent("medthread_emergency_read"));
+        const bc = new BroadcastChannel("medthread_live_notifications");
+        bc.postMessage({ type: "EMERGENCY_READ" });
+        bc.close();
+      } catch {}
     };
     window.addEventListener("medthread_event_reviewed", handleEventReviewed);
     return () => {
       window.removeEventListener("medthread_event_reviewed", handleEventReviewed);
     };
-  }, [patientId]);
+  }, [patientId, numericId]);
 
   const handleAskQuestion = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,6 +102,13 @@ export default function PatientRecords() {
   if (!records) return <LoadingSpinner />;
   const { profile } = records;
   const conflicts = records.conflicts || [];
+  // Deduplicate contradictions by entity and tier to present clean, clinically verified flags
+  const uniqueConflicts = conflicts.filter((conf, index, self) =>
+    index === self.findIndex((c) => 
+      c.entity.toLowerCase().trim() === conf.entity.toLowerCase().trim() && 
+      c.tier === conf.tier
+    )
+  );
 
   return (
     <div className="space-y-7">
@@ -177,14 +210,14 @@ export default function PatientRecords() {
       </section>
 
       {/* CROSS-RECORD CONTRADICTIONS & DISCREPANCIES */}
-      {conflicts.length > 0 && (
+      {uniqueConflicts.length > 0 && (
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-slate-100">
             <div className="flex items-center gap-2">
               <AlertCircle className="h-5 w-5 text-rose-600 shrink-0" />
               <div>
                 <h2 className="font-heading text-base font-bold text-slate-900">
-                  Cross-Record Discrepancies &amp; Contradictions ({conflicts.length} Flagged)
+                  Cross-Record Discrepancies &amp; Contradictions ({uniqueConflicts.length} Flagged)
                 </h2>
                 <p className="text-xs text-slate-500">
                   Conflicting diagnoses, medication statuses, or duplicate tests requiring clinician review.
@@ -198,7 +231,7 @@ export default function PatientRecords() {
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
-            {conflicts.map((conf, idx) => {
+            {uniqueConflicts.map((conf, idx) => {
               const isDirect = conf.tier === "DIRECT_CONFLICT";
               const isReview = conf.tier === "NEEDS_REVIEW";
               const isDup = conf.tier === "DUPLICATE_INVESTIGATION";

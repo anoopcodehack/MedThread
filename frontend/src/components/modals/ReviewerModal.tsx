@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, X, CheckCircle, AlertCircle, Loader2, FileText } from 'lucide-react';
+import { ShieldCheck, X, AlertCircle, Loader2, FileText } from 'lucide-react';
 import { api } from '../../services/api';
 
 export interface ReviewTargetEvent {
@@ -167,13 +167,6 @@ export const ReviewerModal: React.FC<ReviewerModalProps> = ({
               rows={2}
               className="w-full rounded-xl border border-sage px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-forest"
             />
-          </div>
-
-          <div className="rounded-lg bg-emerald-50 border border-emerald-200 p-2.5 text-[11px] text-emerald-900 flex items-start gap-2">
-            <CheckCircle className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
-            <span>
-              <strong>Immutable Evidence Guarantee:</strong> The raw OCR text, document coordinates, and original machine extraction will remain intact. This change will be stored in <code className="font-mono text-emerald-800">review_audit_logs</code>.
-            </span>
           </div>
 
           {error && (

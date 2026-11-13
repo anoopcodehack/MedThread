@@ -1,24 +1,172 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Bell,
   UserRound,
-  Award,
   LogOut,
   Users,
   QrCode,
   ShieldCheck,
   Activity,
   FileSpreadsheet,
+  ArrowRight,
 } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { BrandLogo } from "../common/BrandLogo";
 import { BenchmarkModal } from "../modals/BenchmarkModal";
 
 export default function DoctorHeader() {
   const [isBenchmarkOpen, setIsBenchmarkOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<"patients" | "audit" | null>(null);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [hasAlert, setHasAlert] = useState<boolean>(() => {
+    try {
+      const readStatus = localStorage.getItem("medthread_emergency_notif_read");
+      if (readStatus === "true") return false;
+      const stored = localStorage.getItem("medthread_emergency_dispatch");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed.isRead || parsed.isApproved || parsed.isDismissed) return false;
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  });
+  const [alertSummary, setAlertSummary] = useState<{
+    doctor: string;
+    patientName: string;
+    token: string;
+    isRevoked?: boolean;
+    isApproved?: boolean;
+  }>({
+    doctor: "Dr. Suresh Menon, MD",
+    patientName: "Rajesh Sharma (PAT-101)",
+    token: "MT-ER-948271",
+  });
+
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const notifRef = useRef<HTMLDivElement | null>(null);
+  const bcRef = useRef<BroadcastChannel | null>(null);
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const markAsRead = () => {
+    setHasAlert(false);
+    try {
+      localStorage.setItem("medthread_emergency_notif_read", "true");
+      const stored = localStorage.getItem("medthread_emergency_dispatch");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        parsed.isRead = true;
+        parsed.isApproved = true;
+        localStorage.setItem("medthread_emergency_dispatch", JSON.stringify(parsed));
+      }
+      window.dispatchEvent(new CustomEvent("medthread_emergency_read"));
+      if (bcRef.current) {
+        bcRef.current.postMessage({ type: "EMERGENCY_READ" });
+      }
+    } catch {}
+  };
+
+  useEffect(() => {
+    // Check initial stored emergency referral
+    try {
+      const readStatus = localStorage.getItem("medthread_emergency_notif_read");
+      const stored = localStorage.getItem("medthread_emergency_dispatch");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        setAlertSummary({
+          doctor: parsed.doctor || "Dr. Suresh Menon, MD",
+          patientName: "Rajesh Sharma (PAT-101)",
+          token: parsed.token || "MT-ER-948271",
+          isRevoked: parsed.isRevoked,
+          isApproved: parsed.isApproved,
+        });
+        if (readStatus === "true" || parsed.isRead || parsed.isApproved || parsed.isDismissed) {
+          setHasAlert(false);
+        } else {
+          setHasAlert(true);
+        }
+      } else {
+        if (readStatus === "true") {
+          setHasAlert(false);
+        }
+      }
+    } catch {}
+
+    const handleEmergency = (event: Event) => {
+      const customEvent = event as CustomEvent<any>;
+      if (customEvent.detail) {
+        setAlertSummary({
+          doctor: customEvent.detail.doctor || "Dr. Suresh Menon, MD",
+          patientName: "Rajesh Sharma (PAT-101)",
+          token: customEvent.detail.token || "MT-ER-948271",
+          isRevoked: false,
+          isApproved: false,
+        });
+        localStorage.removeItem("medthread_emergency_notif_read");
+        setHasAlert(true);
+      }
+    };
+
+    const handleRevoked = () => {
+      setAlertSummary((prev) => ({ ...prev, isRevoked: true }));
+    };
+
+    const handleEmergencyRead = () => {
+      setHasAlert(false);
+    };
+
+    window.addEventListener("medthread_emergency_dispatched", handleEmergency);
+    window.addEventListener("medthread_access_revoked", handleRevoked);
+    window.addEventListener("medthread_emergency_read", handleEmergencyRead);
+
+    try {
+      const bc = new BroadcastChannel("medthread_live_notifications");
+      bcRef.current = bc;
+      bc.onmessage = (ev) => {
+        if (ev.data?.type === "EMERGENCY_DISPATCH") {
+          localStorage.removeItem("medthread_emergency_notif_read");
+          setHasAlert(true);
+        } else if (ev.data?.type === "EMERGENCY_READ") {
+          setHasAlert(false);
+        } else if (ev.data?.type === "ACCESS_REVOKED") {
+          setAlertSummary((prev) => ({ ...prev, isRevoked: true }));
+        }
+      };
+    } catch {}
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setIsNotifOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      window.removeEventListener("medthread_emergency_dispatched", handleEmergency);
+      window.removeEventListener("medthread_access_revoked", handleRevoked);
+      window.removeEventListener("medthread_emergency_read", handleEmergencyRead);
+      document.removeEventListener("mousedown", handleClickOutside);
+      if (bcRef.current) {
+        bcRef.current.close();
+        bcRef.current = null;
+      }
+    };
+  }, []);
+
+  const triggerShakeAndNavigate = () => {
+    markAsRead(); // Instantly clear red dot upon clicking notification item
+    setIsNotifOpen(false);
+    if (pathname !== "/doctor/dashboard" && pathname !== "/doctor") {
+      navigate("/doctor/dashboard");
+    }
+    // Dispatch highlight event to shake and scroll the referral banner
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent("medthread_highlight_referral"));
+    }, 120);
+  };
 
   const handleMouseEnter = (menu: "patients" | "audit") => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -236,25 +384,94 @@ export default function DoctorHeader() {
             </div>
           </nav>
 
-          {/* Right: Benchmark Trigger, Notifications, Doctor Avatar Only, Logout */}
+          {/* Right: Emergency Notifications, Doctor Avatar, Logout */}
           <div className="flex items-center gap-3 shrink-0">
-            <button
-              type="button"
-              onClick={() => setIsBenchmarkOpen(true)}
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-white/20 text-white border border-white/30 hover:bg-white/30 transition shadow-xs"
-              title="Clinical Performance Benchmark Scorecard"
-            >
-              <Award className="h-3.5 w-3.5 text-white" />
-              <span>Benchmark (-78%)</span>
-            </button>
+            {/* Interactive Emergency Dispatch Notification Bell */}
+            <div className="relative" ref={notifRef}>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsNotifOpen((prev) => !prev);
+                  // If on dashboard, clicking the bell directly shakes the banner!
+                  if (pathname === "/doctor/dashboard" || pathname === "/doctor") {
+                    window.dispatchEvent(new CustomEvent("medthread_highlight_referral"));
+                  }
+                }}
+                className="relative text-white/90 hover:text-white transition p-2 rounded-xl hover:bg-white/15 cursor-pointer"
+                aria-label="Emergency Notifications"
+                title={hasAlert ? "New Emergency Specialist Dispatch" : "Notifications"}
+              >
+                <Bell size={18} />
+                {hasAlert && (
+                  <>
+                    <span className="animate-ping absolute top-1.5 right-1.5 inline-flex h-2.5 w-2.5 rounded-full bg-rose-400 opacity-75" />
+                    <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[9px] font-black text-white shadow-xs">
+                      1
+                    </span>
+                  </>
+                )}
+              </button>
 
-            <button
-              type="button"
-              className="text-white/90 hover:text-white transition p-2 rounded-xl hover:bg-white/15"
-              aria-label="Notifications"
-            >
-              <Bell size={18} />
-            </button>
+              {/* Notification Dropdown Flyout */}
+              {isNotifOpen && (
+                <div className="absolute right-0 top-full mt-2 w-80 rounded-2xl bg-white border border-slate-200 shadow-2xl p-3 z-50 text-slate-800 animate-in fade-in slide-in-from-top-2">
+                  <div className="flex items-center justify-between px-2 py-1.5 border-b border-slate-100 mb-2">
+                    <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                      <Bell size={13} className="text-rose-600" />
+                      Emergency Dispatch Alerts
+                    </span>
+                    <div className="flex items-center gap-2">
+                      {hasAlert && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            markAsRead();
+                          }}
+                          className="text-[10px] font-bold text-slate-500 hover:text-slate-800 hover:underline cursor-pointer"
+                        >
+                          Mark as read
+                        </button>
+                      )}
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${hasAlert ? "bg-rose-50 text-rose-700" : "bg-slate-100 text-slate-500"}`}>
+                        {hasAlert ? "1 Active" : "0 New"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {hasAlert ? (
+                    <button
+                      type="button"
+                      onClick={triggerShakeAndNavigate}
+                      className="w-full text-left p-3 rounded-xl bg-slate-50 hover:bg-emerald-50/70 border border-slate-200 hover:border-emerald-300 transition group cursor-pointer"
+                    >
+                      <div className="flex items-center justify-between text-[10px] text-slate-500 mb-1">
+                        <span className="font-extrabold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">
+                          {alertSummary.isRevoked ? "ACCESS REVOKED" : "SPECIALIST DISPATCH"}
+                        </span>
+                        <span className="font-mono text-slate-400">Just now</span>
+                      </div>
+                      <div className="font-bold text-xs text-slate-900 group-hover:text-forest mt-1">
+                        {alertSummary.patientName}
+                      </div>
+                      <div className="text-[11px] text-slate-600 mt-0.5">
+                        {alertSummary.isRevoked
+                          ? "Access token was revoked by the patient."
+                          : `Routed to ${alertSummary.doctor} · Cardiac Prophylaxis Risk`}
+                      </div>
+                      <div className="text-[10px] font-bold text-forest mt-2.5 pt-2 border-t border-slate-200/60 flex items-center justify-between">
+                        <span>Click to highlight &amp; focus on Cockpit</span>
+                        <ArrowRight size={12} className="group-hover:translate-x-1 transition" />
+                      </div>
+                    </button>
+                  ) : (
+                    <div className="p-4 text-center text-xs text-slate-500">
+                      No active emergency alerts
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
 
             {/* Doctor Profile Icon Only (Zero doctor name in navbar) */}
             <Link

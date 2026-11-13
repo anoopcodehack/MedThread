@@ -852,11 +852,6 @@ function EventCard({
             <span className="font-bold text-emerald-900 block mb-0.5">Clinical Justification / Audit Reason:</span>
             <p className="italic text-slate-700 leading-relaxed">&ldquo;{overrideInfo.reason || "Verified with patient and clinical consultation note: surgical site healed, resuming cardiac prophylaxis."}&rdquo;</p>
           </div>
-
-          <div className="mt-2 text-[10px] text-emerald-800 flex items-center gap-1 font-medium">
-            <ShieldCheck size={12} className="text-emerald-600" />
-            <span>Immutable Evidence Guarantee: Source documents, OCR coordinates, and raw quotations remain preserved in review_audit_logs.</span>
-          </div>
         </div>
       )}
 
