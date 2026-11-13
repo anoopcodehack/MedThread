@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { ComponentType, ReactNode } from "react";
+import QRCode from "qrcode";
 import {
   Activity,
   AlertCircle,
@@ -931,9 +932,10 @@ function FeatureUnavailable({ page, patientId = 101 }: { page: "access" | "profi
 }
 
 function ShareAndAccessHub({ patientId = 101 }: { patientId?: number }) {
-  const [passDuration, setPassDuration] = useState<string>("24h");
+  const [passDuration, setPassDuration] = useState<"15m" | "24h" | "7d">("24h");
   const [copied, setCopied] = useState<boolean>(false);
   const [revokedIds, setRevokedIds] = useState<string[]>([]);
+  const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const [providers, setProviders] = useState([
     {
       id: "prov-1",
@@ -954,6 +956,22 @@ function ShareAndAccessHub({ patientId = 101 }: { patientId?: number }) {
       scope: "Medications & Labs Only",
     },
   ]);
+
+  const accessToken = `MT-ER-${patientId}-${passDuration.toUpperCase()}`;
+  const emergencyUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/doctor/patients/${patientId}?token=${accessToken}&validity=${passDuration}`
+      : `https://medthread.health/doctor/patients/${patientId}`;
+
+  useEffect(() => {
+    QRCode.toDataURL(emergencyUrl, {
+      width: 260,
+      margin: 1.5,
+      color: { dark: "#0A2A18", light: "#ffffff" },
+    })
+      .then(setQrDataUrl)
+      .catch((err) => console.warn("QR code generation fallback:", err));
+  }, [emergencyUrl]);
 
   useEffect(() => {
     async function loadAccessGrants() {
@@ -985,7 +1003,7 @@ function ShareAndAccessHub({ patientId = 101 }: { patientId?: number }) {
 
   const handleCopy = () => {
     setCopied(true);
-    navigator.clipboard?.writeText("https://medthread.health/emergency/pass?token=MT-ER-948271&exp=24h");
+    navigator.clipboard?.writeText(emergencyUrl);
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -1032,17 +1050,17 @@ function ShareAndAccessHub({ patientId = 101 }: { patientId?: number }) {
               </label>
               <div className="flex flex-wrap gap-2">
                 {[
-                  { id: "15m", label: "15 Min (ER Triage)" },
-                  { id: "24h", label: "24 Hours (Specialist Visit)" },
-                  { id: "7d", label: "7 Days (Hospital Stay)" },
+                  { id: "15m" as const, label: "15 Min (ER Triage)" },
+                  { id: "24h" as const, label: "24 Hours (Specialist Visit)" },
+                  { id: "7d" as const, label: "7 Days (Hospital Stay)" },
                 ].map((tier) => (
                   <button
                     key={tier.id}
                     type="button"
                     onClick={() => setPassDuration(tier.id)}
-                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition ${
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
                       passDuration === tier.id
-                        ? "bg-emerald-800 text-white shadow-xs"
+                        ? "bg-emerald-800 text-white shadow-xs ring-2 ring-emerald-800/20"
                         : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                     }`}
                   >
@@ -1056,29 +1074,52 @@ function ShareAndAccessHub({ patientId = 101 }: { patientId?: number }) {
               <button
                 type="button"
                 onClick={handleCopy}
-                className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition flex items-center gap-2"
+                className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition flex items-center gap-2 cursor-pointer shadow-xs"
               >
                 <Share2 size={15} />
                 <span>{copied ? "Link Copied!" : "Copy Emergency Pass Link"}</span>
               </button>
               <span className="text-xs text-slate-500">
-                Access Token: <code className="bg-slate-100 px-2 py-1 rounded font-mono text-emerald-900 font-bold">MT-ER-948271</code>
+                Access Token: <code className="bg-slate-100 px-2 py-1 rounded font-mono text-emerald-900 font-bold border border-slate-200">{accessToken}</code>
               </span>
             </div>
           </div>
 
-          {/* Right Column: QR Code Display */}
+          {/* Right Column: Live Dynamic Scannable QR Code */}
           <div className="md:col-span-4 flex flex-col items-center justify-center p-6 bg-slate-50 rounded-2xl border border-slate-200 text-center">
-            {/* SVG Visual QR Code */}
-            <div className="h-44 w-44 bg-white p-3 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-center relative">
-              <QrCode size={148} className="text-slate-900" />
+            <div className="h-48 w-48 bg-white p-2.5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-center relative overflow-hidden group">
+              {qrDataUrl ? (
+                <img
+                  src={qrDataUrl}
+                  alt={`Scannable Emergency QR Pass for Patient ${patientId}`}
+                  className="w-full h-full object-contain rounded-xl"
+                />
+              ) : (
+                <div className="flex flex-col items-center justify-center gap-2 text-slate-400">
+                  <QrCode size={96} />
+                  <span className="text-[10px] font-medium">Generating QR...</span>
+                </div>
+              )}
             </div>
             <p className="mt-3 font-heading font-bold text-xs text-slate-900">
-              Scan to Authorize Doctor Review
+              Scan with Any Phone Camera or Tablet
             </p>
             <p className="text-[10px] text-slate-500 mt-0.5">
               Valid for {passDuration === "15m" ? "15 minutes" : passDuration === "24h" ? "24 hours" : "7 days"} • Zero app install required
             </p>
+
+            {/* Direct 1-Click Simulation for Demo & Judges */}
+            <a
+              href={emergencyUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-3 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-forest/10 hover:bg-forest hover:text-white text-forest text-xs font-bold transition border border-forest/20 shadow-2xs group"
+              title="Click to simulate what the doctor sees immediately after scanning"
+            >
+              <Stethoscope size={13} />
+              <span>Simulate Doctor Scan</span>
+              <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
+            </a>
           </div>
         </div>
       </section>
