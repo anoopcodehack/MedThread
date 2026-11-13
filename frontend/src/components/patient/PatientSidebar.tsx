@@ -23,6 +23,7 @@ export type PatientPage =
   | "investigations"
   | "visits"
   | "documents"
+  | "scanner"
   | "access"
   | "profile";
 

@@ -5,6 +5,7 @@ import { PlatformFooter } from "../../components/common/PlatformFooter";
 import PatientDashboard from "./PatientDashboard";
 import MedicalHistoryPage from "./MedicalHistoryPage";
 import PatientDocumentsPage from "./PatientDocumentsPage";
+import PrescriptionScannerPage from "./PrescriptionScannerPage";
 import PatientSectionPage from "./PatientSectionPage";
 import { api } from "../../services/api";
 import type { PatientSummary } from "../../types/clinical";
@@ -21,6 +22,7 @@ const pageTitles: Record<PatientPage, string> = {
   investigations: "Tests & Investigations",
   visits: "Visits & Procedures",
   documents: "Medical Documents",
+  scanner: "Prescription Scanner",
   access: "Share & Access",
   profile: "Profile & Caregivers",
 };
@@ -78,6 +80,7 @@ export default function PatientPortal({ patientId }: Props) {
           title={pageTitles[activePage]}
           patientName={patientName}
           patientExternalId={patientExternalId}
+          patientId={effectivePatientId}
           activePage={activePage}
           onNavigate={setActivePage}
         />
@@ -99,6 +102,13 @@ export default function PatientPortal({ patientId }: Props) {
             <PatientDocumentsPage
               key={`${effectivePatientId}-${dataRevision}`}
               patientId={effectivePatientId}
+            />
+          ) : activePage === "scanner" ? (
+            <PrescriptionScannerPage
+              key={`${effectivePatientId}-${dataRevision}`}
+              patientId={effectivePatientId}
+              onNavigate={(page) => setActivePage(page as PatientPage)}
+              onSuccess={() => setDataRevision((r) => r + 1)}
             />
           ) : (
             <PatientSectionPage
