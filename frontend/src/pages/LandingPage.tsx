@@ -133,8 +133,9 @@ export default function LandingPage() {
               className="bg-[#0A2A18] hover:bg-[#124227] text-white text-xs font-bold pl-4 pr-1.5 py-1.5 rounded-full shadow-lg transition-all transform hover:scale-105 uppercase tracking-wider flex items-center gap-2 group"
             >
               <span>Get Started</span>
-              <span className="h-6 w-6 rounded-full bg-white text-[#0A2A18] flex items-center justify-center shrink-0 group-hover:rotate-45 transition-transform">
-                <ArrowUpRight size={13} className="stroke-[2.5]" />
+              <span className="relative overflow-hidden h-6 w-6 rounded-full bg-white text-[#0A2A18] flex items-center justify-center shrink-0">
+                <ArrowUpRight size={13} className="stroke-[2.5] transition-transform duration-300 group-hover:translate-x-4 group-hover:-translate-y-4" />
+                <ArrowUpRight size={13} className="stroke-[2.5] absolute transition-transform duration-300 -translate-x-4 translate-y-4 group-hover:translate-x-0 group-hover:translate-y-0" />
               </span>
             </Link>
           </div>
@@ -181,8 +182,9 @@ export default function LandingPage() {
                 className="mt-6 group inline-flex items-center gap-3 bg-[#0A2A18] hover:bg-[#14482B] text-white text-xs font-bold pl-5 pr-2 py-2 rounded-full shadow-2xl transition-all transform hover:scale-105 tracking-wider uppercase"
               >
                 <span>Start Now</span>
-                <span className="h-7 w-7 rounded-full bg-white text-[#0A2A18] flex items-center justify-center shrink-0 group-hover:rotate-45 transition-transform">
-                  <ArrowUpRight size={14} className="stroke-[2.5]" />
+                <span className="relative overflow-hidden h-7 w-7 rounded-full bg-white text-[#0A2A18] flex items-center justify-center shrink-0">
+                  <ArrowUpRight size={14} className="stroke-[2.5] transition-transform duration-300 group-hover:translate-x-5 group-hover:-translate-y-5" />
+                  <ArrowUpRight size={14} className="stroke-[2.5] absolute transition-transform duration-300 -translate-x-5 translate-y-5 group-hover:translate-x-0 group-hover:translate-y-0" />
                 </span>
               </Link>
             </div>
@@ -291,8 +293,9 @@ export default function LandingPage() {
               className="bg-[#0A2A18] hover:bg-[#124227] text-white text-xs font-bold pl-5 pr-2 py-2 rounded-full transition-all transform hover:scale-105 self-start md:self-auto uppercase tracking-wider flex items-center gap-2.5 shadow-md group"
             >
               <span>Explore Platform</span>
-              <span className="h-6 w-6 rounded-full bg-white text-[#0A2A18] flex items-center justify-center shrink-0 group-hover:rotate-45 transition-transform">
-                <ArrowUpRight size={13} className="stroke-[2.5]" />
+              <span className="relative overflow-hidden h-6 w-6 rounded-full bg-white text-[#0A2A18] flex items-center justify-center shrink-0">
+                <ArrowUpRight size={13} className="stroke-[2.5] transition-transform duration-300 group-hover:translate-x-4 group-hover:-translate-y-4" />
+                <ArrowUpRight size={13} className="stroke-[2.5] absolute transition-transform duration-300 -translate-x-4 translate-y-4 group-hover:translate-x-0 group-hover:translate-y-0" />
               </span>
             </Link>
           </div>
@@ -673,8 +676,9 @@ export default function LandingPage() {
                 className="bg-white hover:bg-slate-100 text-[#0A2A18] text-xs font-bold pl-5 pr-2 py-2 rounded-full shadow-xl transition-all transform hover:scale-105 uppercase tracking-wider flex items-center gap-2.5 group"
               >
                 <span>Get Started Free</span>
-                <span className="h-6 w-6 rounded-full bg-[#0A2A18] text-white flex items-center justify-center shrink-0 group-hover:rotate-45 transition-transform">
-                  <ArrowUpRight size={13} className="stroke-[2.5]" />
+                <span className="relative overflow-hidden h-6 w-6 rounded-full bg-[#0A2A18] text-white flex items-center justify-center shrink-0">
+                  <ArrowUpRight size={13} className="stroke-[2.5] transition-transform duration-300 group-hover:translate-x-4 group-hover:-translate-y-4" />
+                  <ArrowUpRight size={13} className="stroke-[2.5] absolute transition-transform duration-300 -translate-x-4 translate-y-4 group-hover:translate-x-0 group-hover:translate-y-0" />
                 </span>
               </Link>
 
@@ -683,8 +687,9 @@ export default function LandingPage() {
                 className="bg-[#0A2A18] hover:bg-[#124227] text-white border border-white/30 text-xs font-bold pl-5 pr-2 py-2 rounded-full transition-all transform hover:scale-105 uppercase tracking-wider flex items-center gap-2.5 group shadow-lg"
               >
                 <span>Provider Login</span>
-                <span className="h-6 w-6 rounded-full bg-white text-[#0A2A18] flex items-center justify-center shrink-0 group-hover:rotate-45 transition-transform">
-                  <ArrowUpRight size={13} className="stroke-[2.5]" />
+                <span className="relative overflow-hidden h-6 w-6 rounded-full bg-white text-[#0A2A18] flex items-center justify-center shrink-0">
+                  <ArrowUpRight size={13} className="stroke-[2.5] transition-transform duration-300 group-hover:translate-x-4 group-hover:-translate-y-4" />
+                  <ArrowUpRight size={13} className="stroke-[2.5] absolute transition-transform duration-300 -translate-x-4 translate-y-4 group-hover:translate-x-0 group-hover:translate-y-0" />
                 </span>
               </Link>
             </div>
@@ -712,14 +717,15 @@ export default function LandingPage() {
                 className="bg-white text-[#0A2A18] text-xs font-bold pl-4 pr-1.5 py-1.5 rounded-full hover:bg-slate-100 transition whitespace-nowrap uppercase tracking-wider flex items-center gap-2 group cursor-pointer shadow-sm"
               >
                 <span>Subscribe</span>
-                <span className="h-5 w-5 rounded-full bg-[#0A2A18] text-white flex items-center justify-center shrink-0 group-hover:rotate-45 transition-transform">
-                  <ArrowUpRight size={11} className="stroke-[2.5]" />
+                <span className="relative overflow-hidden h-5 w-5 rounded-full bg-[#0A2A18] text-white flex items-center justify-center shrink-0">
+                  <ArrowUpRight size={11} className="stroke-[2.5] transition-transform duration-300 group-hover:translate-x-3 group-hover:-translate-y-3" />
+                  <ArrowUpRight size={11} className="stroke-[2.5] absolute transition-transform duration-300 -translate-x-3 translate-y-3 group-hover:translate-x-0 group-hover:translate-y-0" />
                 </span>
               </button>
             </div>
           </div>
 
-          {/* Navigation Links Columns (From Image 1) */}
+          {/* Navigation Links Columns (From Image 1) with Right-Slide Hover Animation */}
           <div className="pt-12 grid grid-cols-2 md:grid-cols-4 gap-8 text-xs">
             {/* Col 1 */}
             <div>
@@ -737,10 +743,58 @@ export default function LandingPage() {
                 PLATFORM
               </h4>
               <ul className="space-y-2 text-white/60">
-                <li>Unified Timeline</li>
-                <li>Prescription Safety</li>
-                <li>Laboratory Panels</li>
-                <li>Verifiable Citations</li>
+                <li className="group">
+                  <a
+                    href="#features"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      document.getElementById("features")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }}
+                    className="transition-all duration-200 hover:translate-x-2 hover:text-white inline-flex items-center gap-1.5"
+                  >
+                    <span>Unified Timeline</span>
+                    <ArrowUpRight size={11} className="opacity-0 -translate-x-1.5 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-[#A3C4AE]" />
+                  </a>
+                </li>
+                <li className="group">
+                  <a
+                    href="#how-it-works"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }}
+                    className="transition-all duration-200 hover:translate-x-2 hover:text-white inline-flex items-center gap-1.5"
+                  >
+                    <span>Prescription Safety</span>
+                    <ArrowUpRight size={11} className="opacity-0 -translate-x-1.5 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-[#A3C4AE]" />
+                  </a>
+                </li>
+                <li className="group">
+                  <a
+                    href="#essentials"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      document.getElementById("essentials")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }}
+                    className="transition-all duration-200 hover:translate-x-2 hover:text-white inline-flex items-center gap-1.5"
+                  >
+                    <span>Laboratory Panels</span>
+                    <ArrowUpRight size={11} className="opacity-0 -translate-x-1.5 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-[#A3C4AE]" />
+                  </a>
+                </li>
+                <li className="group">
+                  <a
+                    href="#features"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      document.getElementById("features")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }}
+                    className="transition-all duration-200 hover:translate-x-2 hover:text-white inline-flex items-center gap-1.5"
+                  >
+                    <span>Verifiable Citations</span>
+                    <ArrowUpRight size={11} className="opacity-0 -translate-x-1.5 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-[#A3C4AE]" />
+                  </a>
+                </li>
               </ul>
             </div>
 
@@ -750,10 +804,30 @@ export default function LandingPage() {
                 ACCESS &amp; PORTALS
               </h4>
               <ul className="space-y-2 text-white/60">
-                <li><Link to="/auth" className="hover:text-white">Create Account</Link></li>
-                <li><Link to="/login" className="hover:text-white">Provider Sign In</Link></li>
-                <li><Link to="/doctor/dashboard" className="hover:text-white">Clinical Cockpit</Link></li>
-                <li><Link to="/patient" className="hover:text-white">Patient Portal</Link></li>
+                <li className="group">
+                  <Link to="/auth" className="transition-all duration-200 hover:translate-x-2 hover:text-white inline-flex items-center gap-1.5">
+                    <span>Create Account</span>
+                    <ArrowUpRight size={11} className="opacity-0 -translate-x-1.5 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-[#A3C4AE]" />
+                  </Link>
+                </li>
+                <li className="group">
+                  <Link to="/login" className="transition-all duration-200 hover:translate-x-2 hover:text-white inline-flex items-center gap-1.5">
+                    <span>Provider Sign In</span>
+                    <ArrowUpRight size={11} className="opacity-0 -translate-x-1.5 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-[#A3C4AE]" />
+                  </Link>
+                </li>
+                <li className="group">
+                  <Link to="/doctor/dashboard" className="transition-all duration-200 hover:translate-x-2 hover:text-white inline-flex items-center gap-1.5">
+                    <span>Clinical Cockpit</span>
+                    <ArrowUpRight size={11} className="opacity-0 -translate-x-1.5 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-[#A3C4AE]" />
+                  </Link>
+                </li>
+                <li className="group">
+                  <Link to="/patient" className="transition-all duration-200 hover:translate-x-2 hover:text-white inline-flex items-center gap-1.5">
+                    <span>Patient Portal</span>
+                    <ArrowUpRight size={11} className="opacity-0 -translate-x-1.5 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-[#A3C4AE]" />
+                  </Link>
+                </li>
               </ul>
             </div>
 
@@ -763,10 +837,58 @@ export default function LandingPage() {
                 SECURITY &amp; COMPLIANCE
               </h4>
               <ul className="space-y-2 text-white/60">
-                <li>HIPAA Aligned</li>
-                <li>SOC-2 Ready</li>
-                <li>Encrypted Storage</li>
-                <li>Immutable Audit Trail</li>
+                <li className="group">
+                  <a
+                    href="#security"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      document.getElementById("security")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }}
+                    className="transition-all duration-200 hover:translate-x-2 hover:text-white inline-flex items-center gap-1.5"
+                  >
+                    <span>HIPAA Aligned</span>
+                    <ArrowUpRight size={11} className="opacity-0 -translate-x-1.5 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-[#A3C4AE]" />
+                  </a>
+                </li>
+                <li className="group">
+                  <a
+                    href="#security"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      document.getElementById("security")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }}
+                    className="transition-all duration-200 hover:translate-x-2 hover:text-white inline-flex items-center gap-1.5"
+                  >
+                    <span>SOC-2 Ready</span>
+                    <ArrowUpRight size={11} className="opacity-0 -translate-x-1.5 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-[#A3C4AE]" />
+                  </a>
+                </li>
+                <li className="group">
+                  <a
+                    href="#security"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      document.getElementById("security")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }}
+                    className="transition-all duration-200 hover:translate-x-2 hover:text-white inline-flex items-center gap-1.5"
+                  >
+                    <span>Encrypted Storage</span>
+                    <ArrowUpRight size={11} className="opacity-0 -translate-x-1.5 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-[#A3C4AE]" />
+                  </a>
+                </li>
+                <li className="group">
+                  <a
+                    href="#security"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      document.getElementById("security")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }}
+                    className="transition-all duration-200 hover:translate-x-2 hover:text-white inline-flex items-center gap-1.5"
+                  >
+                    <span>Immutable Audit Trail</span>
+                    <ArrowUpRight size={11} className="opacity-0 -translate-x-1.5 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-[#A3C4AE]" />
+                  </a>
+                </li>
               </ul>
               <div className="flex items-center gap-3 text-white/80 mt-4">
                 <a href="#instagram" className="h-7 w-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition">
