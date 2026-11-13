@@ -45,7 +45,11 @@ REFUSAL_TRIGGERS: List[str] = [
     "give me medical advice",
     "prescribe me",
     "should i stop taking",
-    "what dose should i take"
+    "what dose should i take",
+    "what dosage should i take",
+    "what dosage",
+    "dosage should i take",
+    "dosage of"
 ]
 
 REFUSAL_RESPONSE_TEXT = (
