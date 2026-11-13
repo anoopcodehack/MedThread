@@ -14,6 +14,7 @@ import {
   AlertCircle,
   ClipboardList,
   Camera,
+  QrCode,
 } from "lucide-react";
 import { api } from "../../services/api";
 import { CameraScannerModal } from "../../components/modals/CameraScannerModal";
@@ -169,80 +170,122 @@ export default function PatientDashboard({ patientId = 101, onUploadSuccess, onN
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Unified Patient Header Banner */}
       <section className="relative overflow-hidden rounded-3xl bg-forest p-6 text-white sm:p-8 shadow-sm">
-        <div className="relative z-10 flex flex-col justify-between gap-6 lg:flex-row lg:items-center">
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div className="space-y-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
-                {banner.badge}
-              </span>
-              <span className="text-xs font-semibold text-emerald-200">
-                {banner.sub}
-              </span>
-            </div>
-
+            {/* 1. Caregiver Mode Pill on its own */}
             <div>
-              <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-white">
-                {banner.name} (Age {banner.age})
-              </h1>
-              <p className="mt-1.5 max-w-2xl text-xs sm:text-sm leading-relaxed text-white/80">
-                {banner.desc}
-              </p>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                {banner.badge || "Verified Patient"}
+              </span>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-1 text-xs text-white/90">
-              <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-2.5 py-1 backdrop-blur-xs">
-                <CheckCircle2 size={14} className="text-emerald-400" />
-                <span>{banner.hospitalCount} Hospital Files Unified</span>
+            {/* 2. Patient Name & Age - Prominent & Clear */}
+            <div>
+              <h1 className="font-heading text-2xl sm:text-3xl font-black text-white tracking-tight">
+                {banner.name}{" "}
+                <span className="font-sans font-medium text-emerald-200 text-lg sm:text-xl">
+                  (Age {banner.age})
+                </span>
+              </h1>
+            </div>
+
+            {/* 3. Caregiver & Ingestion Info - Separate Line */}
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm text-emerald-100/90 font-medium">
+              <span>
+                Primary Caregiver: <strong>Anoop Sharma (Son)</strong>
               </span>
-              <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-2.5 py-1 backdrop-blur-xs">
-                <CheckCircle2 size={14} className="text-emerald-400" />
-                <span>Active vs Discontinued Meds Clarified</span>
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-2.5 py-1 backdrop-blur-xs">
-                <CheckCircle2 size={14} className="text-emerald-400" />
-                <span>Emergency QR Pass Ready</span>
-              </span>
+              <span className="text-white/40 hidden sm:inline">•</span>
+              <span>Managing Parent Dossier</span>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 shrink-0">
-            <button
-              type="button"
-              onClick={() => onNavigate("history")}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-xs sm:text-sm font-semibold text-white transition hover:bg-white/20"
-            >
-              <History size={16} />
-              <span>Medical History</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsCameraScannerOpen(true)}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 border border-emerald-400/30 px-4 py-2.5 text-xs sm:text-sm font-semibold text-white transition shadow-xs"
-            >
-              <Camera size={16} />
-              <span>Scan with Camera</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-xs sm:text-sm font-bold text-forest transition hover:bg-sage shadow-xs"
-            >
-              <FilePlus2 size={16} />
-              <span>Upload Document</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => onNavigate("access")}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-xs sm:text-sm font-semibold text-white transition hover:bg-white/20"
-            >
-              <span>Emergency Access</span>
-            </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-white/10 border border-white/20 text-xs sm:text-sm font-semibold text-emerald-100 backdrop-blur-xs shadow-2xs">
+              <CheckCircle2 size={16} className="text-emerald-400" />
+              <span>4 Hospital Records Synced</span>
+            </span>
           </div>
         </div>
       </section>
+
+      {/* Quick Action Navigation Bar - Clean, Separate, Cohesive Color Palette */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <button
+          type="button"
+          onClick={() => onNavigate("history")}
+          className="flex items-center gap-3 p-4 rounded-2xl bg-white border border-[#E5ECE6] hover:border-emerald-600 hover:shadow-md transition text-left group cursor-pointer shadow-2xs"
+        >
+          <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-800 group-hover:bg-forest group-hover:text-white transition shrink-0">
+            <History size={18} />
+          </div>
+          <div>
+            <span className="block text-xs sm:text-sm font-bold text-slate-900 group-hover:text-forest">
+              Medical History
+            </span>
+            <span className="block text-[11px] text-slate-500">
+              View unified timeline
+            </span>
+          </div>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setIsCameraScannerOpen(true)}
+          className="flex items-center gap-3 p-4 rounded-2xl bg-white border border-[#E5ECE6] hover:border-emerald-600 hover:shadow-md transition text-left group cursor-pointer shadow-2xs"
+        >
+          <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-800 group-hover:bg-forest group-hover:text-white transition shrink-0">
+            <Camera size={18} />
+          </div>
+          <div>
+            <span className="block text-xs sm:text-sm font-bold text-slate-900 group-hover:text-forest">
+              Scan Camera
+            </span>
+            <span className="block text-[11px] text-slate-500">
+              Snap paper report
+            </span>
+          </div>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          className="flex items-center gap-3 p-4 rounded-2xl bg-white border border-[#E5ECE6] hover:border-emerald-600 hover:shadow-md transition text-left group cursor-pointer shadow-2xs"
+        >
+          <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-800 group-hover:bg-forest group-hover:text-white transition shrink-0">
+            <FilePlus2 size={18} />
+          </div>
+          <div>
+            <span className="block text-xs sm:text-sm font-bold text-slate-900 group-hover:text-forest">
+              Upload Document
+            </span>
+            <span className="block text-[11px] text-slate-500">
+              Add PDF or image
+            </span>
+          </div>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onNavigate("access")}
+          className="flex items-center gap-3 p-4 rounded-2xl bg-white border border-[#E5ECE6] hover:border-emerald-600 hover:shadow-md transition text-left group cursor-pointer shadow-2xs"
+        >
+          <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-800 group-hover:bg-forest group-hover:text-white transition shrink-0">
+            <QrCode size={18} />
+          </div>
+          <div>
+            <span className="block text-xs sm:text-sm font-bold text-slate-900 group-hover:text-forest">
+              Emergency Pass
+            </span>
+            <span className="block text-[11px] text-slate-500">
+              QR consent access
+            </span>
+          </div>
+        </button>
+      </div>
 
       {/* Clinical Telemetry Stat Cards */}
       <div className="grid gap-4 sm:grid-cols-3">
@@ -288,9 +331,6 @@ export default function PatientDashboard({ patientId = 101, onUploadSuccess, onN
               <h2 className="font-heading text-xl font-bold text-forest">
                 Ingest Medical Documents
               </h2>
-              <p className="mt-1 max-w-lg text-sm text-muted">
-                Upload prescriptions, lab reports (mmol/L or mg/dL), or discharge summaries. Processed with PyMuPDF and Gemini Vision OCR.
-              </p>
             </div>
           </div>
 
