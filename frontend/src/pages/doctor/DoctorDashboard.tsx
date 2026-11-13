@@ -37,6 +37,8 @@ export default function DoctorDashboard() {
     bypassedDoctor: string;
     bypassedQueue: number;
     queueDepth: number;
+    isRevoked?: boolean;
+    revokedAt?: string;
   } | null>(() => {
     try {
       const stored = localStorage.getItem("medthread_emergency_dispatch");
@@ -79,11 +81,48 @@ export default function DoctorDashboard() {
       }
     };
 
+    const handleRevocation = (event: Event) => {
+      const customEvent = event as CustomEvent<any>;
+      const detail = customEvent.detail;
+      setEmergencyAlert((prev) =>
+        prev
+          ? {
+              ...prev,
+              isRevoked: true,
+              revokedAt: detail?.time || new Date().toLocaleTimeString(),
+            }
+          : null
+      );
+    };
+
     window.addEventListener("medthread_doctor_profile_updated", handleProfileUpdate);
     window.addEventListener("medthread_emergency_dispatched", handleEmergency);
+    window.addEventListener("medthread_access_revoked", handleRevocation);
+
+    // Cross-tab broadcast listener for instant doctor sync
+    let bc: BroadcastChannel | null = null;
+    try {
+      bc = new BroadcastChannel("medthread_live_notifications");
+      bc.onmessage = (ev) => {
+        if (ev.data?.type === "ACCESS_REVOKED") {
+          setEmergencyAlert((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  isRevoked: true,
+                  revokedAt: ev.data?.time || new Date().toLocaleTimeString(),
+                }
+              : null
+          );
+        }
+      };
+    } catch {}
+
     return () => {
       window.removeEventListener("medthread_doctor_profile_updated", handleProfileUpdate);
       window.removeEventListener("medthread_emergency_dispatched", handleEmergency);
+      window.removeEventListener("medthread_access_revoked", handleRevocation);
+      if (bc) bc.close();
     };
   }, []);
 
@@ -130,18 +169,36 @@ export default function DoctorDashboard() {
         </div>
       </div>
 
-      {/* Emergency Queue-Balanced Dispatch Alert Banner */}
+      {/* Specialist Referral / Emergency Queue Alert Banner */}
       {emergencyAlert && (
-        <div className="bg-white border-2 border-rose-300 text-slate-900 p-5 rounded-2xl shadow-xs">
+        <div
+          className={`bg-white border-2 p-5 rounded-2xl shadow-xs transition ${
+            emergencyAlert.isRevoked
+              ? "border-amber-400 bg-amber-50/30"
+              : "border-rose-300"
+          }`}
+        >
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-start gap-3.5">
-              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 shrink-0">
-                <AlertTriangle size={22} className="text-rose-600" />
+              <div
+                className={`p-3 rounded-xl border shrink-0 ${
+                  emergencyAlert.isRevoked
+                    ? "bg-amber-100 border-amber-300 text-amber-800"
+                    : "bg-rose-50 border-rose-200 text-rose-700"
+                }`}
+              >
+                <AlertTriangle size={22} className={emergencyAlert.isRevoked ? "text-amber-700" : "text-rose-600"} />
               </div>
               <div className="space-y-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider bg-rose-50 text-rose-800 px-2.5 py-0.5 rounded border border-rose-200">
-                    Emergency Dispatch Assigned
+                  <span
+                    className={`text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded border ${
+                      emergencyAlert.isRevoked
+                        ? "bg-rose-100 text-rose-900 border-rose-300"
+                        : "bg-rose-50 text-rose-800 border border-rose-200"
+                    }`}
+                  >
+                    {emergencyAlert.isRevoked ? "Access Revoked by Patient" : "Specialist Referral Dispatched"}
                   </span>
                   <span className="text-xs text-slate-600 font-medium">
                     via Distributed Queue Allocation
@@ -151,34 +208,48 @@ export default function DoctorDashboard() {
                   </span>
                 </div>
                 <h3 className="font-heading font-extrabold text-base text-slate-900">
-                  Patient Rajesh Sharma (PAT-101) routed to {emergencyAlert.doctor}
+                  {emergencyAlert.isRevoked
+                    ? `Session Terminated: Record access revoked at ${emergencyAlert.revokedAt || "recently"}`
+                    : `Patient Rajesh Sharma (PAT-101) routed to ${emergencyAlert.doctor}`}
                 </h3>
                 <p className="text-xs text-slate-600 leading-relaxed max-w-2xl">
-                  <strong>Queue Allocation Decision:</strong> {emergencyAlert.bypassedDoctor} was at capacity ({emergencyAlert.bypassedQueue} patients in queue). Emergency routed to {emergencyAlert.doctor} ({emergencyAlert.queueDepth} waiting) for immediate care.
+                  {emergencyAlert.isRevoked ? (
+                    <span className="text-rose-700 font-medium">
+                      The patient or caregiver has revoked record authorization. Access to this clinical dossier is now locked.
+                    </span>
+                  ) : (
+                    <>
+                      <strong>Queue Allocation Decision:</strong> {emergencyAlert.bypassedDoctor} was at capacity ({emergencyAlert.bypassedQueue} patients in queue). Referral routed to {emergencyAlert.doctor} ({emergencyAlert.queueDepth} waiting) for immediate care.
+                    </>
+                  )}
                 </p>
-                <div className="pt-1 flex flex-wrap items-center gap-3 text-[11px] text-slate-700 font-medium">
-                  <span className="inline-flex items-center gap-1 text-rose-700 font-semibold">
-                    <AlertCircle size={13} className="text-rose-600" />
-                    Critical Alert: Aspirin temporarily held for hernia surgery (Feb 2024)
-                  </span>
-                  <span className="text-slate-300">•</span>
-                  <span>T2D on Metformin</span>
-                </div>
+                {!emergencyAlert.isRevoked && (
+                  <div className="pt-1 flex flex-wrap items-center gap-3 text-[11px] text-slate-700 font-medium">
+                    <span className="inline-flex items-center gap-1 text-rose-700 font-semibold">
+                      <AlertCircle size={13} className="text-rose-600" />
+                      Critical Alert: Aspirin temporarily held for hernia surgery (Feb 2024)
+                    </span>
+                    <span className="text-slate-300">•</span>
+                    <span>T2D on Metformin</span>
+                  </div>
+                )}
               </div>
             </div>
 
             <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
-              <Link
-                to="/doctor/patients/101"
-                className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition shadow-xs whitespace-nowrap flex items-center gap-1.5"
-              >
-                <span>Open Patient Triage Dossier</span>
-                <ArrowRight size={14} />
-              </Link>
+              {!emergencyAlert.isRevoked && (
+                <Link
+                  to="/doctor/patients/101"
+                  className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition shadow-xs whitespace-nowrap flex items-center gap-1.5"
+                >
+                  <span>Open Patient Triage Dossier</span>
+                  <ArrowRight size={14} />
+                </Link>
+              )}
               <button
                 type="button"
                 onClick={() => setEmergencyAlert(null)}
-                className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition"
+                className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition cursor-pointer"
                 title="Dismiss Alert"
               >
                 <X size={16} />

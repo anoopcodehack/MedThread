@@ -24,13 +24,13 @@ import {
   ShieldCheck,
   Stethoscope,
   Users,
+  XCircle,
 } from "lucide-react";
 import type { LucideProps } from "lucide-react";
 import { DocumentPreviewModal } from "../../components/modals/DocumentPreviewModal";
 import { api } from "../../services/api";
 import { getSupabaseClient } from "../../lib/supabase";
-import { getAllDoctors, updateDoctorQueueInSupabase } from "../../services/doctorService";
-import type { DoctorProfile } from "../../types/doctor";
+import { updateDoctorQueueInSupabase } from "../../services/doctorService";
 import type {
   ContradictionItem,
   TimelineEventItem,
@@ -1224,8 +1224,9 @@ function EmergencyTriageQueueBalancer({
   patientId?: number;
   onDispatch: (provider: DispatchedProvider) => void;
 }) {
-  const [selectedCase, setSelectedCase] = useState<"cardiac" | "endocrine" | "pulmonary">("cardiac");
+  const [selectedCase, setSelectedCase] = useState<"cardiac" | "endocrine" | "pulmonary" | "renal">("cardiac");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [revokeNotice, setRevokeNotice] = useState<string | null>(null);
   const [dispatchedData, setDispatchedData] = useState<{
     patientId?: number;
     doctor: string;
@@ -1236,6 +1237,8 @@ function EmergencyTriageQueueBalancer({
     bypassedQueue: number;
     token: string;
     time: string;
+    isRevoked?: boolean;
+    revokedAt?: string;
   } | null>(() => {
     try {
       const stored = localStorage.getItem("medthread_emergency_dispatch");
@@ -1245,44 +1248,42 @@ function EmergencyTriageQueueBalancer({
     }
   });
 
-  const [supabaseDoctors, setSupabaseDoctors] = useState<DoctorProfile[]>([]);
-
-  useEffect(() => {
-    void getAllDoctors().then((docs) => {
-      if (docs && docs.length > 0) {
-        setSupabaseDoctors(docs);
-      }
-    });
-  }, []);
-
+  // 4 Clinical Disease Scenarios
   const cases = [
     {
-      id: "cardiac",
+      id: "cardiac" as const,
       title: "Acute Chest Pain & Post-Angioplasty Angina",
       specialty: "Cardiology",
-      urgency: "High Priority (Triage 1)",
+      urgency: "Priority Triage",
       relevantHistory: "Prior Hernia Surgery (Aspirin Held), Stent Record (PAT-101)",
     },
     {
-      id: "endocrine",
+      id: "endocrine" as const,
       title: "Severe Hypoglycemic Crisis & Confusion",
       specialty: "Endocrinology",
-      urgency: "Medium Priority (Triage 2)",
+      urgency: "Metabolic Alert",
       relevantHistory: "Metformin Titration 500mg -> 850mg (PAT-101)",
     },
     {
-      id: "pulmonary",
+      id: "pulmonary" as const,
       title: "Acute Bronchospasm & Wheezing",
       specialty: "Pulmonology",
-      urgency: "High Priority (Triage 1)",
-      relevantHistory: "Allergy History & Dyspnea Notes",
+      urgency: "Airway Risk",
+      relevantHistory: "Documented Allergy History & Ceftriaxone Alert (PAT-102)",
     },
-  ] as const;
+    {
+      id: "renal" as const,
+      title: "Acute Renal Impairment & Medication Titration",
+      specialty: "Nephrology",
+      urgency: "Renal Dose Alert",
+      relevantHistory: "Serum Creatinine Elevation & Lisinopril Titration (PAT-105)",
+    },
+  ];
 
   const currentCase = cases.find((c) => c.id === selectedCase) || cases[0];
 
-  // Live Supabase On-Call Specialist Pool
-  const basePool = supabaseDoctors.length >= 3 ? supabaseDoctors.slice(0, 3) : [
+  // Comprehensive Specialist Pool matching all 4 clinical specialties
+  const basePool = [
     {
       id: 1,
       name: "Dr. Ananya Rao, MD",
@@ -1299,17 +1300,31 @@ function EmergencyTriageQueueBalancer({
     },
     {
       id: 3,
+      name: "Dr. Rajiv Nair, MD",
+      specialisation: "Endocrinology",
+      organisation: "Max Diabetes Center",
+      queueDepth: 2,
+    },
+    {
+      id: 4,
       name: "Dr. Kavita Shenoy, MD",
       specialisation: "Pulmonology",
       organisation: "Fortis Hospital",
       queueDepth: 2,
     },
+    {
+      id: 5,
+      name: "Dr. Priya Sundaram, MD",
+      specialisation: "Nephrology",
+      organisation: "Manipal Nephrology Center",
+      queueDepth: 1,
+    },
   ];
 
   const doctors = basePool.map((doc, idx) => {
-    const spec = doc.specialisation || (idx === 2 ? "Pulmonology" : "Cardiology");
+    const spec = doc.specialisation;
     const isMatch = spec.toLowerCase().includes(currentCase.specialty.toLowerCase());
-    const queueDepth = doc.queueDepth ?? (idx === 0 ? 5 : idx === 1 ? 1 : 2);
+    const queueDepth = doc.queueDepth;
     return {
       id: doc.id || `doc-${idx + 1}`,
       rawId: typeof doc.id === "number" ? doc.id : idx + 1,
@@ -1325,15 +1340,16 @@ function EmergencyTriageQueueBalancer({
 
   const handleRunBalancer = () => {
     setIsProcessing(true);
+    setRevokeNotice(null);
     setTimeout(() => {
       // Algorithmic resolution: Filter by specialty match, then pick minimum queue depth
       const eligible = doctors.filter((d) => d.isMatch);
-      const selectedDoc = eligible.reduce((prev, curr) =>
-        curr.queueDepth < prev.queueDepth ? curr : prev
-      );
+      const selectedDoc = eligible.length > 0
+        ? eligible.reduce((prev, curr) => (curr.queueDepth < prev.queueDepth ? curr : prev))
+        : doctors[1];
       const bypassed = eligible.find((d) => d.id !== selectedDoc.id) || doctors[0];
 
-      const token = `MT-ER-${Math.floor(100000 + Math.random() * 900000)}`;
+      const token = `MT-SPEC-${Math.floor(100000 + Math.random() * 900000)}`;
       const result = {
         patientId: patientId,
         doctor: selectedDoc.name,
@@ -1344,6 +1360,7 @@ function EmergencyTriageQueueBalancer({
         bypassedQueue: bypassed.queueDepth,
         token: token,
         time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        isRevoked: false,
       };
 
       setDispatchedData(result);
@@ -1354,45 +1371,78 @@ function EmergencyTriageQueueBalancer({
         void updateDoctorQueueInSupabase(selectedDoc.rawId, selectedDoc.queueDepth + 1);
       }
 
-      // Save to localStorage so Doctor Dashboard immediately shows the incoming emergency banner
+      // Save to localStorage so Doctor Dashboard receives incoming allocation
       localStorage.setItem("medthread_emergency_dispatch", JSON.stringify(result));
       window.dispatchEvent(new CustomEvent("medthread_emergency_dispatched", { detail: result }));
 
       // Add to active provider permissions list
       onDispatch({
-        id: `emergency-${Date.now()}`,
+        id: `spec-${Date.now()}`,
         name: selectedDoc.name,
         facility: selectedDoc.facility,
         specialty: selectedDoc.specialty,
         grantedAt: "Just now (Queue Balanced)",
         expiresIn: "24 hours",
-        scope: "Full Emergency Access (Aspirin & Allergy Alert)",
+        scope: `Specialist Referral Access (${selectedDoc.specialty})`,
       });
-    }, 800);
+    }, 700);
+  };
+
+  // 1-Click Revoke right in the same flow, with instant doctor notification
+  const handleRevokeAllocation = () => {
+    if (!dispatchedData) return;
+    const revokedDoc = dispatchedData.doctor;
+    const updated = {
+      ...dispatchedData,
+      isRevoked: true,
+      revokedAt: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    };
+    setDispatchedData(updated);
+    localStorage.setItem("medthread_emergency_dispatch", JSON.stringify(updated));
+    setRevokeNotice(`Record access for ${revokedDoc} has been terminated.`);
+
+    // 1. Dispatch custom event for same-window doctor notification
+    window.dispatchEvent(
+      new CustomEvent("medthread_access_revoked", {
+        detail: { doctor: revokedDoc, patientId, time: updated.revokedAt },
+      })
+    );
+
+    // 2. BroadcastChannel for cross-tab doctor sync
+    try {
+      const bc = new BroadcastChannel("medthread_live_notifications");
+      bc.postMessage({
+        type: "ACCESS_REVOKED",
+        doctor: revokedDoc,
+        patientId,
+        time: updated.revokedAt,
+      });
+      bc.close();
+    } catch {}
   };
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-xs space-y-6">
+    <section className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-xs space-y-6">
       {/* Top Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
         <div className="flex items-start gap-3">
-          <div className="p-3 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 shrink-0">
+          <div className="p-3 rounded-xl bg-forest/10 border border-forest/20 text-forest shrink-0">
             <Stethoscope size={22} className="text-forest" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-slate-100 text-slate-800 border border-slate-200">
-                Distributed Queue Load Balancer
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-slate-100 text-slate-800 border border-slate-200">
+                Specialist Referral Engine
               </span>
               <span className="text-xs text-slate-500 font-semibold hidden sm:inline">
-                Dynamic Priority Triage (PS-7 Emergency Constraint)
+                Cross-Hospital Queue Balancer
               </span>
             </div>
             <h3 className="font-heading font-extrabold text-xl text-slate-900 mt-1">
-              Autonomous Specialist Triage &amp; Load Balancing
+              Autonomous Specialist Referral &amp; Queue Routing
             </h3>
             <p className="text-xs text-slate-600 mt-1 max-w-2xl leading-relaxed">
-              When an emergency occurs, MedThread correlates the patient’s historical records (e.g. held anticoagulants, stenting), evaluates real-time queue depths of matching specialists, and automatically routes the emergency cryptographic token to the doctor with the shortest wait time.
+              When complex care is needed, MedThread correlates historical records, evaluates real-time queue depths across partner hospital networks, and routes cryptographic access to the specialist with the shortest wait time.
             </p>
           </div>
         </div>
@@ -1402,28 +1452,28 @@ function EmergencyTriageQueueBalancer({
             type="button"
             onClick={handleRunBalancer}
             disabled={isProcessing}
-            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shadow-xs flex items-center justify-center gap-2"
+            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
           >
             <Activity size={15} />
-            <span>{isProcessing ? "Calculating Optimal Specialist..." : "Execute Queue Allocation"}</span>
+            <span>{isProcessing ? "Routing to Optimal Specialist..." : "Execute Queue Allocation"}</span>
           </button>
         </div>
       </div>
 
-      {/* Step 1: Emergency Condition Selector */}
+      {/* Step 1: 4 Disease / Condition Selectors */}
       <div className="space-y-2">
         <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
-          Step 1: Patient Emergency Scenario &amp; Clinical Match:
+          Step 1: Select Clinical Specialty &amp; Patient Scenario (4 Clinical Conditions):
         </label>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {cases.map((c) => (
             <button
               key={c.id}
               type="button"
-              onClick={() => setSelectedCase(c.id as any)}
-              className={`p-3.5 rounded-xl border text-left transition flex flex-col justify-between ${
+              onClick={() => setSelectedCase(c.id)}
+              className={`p-3.5 rounded-2xl border text-left transition flex flex-col justify-between cursor-pointer ${
                 selectedCase === c.id
-                  ? "bg-slate-50 border-forest ring-1 ring-forest/30 shadow-xs"
+                  ? "bg-slate-50 border-forest ring-2 ring-forest/20 shadow-xs"
                   : "bg-white border-slate-200 hover:border-slate-300"
               }`}
             >
@@ -1435,7 +1485,7 @@ function EmergencyTriageQueueBalancer({
                   {c.title}
                 </h4>
               </div>
-              <p className="text-[10px] text-slate-500 mt-2 pt-2 border-t border-slate-100">
+              <p className="text-[10px] text-slate-500 mt-2 pt-2 border-t border-slate-100 line-clamp-2">
                 Grounding: {c.relevantHistory}
               </p>
             </button>
@@ -1455,97 +1505,100 @@ function EmergencyTriageQueueBalancer({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-          {doctors.map((doc) => {
-            const isAssigned = dispatchedData?.doctor === doc.name;
-            return (
-              <div
-                key={doc.id}
-                className={`p-4 rounded-xl border transition relative ${
-                  isAssigned
-                    ? "bg-emerald-50/80 border-emerald-400 ring-1 ring-emerald-400/40 shadow-xs"
-                    : doc.isMatch && doc.status === "OVERLOADED"
-                    ? "bg-rose-50/60 border-rose-200"
-                    : doc.isMatch
-                    ? "bg-white border-slate-200 shadow-xs"
-                    : "bg-slate-50 border-slate-200 opacity-60"
-                }`}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <div className="p-2 rounded-lg bg-white border border-slate-200 text-slate-700 shadow-2xs">
-                      <Stethoscope size={16} />
+          {doctors
+            .filter((d) => d.isMatch || d.id === 1 || d.id === 2)
+            .slice(0, 3)
+            .map((doc) => {
+              const isAssigned = dispatchedData && !dispatchedData.isRevoked && dispatchedData.doctor === doc.name;
+              return (
+                <div
+                  key={doc.id}
+                  className={`p-4 rounded-2xl border transition relative ${
+                    isAssigned
+                      ? "bg-emerald-50/80 border-emerald-400 ring-2 ring-emerald-400/30 shadow-xs"
+                      : doc.isMatch && doc.status === "OVERLOADED"
+                      ? "bg-rose-50/60 border-rose-200"
+                      : doc.isMatch
+                      ? "bg-white border-slate-200 shadow-xs"
+                      : "bg-slate-50 border-slate-200 opacity-60"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2 rounded-xl bg-white border border-slate-200 text-slate-700 shadow-2xs">
+                        <Stethoscope size={16} />
+                      </div>
+                      <div>
+                        <h4 className="font-heading font-bold text-xs text-slate-900">
+                          {doc.name}
+                        </h4>
+                        <p className="text-[10px] text-slate-500 font-medium">
+                          {doc.facility} · <span className="font-semibold text-emerald-800">{doc.specialty}</span>
+                        </p>
+                      </div>
+                    </div>
+
+                    <span
+                      className={`text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
+                        isAssigned
+                          ? "bg-emerald-600 text-white"
+                          : doc.isMatch && doc.status === "OVERLOADED"
+                          ? "bg-rose-100 text-rose-800 border border-rose-300"
+                          : doc.isMatch
+                          ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                          : "bg-slate-200 text-slate-600"
+                      }`}
+                    >
+                      {isAssigned
+                        ? "Allocated"
+                        : doc.isMatch && doc.status === "OVERLOADED"
+                        ? `Overloaded (${doc.queueDepth})`
+                        : doc.isMatch
+                        ? `Available (${doc.queueDepth})`
+                        : "Different Spec"}
+                    </span>
+                  </div>
+
+                  <div className="mt-3 pt-2.5 border-t border-slate-200/80 grid grid-cols-2 gap-2 text-[11px]">
+                    <div>
+                      <span className="text-[10px] text-slate-400 block">Queue Depth</span>
+                      <span className="font-bold text-slate-800 flex items-center gap-1">
+                        <Users size={12} className="text-slate-400" />
+                        {doc.queueDepth} Patients
+                      </span>
                     </div>
                     <div>
-                      <h4 className="font-heading font-bold text-xs text-slate-900">
-                        {doc.name}
-                      </h4>
-                      <p className="text-[10px] text-slate-500 font-medium">
-                        {doc.facility}
-                      </p>
+                      <span className="text-[10px] text-slate-400 block">Est. Latency</span>
+                      <span className="font-bold text-slate-800 flex items-center gap-1">
+                        <Clock size={12} className="text-slate-400" />
+                        ~{doc.avgWaitMins} mins
+                      </span>
                     </div>
                   </div>
 
-                  <span
-                    className={`text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
-                      isAssigned
-                        ? "bg-emerald-600 text-white"
-                        : doc.isMatch && doc.status === "OVERLOADED"
-                        ? "bg-rose-100 text-rose-800 border border-rose-300"
-                        : doc.isMatch
-                        ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
-                        : "bg-slate-200 text-slate-600"
-                    }`}
-                  >
-                    {isAssigned
-                      ? "Allocated"
-                      : doc.isMatch && doc.status === "OVERLOADED"
-                      ? "Overloaded (5)"
-                      : doc.isMatch
-                      ? "Available (1)"
-                      : "Wrong Spec"}
-                  </span>
+                  {isAssigned && (
+                    <div className="mt-2.5 pt-2 border-t border-emerald-200 flex items-center gap-1 text-[10px] font-bold text-emerald-800">
+                      <CheckCircle2 size={12} />
+                      <span>Specialist Access Token Transmitted</span>
+                    </div>
+                  )}
                 </div>
-
-                <div className="mt-3 pt-2.5 border-t border-slate-200/80 grid grid-cols-2 gap-2 text-[11px]">
-                  <div>
-                    <span className="text-[10px] text-slate-400 block">Queue Depth</span>
-                    <span className="font-bold text-slate-800 flex items-center gap-1">
-                      <Users size={12} className="text-slate-400" />
-                      {doc.queueDepth} Patients
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-slate-400 block">Est. Latency</span>
-                    <span className="font-bold text-slate-800 flex items-center gap-1">
-                      <Clock size={12} className="text-slate-400" />
-                      ~{doc.avgWaitMins} mins
-                    </span>
-                  </div>
-                </div>
-
-                {isAssigned && (
-                  <div className="mt-2.5 pt-2 border-t border-emerald-200 flex items-center gap-1 text-[10px] font-bold text-emerald-800">
-                    <CheckCircle2 size={12} />
-                    <span>Emergency Access Token Transmitted</span>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+              );
+            })}
         </div>
       </div>
 
-      {/* Step 3: Algorithmic Resolution Banner */}
+      {/* Step 3: Algorithmic Resolution & Integrated 1-Click Revoke Flow */}
       {dispatchedData && (
-        <div className="rounded-2xl border border-emerald-300 bg-white p-4 shadow-sm space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-emerald-100 pb-2.5">
+        <div className="rounded-2xl border border-emerald-300 bg-white p-5 shadow-sm space-y-4 animate-in fade-in duration-200">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-emerald-100 pb-3">
             <div className="flex items-center gap-2">
-              <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-ping" />
-              <span className="font-heading font-extrabold text-xs text-emerald-900 uppercase tracking-wide">
-                Distributed Triage Resolution: Token Handshake Dispatched at {dispatchedData.time}
+              <span className={`h-2.5 w-2.5 rounded-full ${dispatchedData.isRevoked ? "bg-rose-500" : "bg-emerald-500 animate-ping"}`} />
+              <span className="font-heading font-extrabold text-xs text-slate-900 uppercase tracking-wide">
+                Specialist Referral Handshake Dispatched at {dispatchedData.time}
               </span>
             </div>
-            <span className="text-xs font-mono font-bold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+            <span className="text-xs font-mono font-bold text-emerald-900 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
               Access Token: {dispatchedData.token}
             </span>
           </div>
@@ -1560,21 +1613,50 @@ function EmergencyTriageQueueBalancer({
               <span className="font-bold text-rose-900">{dispatchedData.bypassedDoctor} ({dispatchedData.bypassedQueue} waiting)</span>
             </div>
             <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200">
-              <span className="text-[10px] text-emerald-600 block uppercase font-bold">Assigned Specialist</span>
-              <span className="font-bold text-emerald-900">{dispatchedData.doctor} ({dispatchedData.queueDepth} waiting)</span>
+              <span className="text-[10px] text-emerald-700 block uppercase font-bold">Assigned Specialist</span>
+              <span className="font-bold text-emerald-950">{dispatchedData.doctor} ({dispatchedData.queueDepth} waiting)</span>
             </div>
             <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex flex-col justify-between">
-              <span className="text-[10px] text-slate-400 block uppercase font-bold">Clinical Cockpit State</span>
-              <span className="font-bold text-forest flex items-center gap-1">
-                <span>Ringing in Doctor Cockpit</span>
+              <span className="text-[10px] text-slate-400 block uppercase font-bold">Session State</span>
+              <span className={`font-bold flex items-center gap-1 ${dispatchedData.isRevoked ? "text-rose-600" : "text-forest"}`}>
+                <span>{dispatchedData.isRevoked ? "Session Revoked" : "Active in Doctor Cockpit"}</span>
                 <ArrowRight size={12} />
               </span>
             </div>
           </div>
 
-          <p className="text-[11px] text-slate-500 italic">
-            *Dr. Suresh Menon now has verified 24-hr access to Rajesh Sharma's complete timeline, highlighting the held Aspirin hernia surgery alert.
-          </p>
+          {/* Unified Revoke Action inside the Flow */}
+          {dispatchedData.isRevoked ? (
+            <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="flex items-center gap-2 text-xs font-bold text-rose-800">
+                <XCircle size={16} className="text-rose-600 shrink-0" />
+                <span>Access Revoked by Patient at {dispatchedData.revokedAt || "Just now"} • Dr. {dispatchedData.doctor} notified immediately</span>
+              </div>
+              <span className="text-[10px] font-mono text-rose-700 bg-white px-2 py-0.5 rounded border border-rose-200 font-bold self-start sm:self-auto">
+                Session Terminated
+              </span>
+            </div>
+          ) : (
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-emerald-100">
+              <p className="text-[11px] text-slate-500 italic">
+                *Dr. {dispatchedData.doctor} currently has time-bound access to patient records. You can terminate this access at any time.
+              </p>
+              <button
+                type="button"
+                onClick={handleRevokeAllocation}
+                className="px-4 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
+              >
+                <XCircle size={14} />
+                <span>Revoke Access Immediately</span>
+              </button>
+            </div>
+          )}
+
+          {revokeNotice && (
+            <p className="text-xs text-emerald-800 font-semibold bg-emerald-50 p-2 rounded-lg border border-emerald-200">
+              ✓ {revokeNotice}
+            </p>
+          )}
         </div>
       )}
     </section>
