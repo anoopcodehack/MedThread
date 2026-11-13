@@ -27,6 +27,9 @@
    - [5. Deterministic Unit & Locale Math](#5-deterministic-unit--locale-math)
    - [6. Clinician Reviewer Override & Forensic Audit Trail](#6-clinician-reviewer-override--forensic-audit-trail)
    - [7. Ephemeral Patient Consent Sharing Protocol](#7-ephemeral-patient-consent-sharing-protocol)
+   - [8. Autonomous Specialist Routing & Distributed Queue Allocation](#8-autonomous-specialist-routing--distributed-queue-allocation)
+   - [9. Real-Time Cryptographic Consent Revocation](#9-real-time-cryptographic-consent-revocation)
+   - [10. Browser-Based Optical Vitals Scanner (PPG)](#10-browser-based-optical-vitals-scanner-ppg)
 5. [Interactive Clinical Cockpit Walkthrough](#-interactive-clinical-cockpit-walkthrough)
 6. [Enterprise Repository Structure](#-enterprise-repository-structure)
 7. [REST API Reference (OpenAPI 3.1)](#-rest-api-reference-openapi-31)
@@ -257,7 +260,43 @@ Patients retain full sovereignty over their records. MedThread generates time-bo
 
 ---
 
-## 🖥️ Interactive 3-Panel Cockpit Walkthrough
+### 8. Autonomous Specialist Routing & Distributed Queue Allocation
+In multi-facility and ER environments, specialist bottlenecks cost lives. MedThread implements an autonomous queue allocation algorithm: when a specialist is at queue capacity (e.g., 5 patients in waiting), incoming emergency cases are autonomously routed to the next available specialist in the same specialty (e.g., routed to Dr. Suresh Menon, MD) with live cryptographic dispatch tokens (`MT-ER-XXXXXX`).
+
+---
+
+### 9. Real-Time Cryptographic Consent Revocation
+Patients hold absolute authority over their clinical data. Through cross-tab `BroadcastChannel("medthread_live_notifications")` coordination, the instant a patient taps **"Revoke Access"** in their sovereignty portal, any active doctor review session is terminated in real time with an immediate `ACCESS REVOKED` lockdown.
+
+---
+
+### 10. Browser-Based Optical Vitals Scanner (PPG)
+MedThread features an integrated web-based Photoplethysmography (PPG) optical sensor. Using the clinician or patient camera feed, subtle micro-vascular blood volume pulsations are tracked to calculate real-time resting heart rate directly in the browser during patient intake without requiring wearable hardware.
+
+---
+
+## 🖥️ Interactive Clinical Cockpit Walkthrough
+
+### Clinical Demonstration & Decision Workflow
+
+```mermaid
+flowchart LR
+    A["1. Cockpit<br/><b>(Dashboard)</b>"] --> B["2. Triage Pillars<br/><b>(Dossier Header)</b>"]
+    B --> C["3. Conflict Radar<br/><b>(Aspirin Comparison)</b>"]
+    C --> D["4. Epistemic Q&A<br/><b>(Zero Hallucination)</b>"]
+
+    style A fill:#0f172a,stroke:#0ea5e9,stroke-width:2px,color:#f8fafc
+    style B fill:#0f172a,stroke:#3b82f6,stroke-width:2px,color:#f8fafc
+    style C fill:#0f172a,stroke:#ef4444,stroke-width:2px,color:#f8fafc
+    style D fill:#0f172a,stroke:#10b981,stroke-width:2px,color:#f8fafc
+```
+
+| Step | Engine & Cockpit View | Clinical Problem Solved | Real-Time Codebase Implementation |
+|---|---|---|---|
+| **1. Cockpit (Dashboard)** | Doctor Overview & Cohort Switcher (`/doctor/dashboard`) | High ER cognitive load, delayed chart review | Aggregates 5 synthetic patients, displays $-78.1\%$ time reduction metric, and handles live specialist overflow routing. |
+| **2. Triage Pillars (Dossier Header)** | Unfamiliar Patient Triage Header (`/doctor/patients/101`) | Fragmented paper records, scattered lab slips | Synthesizes 3 core pillars in $<45\text{s}$: Demographics & Vitals, Active Allergies & Reconciled Meds, and Active Conflict count. |
+| **3. Conflict Radar (Aspirin Comparison)** | 4-Tier Conflict Radar & Evidence Viewer (`EvidenceViewer.tsx`) | Dangerous perioperative medication contradictions | Pinpoints Fortis discharge ("Aspirin HELD for hernia surgery") vs OPD note ("Continue Aspirin 75mg") with side-by-side verbatim quotes and PDF page highlights. |
+| **4. Epistemic Q&A (Zero Hallucination)** | Grounded "Ask Records" Console (`/api/qa`) | Lethal LLM hallucinations on unrecorded conditions | Two-stage hard epistemic gate: returns exact quotes for recorded facts, unconditionally declines unrecorded questions (`NOT_DOCUMENTED`), and blocks diagnostic/prescriptive queries. |
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -392,11 +431,17 @@ MedThread/
 | Method | Endpoint | Description | Request Body | Response Status |
 |---|---|---|---|---|
 | `GET` | `/api/health` | Service health status check | None | `200 OK` |
+| `GET` | `/api/patients` | List all registered patients | None | `200 OK` |
+| `GET` | `/api/doctors` | Real-time specialist directory & queue depths | None | `200 OK` |
 | `POST` | `/api/upload` | Ingest multi-type PDF / image report | `multipart/form-data` | `200 OK` / `422` |
 | `GET` | `/api/timeline/{patient_id}` | Fetch chronologically ordered timeline | None | `200 OK` |
 | `GET` | `/api/conflicts/{patient_id}` | Fetch 4-tier contradiction radar items | None | `200 OK` |
+| `PATCH` | `/api/conflicts/{conflict_id}/resolve` | Mark clinical contradiction as resolved | None | `200 OK` |
+| `GET` | `/api/documents/{patient_id}` | List ingested patient documents and storage paths | None | `200 OK` |
+| `POST` | `/api/documents/signed-url` | Generate time-bounded signed download URLs | `{"patient_id", "filename"}` | `200 OK` |
 | `PATCH` | `/api/review/{event_id}` | Clinician override with audit log | JSON override payload | `200 OK` / `404` |
 | `POST` | `/api/qa` | Epistemic grounded Q&A query | `{"patient_id", "question"}` | `200 OK` |
+| `GET` | `/api/system/status` | Real-time system health, Supabase & DB status | None | `200 OK` |
 
 ---
 
