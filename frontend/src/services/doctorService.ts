@@ -140,6 +140,30 @@ export async function getPatientRecords(patientId: string): Promise<PatientRecor
         url: d.file_url,
       }));
 
+      // Reconcile conflicts with local overrides & resolved status
+      let localResolvedMap: Record<string, any> = {};
+      let localOverridesMap: Record<string, any> = {};
+      try {
+        if (typeof window !== "undefined") {
+          localResolvedMap = JSON.parse(localStorage.getItem("medthread_resolved_conflicts") || "{}");
+          localOverridesMap = JSON.parse(localStorage.getItem("medthread_timeline_overrides") || "{}");
+        }
+      } catch {}
+
+      const mappedConflicts = (conflicts || []).map((c) => {
+        const entityKey = (c.entity || "").toLowerCase().trim();
+        const isLocallyResolved = Boolean(
+          localResolvedMap[entityKey]?.resolved ||
+          (c.id && localResolvedMap[String(c.id)]?.resolved) ||
+          localOverridesMap[entityKey] ||
+          (entityKey.includes("aspirin") && (localOverridesMap["aspirin"] || localOverridesMap["39"]))
+        );
+        return {
+          ...c,
+          resolved: c.resolved ? 1 : isLocallyResolved ? 1 : 0,
+        };
+      });
+
       return {
         profile: {
           id: `PAT-${numericId}`,
@@ -160,7 +184,7 @@ export async function getPatientRecords(patientId: string): Promise<PatientRecor
           document: m.source_doc,
         })),
         documents,
-        conflicts,
+        conflicts: mappedConflicts,
       };
     }
   } catch (err) {

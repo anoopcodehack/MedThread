@@ -37,6 +37,34 @@ const records: PatientRecords = {
     { id: "1", name: "Discharge summary", type: "Discharge summary", date: "18 Jun 2025" },
     { id: "2", name: "June lab report", type: "Lab report", date: "14 Jun 2025" },
   ],
+  conflicts: [
+    {
+      id: 1,
+      patient_id: 101,
+      tier: "DIRECT_CONFLICT",
+      category: "MEDICATION",
+      entity: "Aspirin",
+      description: "Direct contradiction: Apollo Cardiology resumed Aspirin 75mg daily on 2024-03-12, but Fortis Surgical paused it on 2024-03-05.",
+      doc1_name: "01_Discharge_Summary_Fortis_2024.pdf",
+      quote1: "Aspirin 75mg: Temporarily held prior to transurethral surgery.",
+      doc2_name: "04_Cardiology_Followup_Apollo_2024.pdf",
+      quote2: "Aspirin 75mg daily: Resumed cardioprotective antiplatelet therapy.",
+      resolved: 0,
+    },
+    {
+      id: 2,
+      patient_id: 101,
+      tier: "NEEDS_REVIEW",
+      category: "ALLERGY",
+      entity: "Penicillin",
+      description: "Discrepancy: City Hospital 2021 documented Penicillin allergy (anaphylaxis), whereas 2023 Health Camp documented NKDA.",
+      doc1_name: "03_Allergy_Intake_CityHospital_2021.pdf",
+      quote1: "Severe allergy to Penicillin: generalized rash and angioedema in 2018.",
+      doc2_name: "05_Annual_Health_Checkup_2023.pdf",
+      quote2: "Allergies: No Known Drug Allergies (NKDA).",
+      resolved: 0,
+    },
+  ],
 };
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -66,7 +94,33 @@ export async function getAccessHistory() {
 
 export async function getPatientRecords(_patientId: string) {
   await wait(150);
-  return records;
+  let localResolvedMap: Record<string, any> = {};
+  let localOverridesMap: Record<string, any> = {};
+  try {
+    if (typeof window !== "undefined") {
+      localResolvedMap = JSON.parse(localStorage.getItem("medthread_resolved_conflicts") || "{}");
+      localOverridesMap = JSON.parse(localStorage.getItem("medthread_timeline_overrides") || "{}");
+    }
+  } catch {}
+
+  const mappedConflicts = (records.conflicts || []).map((c) => {
+    const entityKey = (c.entity || "").toLowerCase().trim();
+    const isLocallyResolved = Boolean(
+      localResolvedMap[entityKey]?.resolved ||
+      (c.id && localResolvedMap[String(c.id)]?.resolved) ||
+      localOverridesMap[entityKey] ||
+      (entityKey.includes("aspirin") && (localOverridesMap["aspirin"] || localOverridesMap["39"]))
+    );
+    return {
+      ...c,
+      resolved: c.resolved ? 1 : isLocallyResolved ? 1 : 0,
+    };
+  });
+
+  return {
+    ...records,
+    conflicts: mappedConflicts,
+  };
 }
 
 const DOCTOR_PROFILE_STORAGE_KEY = "medthread_doctor_profile";

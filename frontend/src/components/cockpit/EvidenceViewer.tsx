@@ -22,6 +22,7 @@ export interface ContradictionEvidence {
   quote1: string;
   doc2_name: string;
   quote2: string;
+  resolved?: boolean;
 }
 
 interface EvidenceViewerProps {
@@ -44,6 +45,14 @@ export const EvidenceViewer: React.FC<EvidenceViewerProps> = ({
   if (!isOpen || !contradiction) return null;
 
   const getTierBadge = (tier: string) => {
+    if (contradiction.resolved) {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase bg-emerald-100 text-emerald-800 border border-emerald-300">
+          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+          CLINICALLY RESOLVED (Reviewed by Physician)
+        </span>
+      );
+    }
     switch (tier) {
       case 'DIRECT_CONFLICT':
         return (

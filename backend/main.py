@@ -493,6 +493,14 @@ def review_event(
     event.is_reviewed = 1
     event.reviewed_override = f"Modified by {req.reviewer_name}: {req.field_modified} set to '{req.new_value}'. Reason: {req.reason or 'Clinician verified'}"
     
+    # Automatically resolve any related contradiction for this patient and entity
+    patient_conflicts = db.query(Contradiction).filter(Contradiction.patient_id == event.patient_id).all()
+    ev_lower = (event.entity or "").lower()
+    for pc in patient_conflicts:
+        pc_lower = (pc.entity or "").lower()
+        if ev_lower in pc_lower or pc_lower in ev_lower:
+            pc.resolved = 1
+
     db.commit()
     db.refresh(event)
     
