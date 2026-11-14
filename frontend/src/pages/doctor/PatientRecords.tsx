@@ -336,6 +336,49 @@ export default function PatientRecords() {
           </button>
         </form>
 
+        <div className="flex flex-wrap items-center gap-2 mt-3">
+          <span className="text-[11px] font-bold text-muted uppercase tracking-wide">Quick Demo Probes:</span>
+          <button
+            type="button"
+            onClick={() => {
+              setQaQuery("What is the Metformin dose?");
+              setQaLoading(true);
+              api.askQuestion(numericId, "What is the Metformin dose?")
+                .then(setQaResult)
+                .finally(() => setQaLoading(false));
+            }}
+            className="text-xs bg-slate-100 hover:bg-forest/10 hover:text-forest border border-slate-200 rounded-lg px-2.5 py-1 text-slate-700 transition font-medium"
+          >
+            💊 Metformin dose?
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setQaQuery("Aspirin contradiction status?");
+              setQaLoading(true);
+              api.askQuestion(numericId, "Aspirin contradiction status?")
+                .then(setQaResult)
+                .finally(() => setQaLoading(false));
+            }}
+            className="text-xs bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-800 rounded-lg px-2.5 py-1 transition font-medium"
+          >
+            ⚠️ Aspirin contradiction?
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setQaQuery("Does patient have Asthma?");
+              setQaLoading(true);
+              api.askQuestion(numericId, "Does patient have Asthma?")
+                .then(setQaResult)
+                .finally(() => setQaLoading(false));
+            }}
+            className="text-xs bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 rounded-lg px-2.5 py-1 transition font-medium"
+          >
+            🛡️ Does patient have Asthma? (Abstention Gate)
+          </button>
+        </div>
+
         {qaResult && (
           <div className={`mt-4 rounded-xl p-4 border ${
             qaResult.status === "GROUNDED_ANSWER" 
