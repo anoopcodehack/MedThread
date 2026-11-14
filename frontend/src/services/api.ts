@@ -484,7 +484,7 @@ export const api = {
 
     // 3. Stage 2: Hard Epistemic Abstention Gate (Undocumented Conditions)
     const matchedSpecialty =
-      qLower.includes('asthma') || qLower.includes('lung') || qLower.includes('inhaler') || qLower.includes('cough')
+      qLower.includes('asthma') || qLower.includes('asthama') || qLower.includes('lung') || qLower.includes('inhaler') || qLower.includes('cough')
         ? 'Pulmonology (Respiratory Medicine)'
         : qLower.includes('kidney') || qLower.includes('renal')
           ? 'Nephrology'

@@ -73,7 +73,7 @@ CLINICAL_TERM_GROUPS = {
     "diabetes": ["diabetes", "diabetic", "glucose", "fbg", "sugar", "metformin", "glycemia"],
     "hypertension": ["hypertension", "bp", "blood pressure", "hypertonie", "ramipril"],
     "kidney": ["kidney", "renal", "creatinine", "bun", "nephro"],
-    "asthma": ["asthma", "inhaler", "broncho", "salbutamol", "wheeze"],
+    "asthma": ["asthma", "asthama", "inhaler", "broncho", "salbutamol", "wheeze"],
     "allergy": ["allergy", "allergic", "allergies", "anaphylaxis", "nkda", "hypersensitivity"],
     "penicillin": ["penicillin", "amoxicillin", "ampicillin", "beta-lactam"],
     "ceftriaxone": ["ceftriaxone", "cephalosporin", "rocephin"],
@@ -149,6 +149,7 @@ def scope_patient_events(
 # Predefined specialty referral recommendations for undocumented clinical inquiries
 SPECIALTY_LOOKUP = {
     "asthma": "Pulmonology (Respiratory Medicine)",
+    "asthama": "Pulmonology (Respiratory Medicine)",
     "respiratory": "Pulmonology",
     "lung": "Pulmonology",
     "inhaler": "Pulmonology",
